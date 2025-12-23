@@ -1,0 +1,10 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "Local_AI_DB",
+            "database": "data.db"
+        }
+    ]
+}
