@@ -1,0 +1,30 @@
+# --- Python / Conda ---
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+.conda/
+
+# --- C++ / Compilers ---
+# Ignore the executable files you build
+*.exe
+*.out
+*.app
+*.o
+*.obj
+
+# --- SQL / Databases ---
+# We usually keep the .db file itself, but ignore the temporary "journal" files
+*.db-journal
+*.db-wal
+*.db-shm
+
+# --- VS Code ---
+.vscode/
+*.log
+
+# --- SQLTools / Project Settings ---
+.vscode/
+*.json
