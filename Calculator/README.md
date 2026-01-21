@@ -4,14 +4,15 @@ This is console-based calculator which performs basic arithmetic operations.
 ## Features
 - Addition, Multiplication, Division, and Subtraction
 - Calculating Remainders, Exponent, and Absolute Value
-- Handles errors like division by zero
+- Handles errors like division by zero and Value errors
 
 ## Tech Stack
 - Python programming language
 
 ## Installation
 1. Clone my GitHub repository: [Calculator](https://github.com/AryanSolanke/Calculator)
-2. Run the program
+2. Open the 'Calculator.py' in VS Code or any other IDE
+3. Run the program
 
 ## Future Enhancements
 - Expression-based input for basic operations (instead of choice-based)
