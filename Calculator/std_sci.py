@@ -1,33 +1,45 @@
-import math
+from math import *
 
 def errmsg():
     print("Error: Invalid input.")
 
-def std_calc_menuMsg():
-    print("\nSelect an operation:\n1) Add\n2) subtraction\n3) Division\n4) mod\n5) nth Power\n6) Remainder\n7) Logarithm\n8) Factorial\n9) Exit")
-
-def sci_calc_menuMsg():
-    print("\n|=====>Operations<=====|\n\n1. Sin(x)\n2. Cos(x)\n3. Tan(x)\n4. Cot(x)\n5. Sec(x)\n6. Cosec(x)\n7. Exit|======================|")
-    
-def difference(numbers_to_subtract):
-    diff = numbers_to_subtract[0]
-    for i in numbers_to_subtract[1:]:
-        diff -= i
-    return diff
-
-def get_numbers():
+def evaluate_expression():
     try:
-        user_input = input("Enter numbers: ").strip()
-        if not user_input:
-            return []
-        return [float(num) for num in user_input.split(' ')]
-    except ValueError:
+        user_input = input("Enter expression(eg. 2+3*4): ")
+        for char in user_input:
+            if char.isalpha():
+                errmsg()
+                return None
+        result = eval(user_input)
+        return result
+    except(ValueError, SyntaxError, ZeroDivisionError):
         errmsg()
         return None
-    
+    except (KeyboardInterrupt, EOFError):
+        print("\nOperation cancelled by user")
+        return None
+
 def get_angle():
     try:
-        num = float(input("Enter angle(degrees): "))
-        return num
-    except ValueError:
+        angle = float(input("Enter angle(degrees): "))
+        return angle
+    except (ValueError, SyntaxError):
         errmsg()
+
+def sine(angle):
+    return sin(radians(angle))
+
+def cosine(angle):
+    return cos(radians(angle))
+
+def tangent(angle):
+    return tan(radians(angle))
+
+def cot(angle):
+    return 1/tan(radians(angle))
+
+def sec(angle):
+    return 1/cos(radians(angle))
+
+def cosec(angle):
+    return 1/sin(radians(angle))
