@@ -1,4 +1,5 @@
-from std_sci import *
+from std import *
+from sci import *
 
 def mode_choice_menu():
     print("\n======>Main Menu<======\n\n1. Standard\n2. Scientific\n3. Quit Calculator")
@@ -7,7 +8,13 @@ def std_calc_menuMsg():
     print("\n|=====>Operations<=====|\n\n1. Type expression\n2. Quit standard calculator\n\n|======================|")
 
 def sci_calc_menuMsg():
-    print("\n|=====>Operations<=====|\n\n1. Sin(x)\n2. Cos(x)\n3. Tan(x)\n4. Cot(x)\n5. Sec(x)\n6. Cosec(x)\n7. Quit scientific calculator\n|======================|")
+    print("""\n|=========================>Operations<=========================|\n
+          1. Basic trigo functions(sinx,cosx,tanx...)
+          2. Inverse trigo functions(sin⁻¹x,cos⁻¹x,tan⁻¹x...)
+          3. Hyperbolic trigo functions(sinhx, coshx, tanhx...)
+          4. Inverse Hyperbolic trigo functions(sinh⁻¹x,cosh⁻¹x,tanh⁻¹x...)
+          5. Quit scientific calculator.
+          \n|===================================================================|""")
 
 def std_calc_main_menu():
     while True:
@@ -29,7 +36,6 @@ def std_calc_main_menu():
                 errmsg()
 
 def sci_calc_main_menu():
-
     while True:
         sci_calc_menuMsg()
         try:
@@ -65,7 +71,6 @@ def sci_calc_main_menu():
                 errmsg()
 
 if __name__ == '__main__':
-
     try:
         while True:
             mode_choice_menu()
