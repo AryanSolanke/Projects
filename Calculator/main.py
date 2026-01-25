@@ -10,38 +10,51 @@ def std_calc_menuMsg():
 
 def sci_calc_menuMsg():
     print(textwrap.dedent("""
-            |=========================>Operations<=========================|\n
-            1. Basic trigo functions(sinx,cosx,tanx...)
-            2. Inverse trigo functions(sin⁻¹x,cos⁻¹x,tan⁻¹x...)
-            3. Hyperbolic trigo functions(sinhx, coshx, tanhx...)
-            4. Inverse Hyperbolic trigo functions(sinh⁻¹x,cosh⁻¹x,tanh⁻¹x...)
-            5. Quit scientific calculator.\n
-            |==============================================================|\n"""))
-    
-def sci_calc_subMenu_msg(op_num):
-    match op_num:
-        case 1:
-            print("\n|=====>Operations<=====|\n\n1. sinx\n2. cosx\n3. tanx\n4. cotx\n5. secx\n6. cosecx\n\n|======================|")
-        case 2:
-            print("\n|=====>Operations<=====|\n\n1. sin⁻¹x\n2. cos⁻¹x\n3. tan⁻¹x\n4. cot⁻¹x\n5. sec⁻¹x\n6. cosec⁻¹x\n\n|======================|")
-        case 3:
-            print("\n|=====>Operations<=====|\n\n1. sinhx\n2. coshx\n3. tanhx\n4. cothx\n5. sechx\n6. cosechx\n\n|======================|")
-        case 4:
-            print("\n|=====>Operations<=====|\n\n1. sinh⁻¹x\n2. cosh⁻¹x\n3. tanh⁻¹x\n4. coth⁻¹x\n5. sech⁻¹x\n6. cosech⁻¹x\n\n|======================|")
-        case 5:
-            print("\nScientific calculator Sub-menu exited...")
-        case _:
-            errmsg()
+                |============================>Operations<============================|\n
+                1. Basic trigo functions
+                    │──1.1 sin(x)
+                    │──1.2 cos(x)
+                    │──1.3 tan(x)
+                    │──1.4 cot(x)
+                    │──1.5 sec(x)
+                    │──1.6 cosec(x)
+                          
+                2. Inverse trigo functions
+                    │──2.1 sin⁻¹(x)
+                    │──2.2 cos⁻¹(x)
+                    │──2.3 tan⁻¹(x)
+                    │──2.4 cot⁻¹(x)
+                    │──2.5 sec⁻¹(x)
+                    │──2.6 cosec⁻¹(x)
+                          
+                3. Hyperbolic trigo functions
+                    │──3.1 sinh(x)
+                    │──3.2 cosh(x)
+                    │──3.3 tanh(x)
+                    │──3.4 coth(x)
+                    │──3.5 sech(x)
+                    │──3.6 cosech(x)
+                          
+                4. Inverse Hyperbolic trigo functions
+                    │──4.1 sinh⁻¹(x)
+                    │──4.2 cosh⁻¹(x)
+                    │──4.3 tanh⁻¹(x)
+                    |_4.4 coth⁻¹(x)
+                    |_4.5 sech⁻¹(x)
+                    |_4.6 cosech⁻¹(x)
+                          
+                5. Show Operations.
+                6. Quit scientific calculator.
+                |====================================================================|\n"""))
 
-
-def std_calc_main_menu():
+def std_calc():
     while True:
         std_calc_menuMsg()
         try:
             op_num = int(input("Enter your choice: "))
             if not op_num:
                 errmsg()
-        except (ValueError, KeyboardInterrupt, UnboundLocalError):
+        except (ValueError, KeyboardInterrupt, UnboundLocalError,TypeError):
             errmsg()
             continue
         match op_num:
@@ -53,38 +66,29 @@ def std_calc_main_menu():
             case _:
                 errmsg()
 
-def sci_calc_main_menu():
+def sci_calc():
     while True:
-        sci_calc_menuMsg()
         try:
-            op_num = int(input("Enter your choice: "))
-            if not op_num:
-                errmsg()
-        except (ValueError, KeyboardInterrupt, UnboundLocalError):
+            op_num = int(input("Enter operation number: "))
+            match op_num:
+                case 1|2|3|4:
+                    pass
+                case 5:
+                    sci_calc_menuMsg()
+                    continue
+                case 6:
+                    print("\nScientific calculator closed!")
+                    break
+                case _:
+                    errmsg()
+                    break
+            sub_op_num = int(input("Enter sub-opertion number: "))
+            if validate_subOpNum(sub_op_num)==0: continue
+            key = (op_num, sub_op_num)
+            eval_trigo_func(key)
+        except (ValueError, KeyboardInterrupt, UnboundLocalError, TypeError):
             errmsg()
             continue
-        match op_num:
-            case 1:
-                sci_calc_subMenu_msg(op_num)
-                choice = int(input("Enter your choice: "))
-                eval_trigo_func(op_num, choice)
-            case 2:
-                sci_calc_subMenu_msg(op_num)
-                choice = int(input("Enter your choice: "))
-                eval_trigo_func(op_num, choice)
-            case 3:
-                sci_calc_subMenu_msg(op_num)
-                choice = int(input("Enter your choice: "))
-                eval_trigo_func(op_num, choice)
-            case 4: 
-                sci_calc_subMenu_msg(op_num)
-                choice = int(input("Enter your choice: "))
-                eval_trigo_func(op_num, choice)
-            case 5:
-                print("\nScientific calculator closed!")
-                break
-            case _:
-                errmsg()
 
 if __name__ == '__main__':
     try:
@@ -92,13 +96,14 @@ if __name__ == '__main__':
             mode_choice_menu()
             try:
                 mode_choice = int(input("Select a mode for Calc: "))
-            except ValueError:
+            except (ValueError, TypeError):
                 errmsg()
             match mode_choice:
                 case 1:
-                    std_calc_main_menu()
+                    std_calc()
                 case 2:
-                    sci_calc_main_menu()
+                    sci_calc_menuMsg()
+                    sci_calc()
                 case 3:
                     print("\nThank you for using Calculator!")
                     break
