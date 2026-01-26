@@ -59,7 +59,8 @@ def std_calc():
             continue
         match op_num:
             case 1:
-                print(f"Result: {evaluate_expression()}")
+                exp = exp_input()
+                print(f"Result: {evaluate_expression(exp)}")
             case 2:
                 print("\nStandard calculator closed!")
                 break
