@@ -10,6 +10,24 @@ def get_val():
         errmsg()
         return None
 
+def display_hist_sci_calc():
+    try:
+        f1 = open("history_file.txt", 'r', encoding="utf-8")
+        history = f1.readlines()
+        f1.close()
+        print("History:")
+        for history_val in history:
+            print(history_val, end="")
+    except FileNotFoundError:
+        print("File not found")
+    except Exception:
+        errmsg()
+
+def record_history(name, val, answer):
+    f1 = open("history_file.txt", 'a', encoding="utf-8")
+    f1.write(f"{name}({val}) = {answer}\n")
+    f1.close()
+
 def validate_subOpNum(sub_op_num):
         match sub_op_num:
             case 1|2|3|4|5|6:
@@ -28,13 +46,14 @@ def format_answer(result):
 
 def print_eval(name, val, func):
     result = format_answer(func(val))
+    record_history(name, val, result)
     return f"{name}({val}) = {result}"
 
 def validate_and_eval(op_num, sub_op_num, name, func, val):
     try:
         match op_num:
             case 1: # Normal trigo functions
-                if (sub_op_num==4 or sub_op_num==6) and isclose(val%180, 0) or (abs(val)==0): 
+                if (sub_op_num==4 or sub_op_num==6) and (isclose(val%180, 0) or abs(val)==0): 
                     return "Cannot divide by zero"
                 elif (sub_op_num==3 or sub_op_num==5) and (isclose(val%180, 90) or abs(val)==90):
                     return "Cannot divide by zero"

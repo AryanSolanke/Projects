@@ -43,8 +43,9 @@ def sci_calc_menuMsg():
                     |_4.5 sech⁻¹(x)
                     |_4.6 cosech⁻¹(x)
                           
-                5. Show Operations.
-                6. Quit scientific calculator.
+                5. Show operations.
+                6. Show history.
+                7. Quit scientific calculator.
                 |====================================================================|\n"""))
 
 def std_calc():
@@ -78,6 +79,9 @@ def sci_calc():
                     sci_calc_menuMsg()
                     continue
                 case 6:
+                    display_hist_sci_calc()
+                    continue
+                case 7:
                     print("\nScientific calculator closed!")
                     break
                 case _:
