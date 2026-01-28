@@ -45,7 +45,8 @@ def sci_calc_menuMsg():
                           
                 5. Show operations.
                 6. Show history.
-                7. Quit scientific calculator.
+                7. Clear history.
+                8. Quit scientific calculator.
                 |====================================================================|\n"""))
 
 def std_calc():
@@ -82,6 +83,9 @@ def sci_calc():
                     display_hist_sci_calc()
                     continue
                 case 7:
+                    clear_hist_sci_calc()
+                    continue
+                case 8:
                     print("\nScientific calculator closed!")
                     break
                 case _:

@@ -24,9 +24,25 @@ def display_hist_sci_calc():
         errmsg()
 
 def record_history(name, val, answer):
-    f1 = open("history_file.txt", 'a', encoding="utf-8")
-    f1.write(f"{name}({val}) = {answer}\n")
-    f1.close()
+    try: 
+        f1 = open("history_file.txt", 'a', encoding="utf-8")
+        f1.write(f"{name}({val}) = {answer}\n")
+        f1.close()
+    except FileNotFoundError:
+        print("File not found")
+    except Exception:
+        errmsg()
+
+def clear_hist_sci_calc():
+    try:
+        f = open("history_file.txt", 'w', encoding="utf-8")
+        f.write("")
+        f.close()
+        print("History cleared successfully!")
+    except FileNotFoundError:
+        print("File not found")
+    except Exception:
+        errmsg()
 
 def validate_subOpNum(sub_op_num):
         match sub_op_num:
