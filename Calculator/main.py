@@ -3,10 +3,10 @@ from sci import *
 import textwrap
 
 def mode_choice_menu():
-    print("\n======>Main Menu<======\n\n1. Standard\n2. Scientific\n3. Quit Calculator")
+    print("\n======>Main Menu<======\n\n1. Standard.\n2. Scientific.\n3. Quit Calculator.")
 
 def std_calc_menuMsg():
-    print("\n|=====>Operations<=====|\n\n1. Type expression\n2. Quit standard calculator\n\n|======================|")
+    print("\n|=====>Operations<=====|\n\n1. Type expression.\n2. Show history.\n3. Clear history.\n4. Quit standard calculator.\n\n|======================|")
 
 def sci_calc_menuMsg():
     print(textwrap.dedent("""
@@ -64,6 +64,12 @@ def std_calc():
                 exp = exp_input()
                 print(f"Result: {evaluate_expression(exp)}")
             case 2:
+                display_hist_std_calc()
+                continue
+            case 3:
+                clear_hist_std_calc()
+                continue
+            case 4:
                 print("\nStandard calculator closed!")
                 break
             case _:

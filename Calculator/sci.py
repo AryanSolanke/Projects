@@ -12,35 +12,35 @@ def get_val():
 
 def display_hist_sci_calc():
     try:
-        f1 = open("history_file.txt", 'r', encoding="utf-8")
+        f1 = open("sci_calc_history_file.txt", 'r', encoding="utf-8")
         history = f1.readlines()
         f1.close()
         print("History:")
         for history_val in history:
             print(history_val, end="")
     except FileNotFoundError:
-        print("File not found")
+        print("Failed to display history")
     except Exception:
         errmsg()
 
-def record_history(name, val, answer):
+def record_history_sci_calc(name, val, answer):
     try: 
-        f1 = open("history_file.txt", 'a', encoding="utf-8")
+        f1 = open("sci_calc_history_file.txt", 'a', encoding="utf-8")
         f1.write(f"{name}({val}) = {answer}\n")
         f1.close()
     except FileNotFoundError:
-        print("File not found")
+        print("Failed to record history")
     except Exception:
         errmsg()
 
 def clear_hist_sci_calc():
     try:
-        f = open("history_file.txt", 'w', encoding="utf-8")
+        f = open("sci_calc_history_file.txt", 'w', encoding="utf-8")
         f.write("")
         f.close()
         print("History cleared successfully!")
     except FileNotFoundError:
-        print("File not found")
+        print("Failed to clear history")
     except Exception:
         errmsg()
 
@@ -62,7 +62,7 @@ def format_answer(result):
 
 def print_eval(name, val, func):
     result = format_answer(func(val))
-    record_history(name, val, result)
+    record_history_sci_calc(name, val, result)
     return f"{name}({val}) = {result}"
 
 def validate_and_eval(op_num, sub_op_num, name, func, val):
