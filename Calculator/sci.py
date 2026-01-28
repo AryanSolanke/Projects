@@ -58,7 +58,7 @@ def format_answer(result):
     stripped_res = formatted_res.rstrip("0").rstrip(".")
     if stripped_res == "-0":
         return "0"
-    return stripped_res      
+    return stripped_res   
 
 def print_eval(name, val, func):
     result = format_answer(func(val))

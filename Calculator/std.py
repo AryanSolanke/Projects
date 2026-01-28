@@ -1,5 +1,16 @@
 from math import *
 
+def errmsg():
+    print("Error: Invalid input.")
+
+def format_answer(result):
+    # Format to 14 decimal places as a string
+    formatted_res = f"{result:.9f}"
+    stripped_res = formatted_res.rstrip("0").rstrip(".")
+    if stripped_res == "-0":
+        return "0"
+    return stripped_res
+
 def record_history_std_calc(exp, result):
     try: 
         f1 = open("std_calc_history_file.txt", 'a', encoding="utf-8")
@@ -34,9 +45,6 @@ def clear_hist_std_calc():
     except Exception:
         errmsg()
 
-def errmsg():
-    print("Error: Invalid input.")
-
 def exp_input():
     exp = input("Enter expression(eg. 2+3*4): ")
     return exp
@@ -58,8 +66,10 @@ def validate_exp(exp):
 def evaluate_expression(exp):
     if validate_exp(exp):
         try:
-            result = float(f"{eval(exp):.15g}")
+            result = float(f"{eval(exp)}")
+            result = format_answer(result)
             record_history_std_calc(exp, result)
+            return result
         except (SyntaxError, ZeroDivisionError, TypeError, OverflowError):
             errmsg()
             return 0
