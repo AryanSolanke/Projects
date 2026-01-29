@@ -17,7 +17,7 @@ def test_std_calc():
     assert evaluate_expression("-/*-+/+-*+*-/-3+/") == 0
 
     # Basic functionality of std calc should be correct
-    assert evaluate_expression("15*(6+3-1)+215-(31*(4/35)**16)//733%648") == 335.0
+    assert evaluate_expression("15*(6+3-1)+215-(31*(4/35)**16)//733%648") == 335
 
     # Multi decimal, Syntax error should be caught by validation
     assert evaluate_expression("5...56.67.5.443.") == 0

@@ -5,7 +5,7 @@ def errmsg():
 
 def format_answer(result):
     # Format to 14 decimal places as a string
-    formatted_res = f"{result:.9f}"
+    formatted_res = f"{result:.14f}"
     stripped_res = formatted_res.rstrip("0").rstrip(".")
     if stripped_res == "-0":
         return "0"

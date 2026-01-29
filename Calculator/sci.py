@@ -4,7 +4,7 @@ from std import errmsg
 #Takes values for trigo functions
 def get_val():
     try:
-        val = float(input("Enter x: "))
+        val = float(input())
         return val
     except (ValueError, SyntaxError, TypeError):
         errmsg()
@@ -52,16 +52,16 @@ def validate_subOpNum(sub_op_num):
                 errmsg()
                 return 0
             
-def format_answer(result):
+def frmt_ans(result):
     # Format to 14 decimal places as a string
     formatted_res = f"{result:.9f}"
     stripped_res = formatted_res.rstrip("0").rstrip(".")
     if stripped_res == "-0":
         return "0"
-    return stripped_res   
+    return stripped_res
 
 def print_eval(name, val, func):
-    result = format_answer(func(val))
+    result = frmt_ans(func(val))
     record_history_sci_calc(name, val, result)
     return f"{name}({val}) = {result}"
 
@@ -120,6 +120,7 @@ def eval_trigo_func(key):
     if key in trigo_funcs:
         op_num, sub_op_num = key
         name, func = trigo_funcs[key]
+        print("Enter angle: ", end='')
         val = get_val()
         if val!=None:
             answer = validate_and_eval(op_num, sub_op_num, name, func, val)

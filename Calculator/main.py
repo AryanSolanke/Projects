@@ -1,9 +1,10 @@
 from std import *
 from sci import *
+from converter import *
 import textwrap
 
 def mode_choice_menu():
-    print("\n======>Main Menu<======\n\n1. Standard.\n2. Scientific.\n3. Quit Calculator.")
+    print("\n|======>Main Menu<======|\n\n1. Standard.\n2. Scientific.\n3. Converter\n4. Quit Calculator.")
 
 def std_calc_menuMsg():
     print("\n|=====>Operations<=====|\n\n1. Type expression.\n2. Show history.\n3. Clear history.\n4. Quit standard calculator.\n\n|======================|")
@@ -120,7 +121,9 @@ if __name__ == '__main__':
                     sci_calc_menuMsg()
                     sci_calc()
                 case 3:
-                    print("\nThank you for using Calculator!")
+                    angle_converter()
+                case 4:
+                    print("\nThank you for using Calculator!\n")
                     break
                 case _:
                     errmsg()

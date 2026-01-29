@@ -24,6 +24,9 @@ A robust, console-based Python calculator designed with a clean modular architec
 * **24 Engineering Functions**: Includes full suites for Trigonometric, Inverse Trigonometric, Hyperbolic, and Inverse Hyperbolic functions.
 * **High Efficiency**: Uses $O(1)$ dictionary lookups with tuple-key mapping for function execution.
 
+## 🔄️ Converter Mode
+* **Converts given angle(degree, radian, or gradian) to other to alternatives.**
+
 ## 🧠 Domain Guarding (Critical Feature)
 Every function is protected by explicit mathematical domain checks, preventing undefined or misleading results.
 Examples:
@@ -59,16 +62,17 @@ Testing ensures mathematical correctness and stability across all supported oper
 Calculator/
 │
 ├── main.py # Entry point & menu-driven UI
-├── std.py # Standard arithmetic engine & error handling
+├── std.py # Standard arithmetic logic & error handling
 ├── sci.py # Scientific math logic, validation & formatting
+├── converter.py # Convertion logic, validation & formatting
 ├── tests/
-│ ├── test_std.py
-│ └── test_sci.py
+│ ├── test_std.py # tests standard calc
+│ └── test_sci.py # tests scietific calc
 └── README.md
 
 ## 🛠️ Tech Stack
 * **Language: Python 3.13**
-* **Math Engine: math module**
+* **Math logic: math module**
 * **Architecture: Modular, function-dispatch based**
 * **Testing: pytest**
 
