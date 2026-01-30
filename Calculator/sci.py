@@ -1,7 +1,6 @@
 from math import *
 from std import errmsg
 
-#Takes values for trigo functions
 def get_val():
     try:
         val = float(input())
@@ -53,7 +52,7 @@ def validate_subOpNum(sub_op_num):
                 return 0
             
 def frmt_ans(result):
-    # Format to 14 decimal places as a string
+    # Format to 9 decimal places as a string
     formatted_res = f"{result:.9f}"
     stripped_res = formatted_res.rstrip("0").rstrip(".")
     if stripped_res == "-0":
@@ -116,7 +115,6 @@ def validate_and_eval(op_num, sub_op_num, name, func, val):
         return 0
 
 def eval_trigo_func(key):
-    # if op_num==1:
     if key in trigo_funcs:
         op_num, sub_op_num = key
         name, func = trigo_funcs[key]
