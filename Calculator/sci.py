@@ -11,37 +11,32 @@ def get_val():
 
 def display_hist_sci_calc():
     try:
-        f1 = open("sci_calc_history_file.txt", 'r', encoding="utf-8")
-        history = f1.readlines()
-        f1.close()
-        print("History:")
-        for history_val in history:
-            print(history_val, end="")
+        with open("sci_calc_history_file.txt", 'r', encoding="utf-8") as f:
+            content = f.read().strip()
+            if not content:
+                print("\nHistory is currently empty.")
+            else:
+                print("\n--- Scientific Calculation History ---")
+                print(content)
     except FileNotFoundError:
-        print("Failed to display history")
-    except Exception:
-        errmsg()
+        print("\nNo history file found. Perform a calculation first!")
+    except Exception as e:
+        print(f"Error reading history: {e}")
 
 def record_history_sci_calc(name, val, answer):
-    try: 
-        f1 = open("sci_calc_history_file.txt", 'a', encoding="utf-8")
-        f1.write(f"{name}({val}) = {answer}\n")
-        f1.close()
-    except FileNotFoundError:
-        print("Failed to record history")
-    except Exception:
-        errmsg()
+    try:
+        with open("sci_calc_history_file.txt", 'a', encoding="utf-8") as f:
+            f.write(f"{name}({val}) = {answer}\n")
+    except Exception as e:
+        print(f"File Error: Could not record history. ({e})")
 
 def clear_hist_sci_calc():
     try:
-        f = open("sci_calc_history_file.txt", 'w', encoding="utf-8")
-        f.write("")
-        f.close()
-        print("History cleared successfully!")
-    except FileNotFoundError:
-        print("Failed to clear history")
-    except Exception:
-        errmsg()
+        with open("sci_calc_history_file.txt", 'w', encoding="utf-8") as f:
+            pass 
+        print("Scientific history cleared successfully!")
+    except Exception as e:
+        print(f"Could not clear history: {e}")
 
 def validate_subOpNum(sub_op_num):
         match sub_op_num:
@@ -52,12 +47,7 @@ def validate_subOpNum(sub_op_num):
                 return 0
             
 def frmt_ans(result):
-    # Format to 9 decimal places as a string
-    formatted_res = f"{result:.9f}"
-    stripped_res = formatted_res.rstrip("0").rstrip(".")
-    if stripped_res == "-0":
-        return "0"
-    return stripped_res
+    return f"{result:.9g}"
 
 def print_eval(name, val, func):
     result = frmt_ans(func(val))
@@ -65,54 +55,69 @@ def print_eval(name, val, func):
     return f"{name}({val}) = {result}"
 
 def validate_and_eval(op_num, sub_op_num, name, func, val):
+    """
+    Validates input domains and executes scientific calculations.
+    
+    Args:
+        op_num (int): Category of function (Trigo, Hyperbolic, etc.)
+        sub_op_num (int): Specific function identifier within category.
+        name (str): Display name of the function.
+        func (callable): The mathematical function to execute.
+        val (float): The input value/angle.
+        
+    Returns:
+        str: Formatted result string or a descriptive error message.
+    """
     try:
-        match op_num:
-            case 1: # Normal trigo functions
-                if (sub_op_num==4 or sub_op_num==6) and (isclose(val%180, 0) or abs(val)==0): 
-                    return "Cannot divide by zero"
-                elif (sub_op_num==3 or sub_op_num==5) and (isclose(val%180, 90) or abs(val)==90):
-                    return "Cannot divide by zero"
-                else:
-                    return print_eval(name, val, func)
+        # Category 1: Standard Trigonometric Functions
+        # Handles periodicity and undefined points (asymptotes)
+        if op_num == 1:
+            # Undefined where sin(x) = 0: cot(x), cosec(x)
+            if sub_op_num in [4, 6] and isclose(val % 180, 0, abs_tol=1e-9):
+                return "Error: Division by zero (Asymptote at n*180°)"
+            # Undefined where cos(x) = 0: tan(x), sec(x)
+            if sub_op_num in [3, 5] and isclose(val % 180, 90, abs_tol=1e-9):
+                return "Error: Division by zero (Asymptote at n*180° + 90°)"
 
-            case 2: # Hyperbolic functions
-                if (sub_op_num == 4 or sub_op_num == 6) and val == 0:
-                    return "Cannot divide by zero"
-                else:
-                    return print_eval(name, val, func)
+        # Category 2: Hyperbolic Functions
+        elif op_num == 2:
+            # coth(0) and cosech(0) are undefined
+            if sub_op_num in [4, 6] and val == 0:
+                return "Error: Division by zero (Undefined at x=0)"
 
-            case 3: # Inverse of Normal trigo functions
-                match sub_op_num:
-                    case 1 | 2: # sin⁻¹, cos⁻¹
-                        if val < -1 or val > 1:
-                            return "Domain error: Enter value between [-1,1]"
-                    case 5 | 6: # sec⁻¹, cosec⁻¹
-                        if -1 < val < 1:
-                            return "Domain error: Enter value which lie in |x|>=1"
-                    case 4: # cot⁻¹ special case for x=0
-                        if val == 0:
-                            return f"{name}({val}) = 90" 
-                return print_eval(name, val, func)
+        # Category 3: Inverse Trigonometric Functions
+        elif op_num == 3:
+            # Domain check for arcsin and arccos
+            if sub_op_num in [1, 2] and (val < -1 or val > 1):
+                return "Domain Error: Input x must satisfy |x| <= 1"
+            # Domain check for arcsec and arccosec
+            if sub_op_num in [5, 6] and (-1 < val < 1):
+                return "Domain Error: Input x must satisfy |x| >= 1"
+            # Special case: cot⁻¹(0) is traditionally defined as 90°
+            if sub_op_num == 4 and val == 0:
+                return f"{name}({val}) = 90"
 
-            case 4: # Inverse Hyperbolic functions
-                match sub_op_num:
-                    case 2: # cosh⁻¹
-                        if val < 1: return "Domain error: Enter value greater than 1"
-                    case 3: # tanh⁻¹
-                        if val <= -1 or val >= 1: return "Domain error: Enter value between (-1,1)"
-                    case 4: # coth⁻¹
-                        if -1 <= val <= 1: return "Domain error: Enter value outside [-1,1]"
-                    case 5: # sech⁻¹
-                        if val <= 0 or val > 1: return "Domain error: Enter value in range (0,1]"
-                    case 6: # cosech⁻¹
-                        if val == 0: return "Domain error: Enter any value except 0"
-                return print_eval(name, val, func)
-            case _:
-                errmsg()
-                return 0
-    except (ValueError, KeyboardInterrupt, UnboundLocalError,TypeError):
-        errmsg()
-        return 0
+        # Category 4: Inverse Hyperbolic Functions
+        elif op_num == 4:
+            if sub_op_num == 2 and val < 1: 
+                return "Domain Error: acosh(x) requires x >= 1"
+            if sub_op_num == 3 and (val <= -1 or val >= 1): 
+                return "Domain Error: atanh(x) requires x in open interval (-1, 1)"
+            if sub_op_num == 4 and (-1 <= val <= 1): 
+                return "Domain Error: acoth(x) requires x outside closed interval [-1, 1]"
+            if sub_op_num == 5 and (val <= 0 or val > 1): 
+                return "Domain Error: asech(x) requires x in range (0, 1]"
+            if sub_op_num == 6 and val == 0: 
+                return "Domain Error: acosech(x) is undefined at x=0"
+
+        # Execution Phase: Validated inputs proceed to calculation
+        return print_eval(name, val, func)
+
+    except (ValueError, ArithmeticError) as e:
+        return f"Math Error: {e}"
+    except Exception as e:
+        # Catch unexpected runtime exceptions (e.g., NameError, TypeError)
+        return f"System Error: {type(e).__name__}"
 
 def eval_trigo_func(key):
     if key in trigo_funcs:

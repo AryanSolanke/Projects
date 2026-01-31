@@ -16,9 +16,7 @@ def convert_angle(name1, func1, name2, func2, angle):
     ans2 =  f"{name2}({angle}) = {frmt_ans(func2(angle))}"
     if (ans1 or ans2)!=None:
         return ans1, ans2
-    
-def convert_temp(tmp):
-    pass
+
 def angle_converter():
     while(True):
         try:
