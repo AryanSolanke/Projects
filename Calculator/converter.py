@@ -23,7 +23,7 @@ class TempUnit(IntEnum):
     """Temperature unit types."""
     CELSIUS = 1
     KELVIN = 2
-    FARENHEIT = 3
+    FAHRENHEIT = 3
     QUIT = 4
 
 class MenuOptions(IntEnum):
@@ -51,7 +51,7 @@ def temp_conv_menuMsg() -> None:
     """Display temperature conversion menu."""
     print("\n|=====>Input choices<=====|\n")
     print("Select a input choice\n")
-    print("1. Celsius.\n2. Kelvin \n3. Farenheit\n4. Quit Temperature Converter.")
+    print("1. Celsius.\n2. Kelvin \n3. Fahrenheit\n4. Quit Temperature Converter.")
 
 
 # ============================================================================
@@ -108,7 +108,7 @@ def C_to_kelvin(tmp: float) -> float:
 
 
 def C_to_Fahrenheit(tmp: float) -> float:
-    """Converts Celsius to Farenheit."""
+    """Converts Celsius to Fahrenheit."""
     return ((9/5)*tmp) + 32
 
 
@@ -118,17 +118,17 @@ def K_to_celsius(tmp: float) -> float:
 
 
 def K_to_Fahrenheit(tmp: float) -> float:
-    """Converts Kelvin to Farenheit."""
+    """Converts Kelvin to Fahrenheit."""
     return C_to_Fahrenheit(K_to_celsius(tmp))
 
 
 def F_to_celsius(tmp: float) -> float:
-    """Converts Farenheit to Celsius"""
+    """Converts Fahrenheit to Celsius"""
     return (5/9)*(tmp - 32)
 
 
 def F_to_kelvin(tmp: float) -> float:
-    """Converts Farenheit to Kelvin"""
+    """Converts Fahrenheit to Kelvin"""
     return F_to_celsius(tmp) + 273.15
 
 
@@ -148,11 +148,11 @@ angle_conv_funcs: Dict[int, Tuple[str, Callable, str, Callable]]= {
 # Temperature conversion: (from_unit, to_unit, conversion_function)
 temp_conv_funcs: Dict[Tuple[int, int], Tuple[str, str, Callable]] = {
     (TempUnit.CELSIUS,TempUnit.KELVIN): ("Celsius", "Kelvin", C_to_kelvin),
-    (TempUnit.CELSIUS,TempUnit.FARENHEIT): ("Celsius", "Farenheit", C_to_Fahrenheit),
+    (TempUnit.CELSIUS,TempUnit.FAHRENHEIT): ("Celsius", "Fahrenheit", C_to_Fahrenheit),
     (TempUnit.KELVIN,TempUnit.CELSIUS): ("Kelvin", "Celsius", K_to_celsius),
-    (TempUnit.KELVIN,TempUnit.FARENHEIT): ("Kelvin", "Farenheit", K_to_Fahrenheit),
-    (TempUnit.FARENHEIT,TempUnit.CELSIUS): ("Farenheit", "Celsius", F_to_celsius),
-    (TempUnit.FARENHEIT,TempUnit.KELVIN): ("Farenheit", "Kelvin", F_to_kelvin)
+    (TempUnit.KELVIN,TempUnit.FAHRENHEIT): ("Kelvin", "Fahrenheit", K_to_Fahrenheit),
+    (TempUnit.FAHRENHEIT,TempUnit.CELSIUS): ("Fahrenheit", "Celsius", F_to_celsius),
+    (TempUnit.FAHRENHEIT,TempUnit.KELVIN): ("Fahrenheit", "Kelvin", F_to_kelvin)
     }
 
 
