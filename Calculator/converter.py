@@ -73,7 +73,7 @@ def to_grad(angle: float) -> float:
     return (angle*200)/180
 
 
-def convert_angles(
+def convert_angle(
         name1: str,
         func1: Callable[[float], float],
         name2: str,
@@ -107,7 +107,7 @@ def C_to_kelvin(tmp: float) -> float:
     return (tmp+273.15)
 
 
-def C_to_Farenheit(tmp: float) -> float:
+def C_to_Fahrenheit(tmp: float) -> float:
     """Converts Celsius to Farenheit."""
     return ((9/5)*tmp) + 32
 
@@ -117,9 +117,9 @@ def K_to_celsius(tmp: float) -> float:
     return (tmp-273.15)
 
 
-def K_to_Farenheit(tmp: float) -> float:
+def K_to_Fahrenheit(tmp: float) -> float:
     """Converts Kelvin to Farenheit."""
-    return C_to_Farenheit(K_to_celsius(tmp))
+    return C_to_Fahrenheit(K_to_celsius(tmp))
 
 
 def F_to_celsius(tmp: float) -> float:
@@ -148,9 +148,9 @@ angle_conv_funcs: Dict[int, Tuple[str, Callable, str, Callable]]= {
 # Temperature conversion: (from_unit, to_unit, conversion_function)
 temp_conv_funcs: Dict[Tuple[int, int], Tuple[str, str, Callable]] = {
     (TempUnit.CELSIUS,TempUnit.KELVIN): ("Celsius", "Kelvin", C_to_kelvin),
-    (TempUnit.CELSIUS,TempUnit.FARENHEIT): ("Celsius", "Farenheit", C_to_Farenheit),
+    (TempUnit.CELSIUS,TempUnit.FARENHEIT): ("Celsius", "Farenheit", C_to_Fahrenheit),
     (TempUnit.KELVIN,TempUnit.CELSIUS): ("Kelvin", "Celsius", K_to_celsius),
-    (TempUnit.KELVIN,TempUnit.FARENHEIT): ("Kelvin", "Farenheit", K_to_Farenheit),
+    (TempUnit.KELVIN,TempUnit.FARENHEIT): ("Kelvin", "Farenheit", K_to_Fahrenheit),
     (TempUnit.FARENHEIT,TempUnit.CELSIUS): ("Farenheit", "Celsius", F_to_celsius),
     (TempUnit.FARENHEIT,TempUnit.KELVIN): ("Farenheit", "Kelvin", F_to_kelvin)
     }
@@ -191,7 +191,7 @@ def angle_converter() -> None:
                     angle = get_val()
 
                     if angle!=None:
-                        ans1, ans2 = convert_angles(name1, func1, name2, func2, angle)
+                        ans1, ans2 = convert_angle(name1, func1, name2, func2, angle)
                         print(f"{ans1}\n{ans2}")
                     else:
                         print("No angle given")

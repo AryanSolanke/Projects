@@ -1,17 +1,82 @@
-from std import *
-from sci import *
-from converter import *
+"""
+Advanced Modular Calculator - Main Entry Point
+
+Console-based calculator with standard arithmetic, scientific functions,
+and unit conversions.
+"""
+
 import textwrap
+from enum import IntEnum
 
-def mode_choice_menu():
-    print("\n|======>Main Menu<======|\n\n1. Standard.\n2. Scientific.\n3. Converter\n4. Quit Calculator.")
+from std import (
+    errmsg,
+    exp_input,
+    evaluate_expression,
+    display_hist_std_calc,
+    clear_hist_std_calc
+)
+from sci import (
+    display_hist_sci_calc,
+    clear_hist_sci_calc,
+    validate_subOpNum,
+    eval_trigo_func
+)
+from converter import angle_converter
 
-def std_calc_menuMsg():
-    print("\n|=====>Operations<=====|\n\n1. Type expression.\n2. Show history.\n3. Clear history.\n4. Quit standard calculator.\n\n|======================|")
 
-def sci_calc_menuMsg():
+class MainMode(IntEnum):
+    """Main calculator modes."""
+    STANDARD = 1
+    SCIENTIFIC = 2
+    CONVERTER = 3
+    QUIT = 4
+
+
+class StdOperation(IntEnum):
+    """Standard calculator operations."""
+    EVALUATE = 1
+    SHOW_HISTORY = 2
+    CLEAR_HISTORY = 3
+    QUIT = 4
+
+
+class SciOperation(IntEnum):
+    """Scientific calculator operations."""
+    TRIG = 1
+    INVERSE_TRIG = 2
+    HYPERBOLIC = 3
+    INVERSE_HYPERBOLIC = 4
+    SHOW_MENU = 5
+    SHOW_HISTORY = 6
+    CLEAR_HISTORY = 7
+    QUIT = 8
+
+
+# ============================================================================
+# Menu Display Functions
+# ============================================================================
+
+def mode_choice_menu() -> None:
+    """Display main menu options."""
+    print("\n|======>Main Menu<======|\n")
+    print("1. Standard.\n2. Scientific.\n3. Converter\n4. Quit Calculator.")
+
+
+def std_calc_menuMsg() -> None:
+    print("\n|=====>Operations<=====|\n")
+    print("\n|=====>Operations<=====|\n")
+    print("1. Type expression.")
+    print("2. Show history.")
+    print("3. Clear history.")
+    print("4. Quit standard calculator.")
+    print("\n|======================|")
+
+
+def sci_calc_menuMsg() -> None:
+    """Display scientific calculator menu with all functions."""
     print(textwrap.dedent("""
                 |============================>Operations<============================|\n
+                          
                 1. Basic trigo functions
                     │──1.1 sin(x)
                     │──1.2 cos(x)
@@ -48,65 +113,91 @@ def sci_calc_menuMsg():
                 6. Show history.
                 7. Clear history.
                 8. Quit scientific calculator.
-                |====================================================================|\n"""))
+                |====================================================================|
+"""))
 
-def std_calc():
+
+# ============================================================================
+# Calculator Mode Functions
+# ============================================================================
+
+def std_calc() -> None:
+    """
+    Standard calculator interface.
+    Handles expression evaluation and history management.
+    """
     while True:
         std_calc_menuMsg()
         try:
             op_num = int(input("Enter your choice: "))
-            if not op_num:
-                errmsg()
-        except (ValueError, KeyboardInterrupt, UnboundLocalError,TypeError):
-            errmsg()
-            continue
-        match op_num:
-            case 1:
+
+            if op_num == StdOperation.EVALUATE:
                 exp = exp_input()
                 print(f"Result: {evaluate_expression(exp)}")
-            case 2:
+
+            elif op_num == StdOperation.SHOW_HISTORY:
                 display_hist_std_calc()
-                continue
-            case 3:
+
+            elif op_num == StdOperation.CLEAR_HISTORY:
                 clear_hist_std_calc()
-                continue
-            case 4:
+
+            elif op_num == StdOperation.QUIT:
                 print("\nStandard calculator closed!")
                 break
-            case _:
+            else:
                 errmsg()
 
-def sci_calc():
-    while True:
-        try:
-            op_num = int(input("Enter operation number: "))
-            match op_num:
-                case 1|2|3|4:
-                    pass
-                case 5:
-                    sci_calc_menuMsg()
-                    continue
-                case 6:
-                    display_hist_sci_calc()
-                    continue
-                case 7:
-                    clear_hist_sci_calc()
-                    continue
-                case 8:
-                    print("\nScientific calculator closed!")
-                    break
-                case _:
-                    errmsg()
-                    break
-            sub_op_num = int(input("Enter sub-opertion number: "))
-            if validate_subOpNum(sub_op_num)==0: continue
-            key = (op_num, sub_op_num)
-            eval_trigo_func(key)
         except (ValueError, KeyboardInterrupt, UnboundLocalError, TypeError):
             errmsg()
             continue
 
-if __name__ == '__main__':
+
+def sci_calc() -> None:
+    """
+    Scientific calculator interface.
+    Handles trignometric and hyperbolic function calculations.
+    """
+    while True:
+        try:
+            op_num = int(input("Enter operation number: "))
+
+            if op_num in (SciOperation.TRIG, SciOperation.INVERSE_TRIG,
+                          SciOperation.HYPERBOLIC, SciOperation.INVERSE_HYPERBOLIC):
+                # Get sub-oeration for function categories 1-4
+                sub_op_num = int(input("Enter sub-operation number: "))
+
+                if validate_subOpNum(sub_op_num) == 0:
+                    continue
+
+                key = (op_num, sub_op_num)
+                eval_trigo_func(key)
+
+            elif op_num == SciOperation.SHOW_MENU:
+                sci_calc_menuMsg()
+
+            elif op_num == SciOperation.SHOW_HISTORY:
+                display_hist_sci_calc()
+            
+            elif op_num == SciOperation.CLEAR_HISTORY:
+                clear_hist_sci_calc()
+            
+            elif op_num == SciOperation.QUIT:
+                print("\nScientific calculator closed!")
+                break
+            else:
+                errmsg()
+            
+        except (ValueError, KeyboardInterrupt, UnboundLocalError, TypeError):
+            errmsg()
+            continue
+
+
+# ============================================================================
+# Main Entry Point
+# ============================================================================
+
+def main() -> None:
+    """Main application loop."""
     try:
         while True:
             mode_choice_menu()
@@ -114,18 +205,27 @@ if __name__ == '__main__':
                 mode_choice = int(input("Select a mode for Calc: "))
             except (ValueError, TypeError):
                 errmsg()
-            match mode_choice:
-                case 1:
-                    std_calc()
-                case 2:
-                    sci_calc_menuMsg()
-                    sci_calc()
-                case 3:
-                    angle_converter()
-                case 4:
-                    print("\nThank you for using Calculator!\n")
-                    break
-                case _:
-                    errmsg()
+                continue
+
+            if mode_choice == MainMode.STANDARD:
+                std_calc()
+            
+            elif mode_choice == MainMode.SCIENTIFIC:
+                sci_calc_menuMsg()
+                sci_calc()
+            
+            elif mode_choice == MainMode.CONVERTER:
+                angle_converter()
+            
+            elif mode_choice == MainMode.QUIT:
+                print("\nThank you for using Calculator!\n")
+                break
+            else:
+                errmsg()
+
     except(KeyboardInterrupt, EOFError):
             print("\nProgram interrupted by user. Thank you for using Calculator!")
+
+
+if __name__ == '__main__':
+    main()
