@@ -181,8 +181,8 @@ def angle_converter() -> None:
 
                 if choice == AngleUnit.QUIT:
                     continue
-                else:
-                    errmsg()
+                # else:
+                #     errmsg()
 
                 if choice in angle_conv_funcs:
                     name1, func1, name2, func2 = angle_conv_funcs[choice]

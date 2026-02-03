@@ -20,10 +20,11 @@ Standards:
 import pytest
 import math
 from typing import Tuple
+from unittest.mock import patch
 
 from converter import (
     # Angle conversion functions
-    to_rads, to_deg, to_grad, convert_angle,
+    to_rads, to_deg, to_grad, convert_angle, angle_converter,
 
     # Temperature conversion functions
     C_to_kelvin, C_to_Fahrenheit,
@@ -36,6 +37,8 @@ from converter import (
     # Lookup tables
     angle_conv_funcs, temp_conv_funcs,
 )
+
+from std import errmsg
 
 
 # ============================================================================
@@ -628,6 +631,367 @@ class TestPrecisionAccuracy:
         c2 = F_to_celsius(f)
         
         assert abs(c2 - original) < 1e-9
+
+
+class TestConverterErrorMessages:
+    """Test suite for error messages in converter module."""
+
+    def test_invalid_angle_choice_message(self, capsys, monkeypatch) -> None:
+        """Test error message for invalid angle unit choice.
+        
+        Scenario: User enters a invalid choice(e.g., 99) for angle conversion
+        Expected: "Invalid choice. select between 1-3"
+        """
+        # Simulate user input: main menu choice 1, tehn invalid angle choice 99
+        inputs = iter(['1', '99', '3']) # 1=angle, 99=invalid, 3=quit
+        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+        # Run converter
+        angle_converter()
+
+        # Cpature output
+        captured = capsys.readouterr()
+
+        #Verify exact error message
+        assert "Invalid choice. select between 1-3" in captured.out
+
+    def test_no_angle_given_error_message(self, capsys, monkeypatch) -> None:
+        """
+        Test error message when no angle value is entered.
+
+        Expected: "No angle given"
+        """
+        # Mock get_val to return None (Simluating invalid input)
+        with patch('converter.get_val', return_value=None):
+            inputs = iter(['1', '1', '3'])
+            monkeypatch.setattr('builtins.input', lambda _:next(inputs))
+
+            angle_converter()
+
+            captured = capsys.readouterr()
+            assert "No angle given" in captured.out
+    
+    def test_converter_menu_closed_message(self, capsys, monkeypatch) -> None:
+        """
+        Test success message when converte is closed.
+        
+        Expected: "Converter menu closed"
+        """
+        inputs = iter(['3'])
+        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+
+        angle_converter()
+
+        captured = capsys.readouterr()
+        assert "Converter menu closed" in captured.out
+
+    def test_error_invalid_input_from_message(self, capsys) -> None:
+        """
+        Test generic error message from errmsg() function.
+
+        Expected: "Error: Invalid input."
+        """
+        errmsg()
+        captured = capsys.readouterr()
+        assert captured.out.strip() == "Error: Invalid input."
+
+
+class TestConverterInvalidInputs:
+    """Test suite for invalid input handling in converter functions."""
+
+    def test_to_rads_with_non_numeric_string_raises_error(self) -> None:
+        """
+        Test to_rads with non numeric string input.
+
+        Input: "abc"
+        Expected: TypeError or ValueError
+        """
+        with pytest.raises((TypeError, ValueError)):
+            to_rads("abc")
+    
+    def test_to_deg_with_non_numeric_string_raises_error(self) -> None:
+        """
+        Test to_deg with non-numeric string input.
+        
+        Input: "xyz"
+        Expected: TypeError or ValueError
+        """
+        with pytest.raises((TypeError, ValueError)):
+            to_deg("xyz")
+    
+    def test_to_grad_with_non_numeric_string_raises_error(self) -> None:
+        """
+        Test to_grad with non-numeric string input.
+        
+        Input: "invalid"
+        Expected: TypeError or ValueError
+        """
+        with pytest.raises((TypeError, ValueError)):
+            to_grad("invalid")
+
+    def test_to_rads_with_none_raises_error(self) -> None:
+        """
+        Test to_rads with None input.
+        
+        Input: None
+        Expected: TypeError
+        """
+        with pytest.raises(TypeError):
+            to_rads(None)
+    
+    def test_C_to_kelvin_with_string_raises_error(self) -> None:
+        """
+        Test C_to_kelvin with string input.
+        
+        Input: "25 degrees"
+        Expected: TypeError
+        """
+        with pytest.raises(TypeError):
+            C_to_kelvin("25 degrees")
+    
+    def test_F_to_celsius_with_none_raises_error(self) -> None:
+        """
+        Test F_to_celsius with None input.
+        
+        Input: None
+        Expected: TypeError
+        """
+        with pytest.raises(TypeError):
+            F_to_celsius(None)
+
+
+class TestConverterLookupTableValidation:
+    """Test lookup table validation for error handling."""
+
+    def test_angle_conv_funcs_rejects_invalid_keys(self) -> None:
+        """
+        Test that invalid angle unit choices are not in the lookup table.
+
+        Invalid keys: 0, 4, 5, -1, etc.
+        """
+        invalid_keys = [0, 4, 5, -1, 100]
+
+        for key in invalid_keys:
+            assert key not in angle_conv_funcs, \
+                f"Invalid key {key} should not be in angle_conv_funcs"
+            
+            # Attempting to access should raise KeyError
+            with pytest.raises(KeyError):
+                _ = angle_conv_funcs[key]
+
+    def test_temp_conv_funcs_rejects_same_unit_pairs(self) -> None:
+        """
+        Test that same-unit temperature pairs are not in lookup table.
+        
+        Invalid pairs: (C,C), (K,K), (F,F)
+        """
+        invalid_keys = [
+            (TempUnit.CELSIUS, TempUnit.CELSIUS),
+            (TempUnit.KELVIN, TempUnit.KELVIN),
+            (TempUnit.FAHRENHEIT, TempUnit.FAHRENHEIT),
+        ]
+        
+        for key in invalid_keys:
+            assert key not in temp_conv_funcs, \
+                f"Same-unit pair {key} should not be in temp_conv_funcs"
+    
+    def test_temp_conv_funcs_rejects_invalid_unit_numbers(self) -> None:
+        """
+        Test that invalid temperature unit numbers are not in lookup table.
+        
+        Invalid: (0,1), (99,1), etc.
+        """
+        invalid_keys = [(0, 1), (1, 0), (99, 1), (1, 99)]
+        
+        for key in invalid_keys:
+            assert key not in temp_conv_funcs
+
+
+class TestConverterEdgeCaseErrors:
+    """Test edge case error scenarios in converter."""
+
+    def test_angle_conversion_with_infinity(self) -> None:
+        """
+        Test angle conversion with infinity.
+
+        Input: float('inf)
+        Expected: Result is infinity
+        """
+        result_rad = to_rads(float('inf'))
+        result_grad = to_grad(float('inf'))
+
+        assert math.isinf(result_rad)
+        assert math.isinf(result_grad)
+
+    def test_angle_conversion_with_negative_infinity(self) -> None:
+        """
+        Test angle conversion with negative infinity.
+
+        Input: float('inf')
+        Expected: Result is negative infinity
+        """
+        result_rad = to_rads(float('-inf'))
+        
+        assert math.isinf(result_rad)
+        assert result_rad < 0
+
+    def test_angle_conversion_with_nan(self) -> None:
+        """
+        Test angle conversion with NaN.
+        
+        Input: float('nan')
+        Expected: Result is NaN
+        """
+        result_rad = to_rads(float('nan'))
+        result_grad = to_grad(float('nan'))
+        
+        assert math.isnan(result_rad)
+        assert math.isnan(result_grad)
+    
+    def test_temperature_conversion_with_infinity(self) -> None:
+        """
+        Test temperature conversion with infinity.
+        
+        Input: float('inf')
+        Expected: Result is infinity
+        """
+        result_k = C_to_kelvin(float('inf'))
+        result_f = C_to_Fahrenheit(float('inf'))
+        
+        assert math.isinf(result_k)
+        assert math.isinf(result_f)
+    
+    def test_temperature_conversion_with_nan(self) -> None:
+        """
+        Test temperature conversion with NaN.
+        
+        Input: float('nan')
+        Expected: Result is NaN
+        """
+        result_k = C_to_kelvin(float('nan'))
+        
+        assert math.isnan(result_k)
+    
+    def test_temperature_below_absolute_zero(self) -> None:
+        """
+        Test temperature conversion below absolute zero.
+        
+        Input: -300°C (below -273.15°C)
+        Expected: Mathematically computed (negative Kelvin - unphysical)
+        """
+        result_k = C_to_kelvin(-300)
+        
+        assert isinstance(result_k, float)
+        assert result_k < 0  # Unphysical but mathematically computed
+
+
+class TestConverterErrorMessageFormats:
+    """Test that error messages follow expected format and content."""
+    
+    def test_invalid_choice_message_format(self, capsys, monkeypatch) -> None:
+        """
+        Test exact format of invalid choice message.
+        
+        Expected: "Invalid choice. select between 1-3"
+        """
+        inputs = iter(['1', '999', '3'])
+        monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+        
+        angle_converter()
+        
+        captured = capsys.readouterr()
+        assert "Invalid choice" in captured.out
+        assert "1-3" in captured.out
+    
+    def test_no_angle_given_message_format(self, capsys, monkeypatch) -> None:
+        """
+        Test exact format of "no angle given" message.
+        
+        Expected: "No angle given"
+        """
+        with patch('converter.get_val', return_value=None):
+            inputs = iter(['1', '1', '3'])
+            monkeypatch.setattr('builtins.input', lambda _: next(inputs))
+            
+            angle_converter()
+            
+            captured = capsys.readouterr()
+            assert "No angle given" in captured.out
+    
+    def test_error_message_from_std_module(self, capsys) -> None:
+        """
+        Test that errmsg() from std module produces expected format.
+        
+        Expected: "Error: Invalid input." with period
+        """
+        errmsg()
+        captured = capsys.readouterr()
+        
+        assert captured.out.strip() == "Error: Invalid input."
+
+
+class TestConverterBoundaryErrors:
+    """Test error handling at mathematical and physical boundaries."""
+    
+    def test_temperature_at_absolute_zero_no_error(self) -> None:
+        """
+        Test that absolute zero doesn't produce errors.
+        
+        Input: -273.15°C
+        Expected: Valid conversion to 0 K
+        """
+        result = C_to_kelvin(-273.15)
+        assert abs(result - 0) < 1e-12
+    
+    def test_very_large_positive_angle_no_overflow_error(self) -> None:
+        """
+        Test that very large angles don't cause overflow errors.
+        
+        Input: 10^100 degrees
+        Expected: Computes without error
+        """
+        large_angle = 10**100
+        result_rad = to_rads(large_angle)
+        
+        assert isinstance(result_rad, float)
+    
+    def test_very_small_positive_angle_no_underflow_error(self) -> None:
+        """
+        Test that very small angles don't cause underflow errors.
+        
+        Input: 10^-100 degrees
+        Expected: Computes correctly
+        """
+        small_angle = 10**-100
+        result_rad = to_rads(small_angle)
+        
+        assert isinstance(result_rad, float)
+    
+    def test_temperature_conversion_at_water_freezing_no_error(self) -> None:
+        """
+        Test conversion at water freezing point.
+        
+        Input: 0°C
+        Expected: Exact conversions without errors
+        """
+        k_freeze = C_to_kelvin(0)
+        f_freeze = C_to_Fahrenheit(0)
+        
+        assert abs(k_freeze - 273.15) < 1e-12
+        assert abs(f_freeze - 32) < 1e-12
+    
+    def test_temperature_conversion_at_water_boiling_no_error(self) -> None:
+        """
+        Test conversion at water boiling point.
+        
+        Input: 100°C
+        Expected: Exact conversions without errors
+        """
+        k_boil = C_to_kelvin(100)
+        f_boil = C_to_Fahrenheit(100)
+        
+        assert abs(k_boil - 373.15) < 1e-12
+        assert abs(f_boil - 212) < 1e-12
 
 
 if __name__ == "__main__":
