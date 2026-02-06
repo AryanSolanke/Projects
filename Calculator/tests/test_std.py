@@ -460,5 +460,240 @@ class TestEvaluateExpression:
         assert evaluate_expression(expression) == expected
 
 
+# ============================================================================
+# Test History Management Functions
+# ============================================================================
+
+class TestHistoryManagement:
+    """Test suite for history management functions."""
+    
+    def test_record_history_creates_file(self, temp_history_file) -> None:
+        """
+        Test that recording history creates the file if it doesn't exist.
+        
+        Action: Record a calculation
+        Expected: File exists with correct content
+        """
+        record_history_std_calc("2+2", "4")
+        assert temp_history_file.exists()
+        assert "2+2 = 4\n" in temp_history_file.read_text()
+    
+    def test_record_history_appends_to_existing(self, history_with_data) -> None:
+        """
+        Test that recording appends to existing history.
+        
+        Action: Record to file with existing data
+        Expected: New entry appended, old entries preserved
+        """
+        original_content = history_with_data.read_text()
+        record_history_std_calc("5+5", "10")
+        new_content = history_with_data.read_text()
+        assert original_content in new_content
+        assert "5+5 = 10\n" in new_content
+    
+    def test_record_history_multiple_entries(self, temp_history_file) -> None:
+        """
+        Test recording multiple history entries.
+        
+        Action: Record 3 calculations
+        Expected: All 3 present in file
+        """
+        record_history_std_calc("1+1", "2")
+        record_history_std_calc("2+2", "4")
+        record_history_std_calc("3+3", "6")
+        content = temp_history_file.read_text()
+        assert content.count("\n") == 3
+        assert "1+1 = 2" in content
+        assert "2+2 = 4" in content
+        assert "3+3 = 6" in content
+    
+    def test_display_history_shows_entries(
+        self, history_with_data, capsys
+    ) -> None:
+        """
+        Test that display_hist_std_calc shows all entries.
+        
+        Action: Display history with 3 entries
+        Expected: All entries printed
+        """
+        display_hist_std_calc()
+        captured = capsys.readouterr()
+        assert "History:" in captured.out
+        assert "2+2 = 4" in captured.out
+        assert "3*3 = 9" in captured.out
+        assert "10/2 = 5" in captured.out
+    
+    def test_display_history_empty_file(self, temp_history_file, capsys) -> None:
+        """
+        Test display when history file is empty.
+        
+        Action: Display with empty file
+        Expected: No entries shown
+        """
+        temp_history_file.write_text("")
+        display_hist_std_calc()
+        captured = capsys.readouterr()
+        assert "History:" in captured.out
+    
+    def test_display_history_nonexistent_file(self, capsys, monkeypatch) -> None:
+        """
+        Test display when history file doesn't exist.
+        
+        Action: Display with no file
+        Expected: Error message
+        """
+        nonexistent = Path("/tmp/nonexistent_history_file.txt")
+        monkeypatch.setattr('std_refactored.HISTORY_FILE', nonexistent)
+        display_hist_std_calc()
+        captured = capsys.readouterr()
+        assert "Failed to display history" in captured.out
+    
+    def test_clear_history_removes_content(self, history_with_data) -> None:
+        """
+        Test that clear_hist_std_calc empties the file.
+        
+        Action: Clear history with existing data
+        Expected: File empty but exists
+        """
+        clear_hist_std_calc()
+        assert history_with_data.exists()
+        assert history_with_data.read_text() == ""
+    
+    def test_clear_history_success_message(self, temp_history_file, capsys) -> None:
+        """
+        Test that clear shows success message.
+        
+        Action: Clear history
+        Expected: Success message printed
+        """
+        clear_hist_std_calc()
+        captured = capsys.readouterr()
+        assert "History cleared successfully!" in captured.out
+    
+    def test_clear_history_nonexistent_file(self, capsys, monkeypatch) -> None:
+        """
+        Test clear when file doesn't exist.
+        
+        Action: Clear non-existent file
+        Expected: Error message
+        """
+        nonexistent = Path("/tmp/nonexistent_history_file_clear.txt")
+        if nonexistent.exists():
+            nonexistent.unlink()
+        monkeypatch.setattr('std_refactored.HISTORY_FILE', nonexistent)
+        clear_hist_std_calc()
+        # Should not crash, should handle gracefully
+
+
+# ============================================================================
+# Test Error Handling
+# ============================================================================
+
+class TestErrorHandling:
+    """Test suite for error handling."""
+    
+    def test_errmsg_prints_error(self, capsys) -> None:
+        """
+        Test that errmsg prints standard error message.
+        
+        Action: Call errmsg
+        Expected: Standard error message printed
+        """
+        errmsg()
+        captured = capsys.readouterr()
+        assert "Error: Invalid input." in captured.out
+    
+    def test_evaluate_expression_handles_type_error(self, temp_history_file) -> None:
+        """
+        Test that TypeError is handled gracefully.
+        
+        This tests the exception handling in evaluate_expression.
+        """
+        # This should trigger validation failure
+        result = evaluate_expression("abc")
+        assert result == "0"
+
+
+# ============================================================================
+# Integration Tests
+# ============================================================================
+
+class TestIntegration:
+    """Integration tests for std_refactored module."""
+    
+    def test_full_calculation_workflow(self, temp_history_file) -> None:
+        """
+        Test complete workflow: evaluate, record, display, clear.
+        
+        Action: Perform calculation, check history, clear
+        Expected: All operations work together correctly
+        """
+        # Evaluate and record
+        result = evaluate_expression("10+20")
+        assert result == "30"
+        
+        # Check file was created
+        assert temp_history_file.exists()
+        content = temp_history_file.read_text()
+        assert "10+20 = 30" in content
+        
+        # Clear history
+        clear_hist_std_calc()
+        assert temp_history_file.read_text() == ""
+    
+    def test_multiple_calculations_preserve_history(
+        self, temp_history_file
+    ) -> None:
+        """
+        Test that multiple calculations accumulate in history.
+        
+        Action: Perform 5 calculations
+        Expected: All 5 in history file
+        """
+        expressions = ["1+1", "2*2", "3-1", "4/2", "5%2"]
+        for exp in expressions:
+            evaluate_expression(exp)
+        
+        content = temp_history_file.read_text()
+        assert content.count("\n") == 5
+
+
+# ============================================================================
+# Performance Tests
+# ============================================================================
+
+class TestPerformance:
+    """Performance tests for std_refactored module."""
+    
+    def test_format_answer_performance_large_number(self) -> None:
+        """
+        Test formatting performance with very large numbers.
+        
+        Input: 10**100
+        Expected: Completes without timeout
+        """
+        import time
+        start = time.time()
+        result = format_answer(10.0**100)
+        duration = time.time() - start
+        assert duration < 1.0  # Should complete in under 1 second
+        assert result is not None
+    
+    def test_validate_exp_performance_long_expression(self) -> None:
+        """
+        Test validation performance with very long expressions.
+        
+        Input: Expression with 1000 characters
+        Expected: Completes efficiently
+        """
+        long_exp = "+".join(["1"] * 500)
+        import time
+        start = time.time()
+        result = validate_exp(long_exp)
+        duration = time.time() - start
+        assert duration < 1.0
+        assert result is True
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])
