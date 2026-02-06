@@ -543,7 +543,7 @@ class TestHistoryManagement:
         Expected: Error message
         """
         nonexistent = Path("/tmp/nonexistent_history_file.txt")
-        monkeypatch.setattr('std_refactored.HISTORY_FILE', nonexistent)
+        monkeypatch.setattr('std.HISTORY_FILE', nonexistent)
         display_hist_std_calc()
         captured = capsys.readouterr()
         assert "Failed to display history" in captured.out
@@ -580,7 +580,7 @@ class TestHistoryManagement:
         nonexistent = Path("/tmp/nonexistent_history_file_clear.txt")
         if nonexistent.exists():
             nonexistent.unlink()
-        monkeypatch.setattr('std_refactored.HISTORY_FILE', nonexistent)
+        monkeypatch.setattr('std.HISTORY_FILE', nonexistent)
         clear_hist_std_calc()
         # Should not crash, should handle gracefully
 

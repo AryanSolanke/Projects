@@ -67,7 +67,7 @@ def display_hist_std_calc() -> None:
 def clear_hist_std_calc() -> None:
     """Clear history from file."""
     try:
-        HISTORY_FILE.write_text("", encoding="utf-8").splitlines()
+        HISTORY_FILE.write_text("", encoding="utf-8")
         print("History cleared successfully!")
     except FileNotFoundError:
         print("Failed to clear history")

@@ -64,7 +64,6 @@ def mode_choice_menu() -> None:
 
 def std_calc_menuMsg() -> None:
     print("\n|=====>Operations<=====|\n")
-    print("\n|=====>Operations<=====|\n")
     print("1. Type expression.")
     print("2. Show history.")
     print("3. Clear history.")
