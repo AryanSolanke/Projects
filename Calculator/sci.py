@@ -1,7 +1,7 @@
 """
 Scientific Calculator Module
 
-Provides trignometric, hyperbolic, and inverse functions with strict domain validation.
+Provides trigonometric, hyperbolic, and inverse functions with strict domain validation.
 Supports history tracking and precise numerical formatting.
 """
 
@@ -29,9 +29,9 @@ ANGLE_TOLERANCE = 1e-9 # Tolerance for asymptote detection
 
 class FunctionCategory(IntEnum):
     """Enumeration of function categories for cleaner switch logic."""
-    TRIGNOMETRIC = 1
+    TRIGONOMETRIC = 1
     HYPERBOLIC = 2
-    INVERSE_TRIGNOMETRIC = 3
+    INVERSE_TRIGONOMETRIC = 3
     INVERSE_HYPERBOLIC = 4
 
 
@@ -164,7 +164,7 @@ def validate_subOpNum(sub_op_num: int) -> int:
 
 def _validate_trig_asymptote(sub_op_num: int, angle: float) -> None:
     """
-    Check for asymptotes in regular trignometric functions.
+    Check for asymptotes in regular trigonometric functions.
     
     Args:
         sub_op_num: Specific trig function indentifier
@@ -179,9 +179,9 @@ def _validate_trig_asymptote(sub_op_num: int, angle: float) -> None:
             raise AsymptoteError("Error: Division by zero (Asymptote at n*180°)")
     
     # Undefined where cos(x) = 0: tan(x), sec(x)
-        if sub_op_num in (SubOperation.FUNC_3, SubOperation.FUNC_5):
-            if isclose(angle % 180, 90, abs_tol=ANGLE_TOLERANCE):
-                raise AsymptoteError("Error: Division by zero (Asymptote at n*180° + 90°)")
+    if sub_op_num in (SubOperation.FUNC_3, SubOperation.FUNC_5):
+        if isclose(angle % 180, 90, abs_tol=ANGLE_TOLERANCE):
+            raise AsymptoteError("Error: Division by zero (Asymptote at n*180° + 90°)")
 
 
 def _validate_hyperbolic_asymptote(sub_op_num: int, val: float) -> None:
@@ -202,7 +202,7 @@ def _validate_hyperbolic_asymptote(sub_op_num: int, val: float) -> None:
 
 def _validate_inverse_trig_domain(sub_op_num: int, val: float) -> None:
     """
-    Validate domain for inverse trignometric functions.
+    Validate domain for inverse trigonometric functions.
 
     Args:
         sub_op_num: Specific trig function indentifier
@@ -266,7 +266,7 @@ def _validate_inverse_hyperbolic_domain(sub_op_num: int, val: float) -> None:
 # Core Mathematical Functions
 # ============================================================================
 
-# Standard Trignometric Functions (input in degrees)
+# Standard Trigonometric Functions (input in degrees)
 def sine(angle: float) -> float: 
     """Calculate sine of angle in degrees."""
     return sin(radians(angle))
@@ -297,8 +297,7 @@ def cosec(angle: float) -> float:
     return 1/sin(radians(angle))
 
 
-
-# Inverse Trignometric Functions (output in degrees)
+# Inverse Trigonometric Functions (output in degrees)
 def sine_inv(val: float) -> float: 
     """Calculate arcsine, returns result in degrees."""
     return degrees(asin(val))
@@ -397,13 +396,13 @@ def cosech_inv(val: float) -> float:
 
 #Dictionary mapping (category, sub_op) tuples to (name, function) pairs
 trigo_funcs: dict[Tuple[int, int], Tuple[str, Callable[[float], float]]]= {
-    # Standard Trignometric
-    (FunctionCategory.TRIGNOMETRIC, SubOperation.FUNC_1): ("sin", sine),
-    (FunctionCategory.TRIGNOMETRIC, SubOperation.FUNC_2): ("cos", cosine),
-    (FunctionCategory.TRIGNOMETRIC, SubOperation.FUNC_3): ("tan", tangent),
-    (FunctionCategory.TRIGNOMETRIC, SubOperation.FUNC_4): ("cot", cot),
-    (FunctionCategory.TRIGNOMETRIC, SubOperation.FUNC_5): ("sec", sec),
-    (FunctionCategory.TRIGNOMETRIC, SubOperation.FUNC_6): ("cosec", cosec),
+    # Standard Trigonometric
+    (FunctionCategory.TRIGONOMETRIC, SubOperation.FUNC_1): ("sin", sine),
+    (FunctionCategory.TRIGONOMETRIC, SubOperation.FUNC_2): ("cos", cosine),
+    (FunctionCategory.TRIGONOMETRIC, SubOperation.FUNC_3): ("tan", tangent),
+    (FunctionCategory.TRIGONOMETRIC, SubOperation.FUNC_4): ("cot", cot),
+    (FunctionCategory.TRIGONOMETRIC, SubOperation.FUNC_5): ("sec", sec),
+    (FunctionCategory.TRIGONOMETRIC, SubOperation.FUNC_6): ("cosec", cosec),
 
     # Hyperbolic
     (FunctionCategory.HYPERBOLIC, SubOperation.FUNC_1): ("sinh", sineh),
@@ -413,13 +412,13 @@ trigo_funcs: dict[Tuple[int, int], Tuple[str, Callable[[float], float]]]= {
     (FunctionCategory.HYPERBOLIC, SubOperation.FUNC_5): ("sech", sech),
     (FunctionCategory.HYPERBOLIC, SubOperation.FUNC_6): ("cosech", cosech),
 
-    # Inverse Trignometric
-    (FunctionCategory.INVERSE_TRIGNOMETRIC, SubOperation.FUNC_1): ("sin⁻¹", sine_inv),
-    (FunctionCategory.INVERSE_TRIGNOMETRIC, SubOperation.FUNC_2): ("cos⁻¹", cosine_inv),
-    (FunctionCategory.INVERSE_TRIGNOMETRIC, SubOperation.FUNC_3): ("tan⁻¹", tangent_inv),
-    (FunctionCategory.INVERSE_TRIGNOMETRIC, SubOperation.FUNC_4): ("cot⁻¹", cot_inv),
-    (FunctionCategory.INVERSE_TRIGNOMETRIC, SubOperation.FUNC_5): ("sec⁻¹", sec_inv),
-    (FunctionCategory.INVERSE_TRIGNOMETRIC, SubOperation.FUNC_6): ("cosec⁻¹", cosec_inv),
+    # Inverse Trigonometric
+    (FunctionCategory.INVERSE_TRIGONOMETRIC, SubOperation.FUNC_1): ("sin⁻¹", sine_inv),
+    (FunctionCategory.INVERSE_TRIGONOMETRIC, SubOperation.FUNC_2): ("cos⁻¹", cosine_inv),
+    (FunctionCategory.INVERSE_TRIGONOMETRIC, SubOperation.FUNC_3): ("tan⁻¹", tangent_inv),
+    (FunctionCategory.INVERSE_TRIGONOMETRIC, SubOperation.FUNC_4): ("cot⁻¹", cot_inv),
+    (FunctionCategory.INVERSE_TRIGONOMETRIC, SubOperation.FUNC_5): ("sec⁻¹", sec_inv),
+    (FunctionCategory.INVERSE_TRIGONOMETRIC, SubOperation.FUNC_6): ("cosec⁻¹", cosec_inv),
 
     # Inverse Hyperbolic
     (FunctionCategory.INVERSE_HYPERBOLIC, SubOperation.FUNC_1): ("sinh⁻¹", sineh_inv),
@@ -449,7 +448,7 @@ def validate_and_eval(
     mathematical correctness and provide meaningful error messages.
     
     Args:
-        op_num: Category of function (Trignometric, Hyperbolic, etc.)
+        op_num: Category of function (Trigonometric, Hyperbolic, etc.)
         sub_op_num: Specific function identifier within category
         name: Display name of the function
         func: The mathematical function to execute
@@ -460,13 +459,13 @@ def validate_and_eval(
     """
     try:
         # Perform domain validation based on function category
-        if op_num == FunctionCategory.TRIGNOMETRIC:
+        if op_num == FunctionCategory.TRIGONOMETRIC:
             _validate_trig_asymptote(sub_op_num, val)
 
         elif op_num == FunctionCategory.HYPERBOLIC:
             _validate_hyperbolic_asymptote(sub_op_num, val)
         
-        elif op_num == FunctionCategory.INVERSE_TRIGNOMETRIC:
+        elif op_num == FunctionCategory.INVERSE_TRIGONOMETRIC:
             _validate_inverse_trig_domain(sub_op_num, val)
             if sub_op_num == SubOperation.FUNC_4 and val == 0:
                 return f"{name}({val}) = 90"
@@ -494,7 +493,7 @@ def validate_and_eval(
 
 def eval_trigo_func(key: Tuple[int, int]) -> None:
     """
-    Evaluate trignometric function based on user input.
+    Evaluate trigonometric function based on user input.
     
     Args:
         key: Tuple of (category, sub_operation) identifying the function
@@ -506,7 +505,7 @@ def eval_trigo_func(key: Tuple[int, int]) -> None:
     op_num, sub_op_num = key
     name, func = trigo_funcs[key]
 
-    print("Enter angle:" if op_num == FunctionCategory.TRIGNOMETRIC else "Enter value: ", end='')
+    print("Enter angle:" if op_num == FunctionCategory.TRIGONOMETRIC else "Enter value: ", end='')
     val = get_val()
     if val is not None:
         answer = validate_and_eval(op_num, sub_op_num, name, func, val)

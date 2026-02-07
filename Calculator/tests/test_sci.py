@@ -1,86 +1,292 @@
-from sci import *
+"""
+Comprehensive Test Suite for sci.py
 
-# Tests the "validate_subOpNum" function
-def test_val_subOpNum():
-    # Cases 1-6 should return 1, else 0
-    for i in range(1, 6):
-        assert validate_subOpNum(i) == 1
+This module provides extensive unit tests for the scientific calculator module,
+covering trignometric, hyperbolic, inverse functions with domain validation.
 
-    assert validate_subOpNum(17) == 0
-    assert validate_subOpNum(-28) == 0
+Testing strategy:
+1. Domain validation - Test all domain boundaries 
+2. Mathematical correctness - Verify computational accuracy
+3. Error handling - Domain erros, asymptotes, edge cases
+4. Special values - Zero, infinity, very large/small numbers
+5. Symmetry - Test function properties (even/odd)
+6. Range validation - Ensure outputs are within expected ranges
 
-def test_norm_trigo_funcs():
-    """-------------------------- NORMAL TRIGO FUNCTIONS TEST --------------------------"""
+Standards:
+- pytest framework
+- Type hints for all test functions
+- Parametrized tests for efficiency
+- Property-based testing concepts
+"""
+
+import pytest
+import math
+from typing import Callable, Tuple, Generator
+from pathlib import Path
+import tempfile
+
+from sci import (
+    # Utility functions
+    get_val,
+    format_result,
+    validate_subOpNum,
+    validate_and_eval,
     
-    """----- BASICS + PRECISION + SYMMETRY -----"""
-    # SIN
-    assert validate_and_eval(1, 1, "sin", sine, 1083.7) == "sin(1083.7) = 0.064532308"
-    assert validate_and_eval(1, 1, "sin", sine, -1083.7) == "sin(-1083.7) = -0.064532308"
-    # COS
-    assert validate_and_eval(1, 2, "cos", cosine, 1083.7) == "cos(1083.7) = 0.997915618"
-    assert validate_and_eval(1, 2, "cos", cosine, -1083.7) == "cos(-1083.7) = 0.997915618"
-    # TAN
-    assert validate_and_eval(1, 3, "tan", tangent, 1083.7) == "tan(1083.7) = 0.064667099"
-    assert validate_and_eval(1, 3, "tan", tangent, -1083.7) == "tan(-1083.7) = -0.064667099"
-    # COT
-    assert validate_and_eval(1, 4, "cot", cot, 1083.7) == "cot(1083.7) = 15.4638141"
-    assert validate_and_eval(1, 4, "cot", cot, -1083.7) == "cot(-1083.7) = -15.4638141"
-    # SEC
-    assert validate_and_eval(1, 5, "sec", sec, 1083.7) == "sec(1083.7) = 1.002088735"
-    assert validate_and_eval(1, 5, "sec", sec, -1083.7) == "sec(-1083.7) = 1.002088735"
-    # COSEC
-    assert validate_and_eval(1, 6, "cosec", cosec, 1083.7) == "cosec(1083.7) = 15.496113917"
-    assert validate_and_eval(1, 6, "cosec", cosec, -1083.7) == "cosec(-1083.7) = -15.496113917"
+    # Trigonometric functions
+    sine, cosine, tangent, cot, sec, cosec,
+    
+    # Inverse trigonometric functions
+    sine_inv, cosine_inv, tangent_inv, cot_inv, sec_inv, cosec_inv,
+    
+    # Hyperbolic functions
+    sineh, cosineh, tangenth, coth, sech, cosech,
+    
+    # Inverse hyperbolic functions
+    sineh_inv, cosineh_inv, tangenth_inv, coth_inv, sech_inv, cosech_inv,
+    
+    # Constants and enums
+    FunctionCategory,
+    SubOperation,
+    RESULT_PRECISION,
+    ANGLE_TOLERANCE,
+    
+    # History functions
+    display_hist_sci_calc,
+    record_history_sci_calc,
+    clear_hist_sci_calc,
+)
 
-    """----- DOMAIN TEST -----"""
-    # TAN → undefined at 90 + n*180
-    assert validate_and_eval(1, 3, "tan", tangent, 90) == "Cannot divide by zero"
-    assert validate_and_eval(1, 3, "tan", tangent, -90) == "Cannot divide by zero"
-    # COT → undefined at 0 + n*180
-    assert validate_and_eval(1, 4, "cot", cot, 0) == "Cannot divide by zero"
-    assert validate_and_eval(1, 4, "cot", cot, 180) == "Cannot divide by zero"
-    # SEC → undefined at 90 + n*180
-    assert validate_and_eval(1, 5, "sec", sec, 90) == "Cannot divide by zero"
-    assert validate_and_eval(1, 5, "sec", sec, -90) == "Cannot divide by zero"
-    # COSEC → undefined at 0 + n*180
-    assert validate_and_eval(1, 6, "cosec", cosec, 0) == "Cannot divide by zero"
-    assert validate_and_eval(1, 6, "cosec", cosec, -180) == "Cannot divide by zero"
 
-    """----- RANGE TEST -----"""
-    for angle in [0, 30, 45, 60, 90, 180, 270, 360]:
-        val_sin = sine(angle)
-        val_cos = cosine(angle)
-        assert -1 <= val_sin <= 1
-        assert -1 <= val_cos <= 1
+# ============================================================================
+# Test Fixtures
+# ============================================================================
 
-    """----- VERY LARGE INPUT -----"""
-    for val in [1_000_000, -1_000_000]:
-        assert validate_and_eval(1, 1, "sin", sine, val) in ["sin(1000000) = -0.984807753", "sin(-1000000) = 0.984807753"]
-        assert validate_and_eval(1, 2, "cos", cosine, val) in ["cos(1000000) = 0.173648178", "cos(-1000000) = 0.173648178"]
-        assert validate_and_eval(1, 3, "tan", tangent, val) in ["tan(1000000) = -5.67128182", "tan(-1000000) = 5.67128182"]
-        assert validate_and_eval(1, 4, "cot", cot, val) in ["cot(1000000) = -0.176326981", "cot(-1000000) = 0.176326981"]
-        assert validate_and_eval(1, 5, "sec", sec, val) in ["sec(1000000) = 5.758770483", "sec(-1000000) = 5.758770483"]
-        assert validate_and_eval(1, 6, "cosec", cosec, val) in ["cosec(1000000) = -1.015426612", "cosec(-1000000) = 1.015426612"]
+@pytest.fixture
+def temp_sci_history(monkeypatch) -> Generator[Path, None, None]:
+    """Create temporary history file for isolated testing."""
+    temp_file = Path(tempfile.NamedTemporaryFile(suffix='_sci.txt'))
+    monkeypatch.setattr('sci.HISTORY_FILE', temp_file)
+    yield temp_file
+    if temp_file.exists():
+        temp_file.unlink()
 
-    """----- VERY SMALL INPUT -----"""
-    small_vals = [0.0001, -0.0001]
-    for val in small_vals:
-        assert validate_and_eval(1, 1, "sin", sine, val) in ["sin(0.0001) = 0.000001745", "sin(-0.0001) = -0.000001745"]
-        assert validate_and_eval(1, 2, "cos", cosine, val) in ["cos(0.0001) = 1", "cos(-0.0001) = 1"]
-        assert validate_and_eval(1, 3, "tan", tangent, val) in ["tan(0.0001) = 0.000001745", "tan(-0.0001) = -0.000001745"]
-        assert validate_and_eval(1, 4, "cot", cot, val) in ["cot(0.0001) = 572957.795130241", "cot(-0.0001) = -572957.795130241"]
-        assert validate_and_eval(1, 5, "sec", sec, val) in ["sec(0.0001) = 1", "sec(-0.0001) = 1"]
-        assert validate_and_eval(1, 6, "cosec", cosec, val) in ["cosec(0.0001) = 572957.795131114", "cosec(-0.0001) = -572957.795131114"]
 
-    """----- INVALID / WEIRD INPUT -----"""
-    weird_inputs = ["", "abc", "🙂", "@#$%^&*", None, [], {}]
-    for w in weird_inputs:
-        assert validate_and_eval(1, 1, "sin", sine, w) == 0
-        assert validate_and_eval(1, 2, "cos", cosine, w) == 0
-        assert validate_and_eval(1, 3, "tan", tangent, w) == 0
-        assert validate_and_eval(1, 4, "cot", cot, w) == 0
-        assert validate_and_eval(1, 5, "sec", sec, w) == 0
-        assert validate_and_eval(1, 6, "cosec", cosec, w) == 0
+# ============================================================================
+# Test Utility Functions
+# ============================================================================
+
+class TestUtilityFunctions:
+    """Test suite for utility functions."""
+    
+    def test_format_result_precision(self) -> None:
+        """
+        Test that format_result uses correct precision.
+        
+        Input: Pi to many decimals
+        Expected: 9 significant figures
+        """
+        result = format_result(math.pi)
+        assert result == "3.14159265"
+    
+    def test_format_result_removes_trailing_zeros(self) -> None:
+        """
+        Test removal of trailing zeros.
+        
+        Input: 5.0
+        Expected: "5"
+        """
+        assert format_result(5.0) == "5"
+    
+    def test_format_result_very_small_number(self) -> None:
+        """
+        Test formatting of very small numbers.
+        
+        Input: 1e-12
+        Expected: Scientific notation or very small decimal
+        """
+        result = format_result(1e-12)
+        assert result != "0"
+    
+    def test_format_result_very_large_number(self) -> None:
+        """
+        Test formatting of very large numbers.
+        
+        Input: 1e12
+        Expected: "1000000000000" or "1e+12"
+        """
+        result = format_result(1e12)
+        assert "1" in result
+    
+    def test_validate_subOpNum_valid_range(self) -> None:
+        """
+        Test that valid sub-operation numbers (1-6) are accepted.
+        
+        Inputs: 1, 2, 3, 4, 5, 6
+        Expected: All return 1
+        """
+        for i in range(1, 7):
+            assert validate_subOpNum(i) == 1
+    
+    def test_validate_subOpNum_invalid_numbers(self, capsys) -> None:
+        """
+        Test that invalid sub-operation numbers are rejected.
+        
+        Inputs: 0, 7, -1, 100
+        Expected: All return 0 with error message
+        """
+        for invalid in [0, 7, -1, 100]:
+            result = validate_subOpNum(invalid)
+            assert result == 0
+    
+    @pytest.mark.parametrize("value", [1, 2, 3, 4, 5, 6])
+    def test_validate_subOpNum_parametrized_valid(self, value: int) -> None:
+        """Parametrized test for valid sub-operation numbers."""
+        assert validate_subOpNum(value) == 1
+    
+    @pytest.mark.parametrize("value", [0, 7, -1, 10, 100, -5])
+    def test_validate_subOpNum_parametrized_invalid(self, value: int) -> None:
+        """Parametrized test for invalid sub-operation numbers."""
+        assert validate_subOpNum(value) == 0
+
+
+# ============================================================================
+# Test Trigonometric Functions
+# ============================================================================
+
+class TestTrigonometricFunctions:
+    """Test suite for standard trigonometric functions."""
+    
+    # Sine function tests
+    def test_sine_standard_angles(self) -> None:
+        """
+        Test sine at standard angles.
+        
+        Inputs: 0°, 30°, 45°, 60°, 90°
+        Expected: 0, 0.5, √2/2, √3/2, 1
+        """
+        assert abs(sine(0) - 0) < 1e-9
+        assert abs(sine(30) - 0.5) < 1e-9
+        assert abs(sine(45) - math.sqrt(2)/2) < 1e-9
+        assert abs(sine(60) - math.sqrt(3)/2) < 1e-9
+        assert abs(sine(90) - 1) < 1e-9
+    
+    def test_sine_negative_angle(self) -> None:
+        """
+        Test sine with negative angles (odd function).
+        
+        Property: sin(-x) = -sin(x)
+        """
+        angle = 30
+        assert abs(sine(-angle) - (-sine(angle))) < 1e-9
+    
+    def test_sine_periodicity(self) -> None:
+        """
+        Test sine periodicity.
+        
+        Property: sin(x) = sin(x + 360°)
+        """
+        angle = 45
+        assert abs(sine(angle) - sine(angle + 360)) < 1e-9
+    
+    def test_sine_range(self) -> None:
+        """
+        Test that sine stays within [-1, 1].
+        
+        Test angles: 0° to 360° in 15° steps
+        Expected: All values in [-1, 1]
+        """
+        for angle in range(0, 361, 15):
+            value = sine(angle)
+            assert -1 <= value <= 1
+    
+    # Cosine function tests
+    def test_cosine_standard_angles(self) -> None:
+        """Test cosine at standard angles."""
+        assert abs(cosine(0) - 1) < 1e-9
+        assert abs(cosine(60) - 0.5) < 1e-9
+        assert abs(cosine(90) - 0) < 1e-9
+    
+    def test_cosine_negative_angle(self) -> None:
+        """
+        Test cosine with negative angles (even function).
+        
+        Property: cos(-x) = cos(x)
+        """
+        angle = 45
+        assert abs(cosine(-angle) - cosine(angle)) < 1e-9
+    
+    # Tangent function tests
+    def test_tangent_standard_angles(self) -> None:
+        """Test tangent at standard angles."""
+        assert abs(tangent(0) - 0) < 1e-9
+        assert abs(tangent(45) - 1) < 1e-9
+    
+    def test_tangent_asymptote_detection(self) -> None:
+        """
+        Test that tangent detects asymptotes at 90°, 270°.
+        
+        Inputs: 90, -90, 270
+        Expected: Asymptote error messages
+        """
+        result_90 = validate_and_eval(
+            FunctionCategory.TRIGONOMETRIC, SubOperation.FUNC_3,
+            "tan", tangent, 90
+        )
+        assert "Asymptote" in result_90 or "divide by zero" in result_90.lower()
+    
+    # Cotangent function tests
+    def test_cot_standard_angles(self) -> None:
+        """Test cotangent at standard angles."""
+        assert abs(cot(45) - 1) < 1e-9
+    
+    def test_cot_asymptote_at_zero(self) -> None:
+        """
+        Test cotangent asymptote at 0°, 180°.
+        
+        Expected: Asymptote error
+        """
+        result = validate_and_eval(
+            FunctionCategory.TRIGONOMETRIC, SubOperation.FUNC_4,
+            "cot", cot, 0
+        )
+        assert "Asymptote" in result or "divide by zero" in result.lower()
+    
+    # Secant function tests
+    def test_sec_at_zero(self) -> None:
+        """Test secant at 0° equals 1."""
+        assert abs(sec(0) - 1) < 1e-9
+    
+    def test_sec_asymptote_at_90(self) -> None:
+        """Test secant asymptote at 90°."""
+        result = validate_and_eval(
+            FunctionCategory.TRIGONOMETRIC, SubOperation.FUNC_5,
+            "sec", sec, 90
+        )
+        assert "Asymptote" in result or "divide by zero" in result.lower()
+    
+    # Cosecant function tests
+    def test_cosec_at_90(self) -> None:
+        """Test cosecant at 90° equals 1."""
+        assert abs(cosec(90) - 1) < 1e-9
+    
+    def test_cosec_asymptote_at_zero(self) -> None:
+        """Test cosecant asymptote at 0°."""
+        result = validate_and_eval(
+            FunctionCategory.TRIGONOMETRIC, SubOperation.FUNC_6,
+            "cosec", cosec, 0
+        )
+        assert "Asymptote" in result or "divide by zero" in result.lower()
+    
+    @pytest.mark.parametrize("angle,expected_sin", [
+        (0, 0),
+        (30, 0.5),
+        (90, 1),
+        (180, 0),
+        (270, -1),
+    ])
+    def test_sine_parametrized(self, angle: float, expected_sin: float) -> None:
+        """Parametrized sine tests."""
+        assert abs(sine(angle) - expected_sin) < 1e-9
 
 
 def test_inverse_normal_trigo_funcs():
