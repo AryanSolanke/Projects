@@ -490,14 +490,21 @@ class TestHyperbolicFunctions:
     
     def test_tangenth_range(self) -> None:
         """
-        Test that tanh(x) ∈ (-1, 1).
+        Test that tanh(x) ∈ (-1, 1) with asymptotic behavior.
         
-        Test values: -100, -1, 0, 1, 100
-        Expected: All in (-1, 1)
+        Test values: Small and large
+        Expected: Strictly in (-1,1) for small, approaches ±1 for large
         """
-        for x in [-100, -1, 0, 1, 100]:
+        # For moderate values, strictly in open interval
+        for x in [-10, -1, 0, 1, 10]:
             value = tangenth(x)
             assert -1 < value < 1
+        
+        # For very large values, approaches boundaries
+        for x in [-100, 100]:
+            value = tangenth(x)
+            assert -1 <= value <= 1  # May equal boundaries due to float precision
+            assert abs(abs(value) - 1) < 1e-10
     
     def test_coth_asymptote_at_zero(self) -> None:
         """

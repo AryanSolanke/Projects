@@ -124,7 +124,7 @@ def record_history_sci_calc(name: str, val: float, answer: str) -> None:
         answer: Computed result
     """
     try:
-        with HISTORY_FILE.open(encoding="utf-8") as f:
+        with HISTORY_FILE.open('a', encoding="utf-8") as f:
             f.write(f"{name}({val}) = {answer}\n")
     except Exception as e:
         print(f"File Error: Could not record history. ({e})")
@@ -132,7 +132,7 @@ def record_history_sci_calc(name: str, val: float, answer: str) -> None:
 def clear_hist_sci_calc() -> None:
     """Clear all history by truncating the history file."""
     try:
-        with HISTORY_FILE.open("", encoding="utf-8"):
+        with HISTORY_FILE.open('w', encoding="utf-8"):
             print("Scientific history cleared successfully!")
     except Exception as e:
         print(f"Could not clear history: {e}")
