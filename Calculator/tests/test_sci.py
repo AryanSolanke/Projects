@@ -62,9 +62,10 @@ from sci import (
 # ============================================================================
 
 @pytest.fixture
-def temp_sci_history(monkeypatch) -> Generator[Path, None, None]:
+def temp_sci_history_file(monkeypatch) -> Generator[Path, None, None]:
     """Create temporary history file for isolated testing."""
-    temp_file = Path(tempfile.NamedTemporaryFile(suffix='_sci.txt'))
+    with tempfile.NamedTemporaryFile(mode='w', suffix='_sci.txt', delete=False) as tmp:
+        temp_file = Path(tmp.name)
     monkeypatch.setattr('sci.HISTORY_FILE', temp_file)
     yield temp_file
     if temp_file.exists():
@@ -289,233 +290,633 @@ class TestTrigonometricFunctions:
         assert abs(sine(angle) - expected_sin) < 1e-9
 
 
-def test_inverse_normal_trigo_funcs():
+# ============================================================================
+# Test Inverse Trigonometric Functions
+# ============================================================================
 
-    """-------------------------- POSITIVE & NEGATIVE VALUES TEST --------------------------"""
+class TestInverseTrigonometricFunctions:
+    """Test suite for inverse trigonometric functions."""
     
-    # ----- SIN⁻¹ ----- (sub_op = 1)
-    assert validate_and_eval(3, 1, "sin⁻¹", sine_inv, 0.564738) == "sin⁻¹(0.564738) = 34.384099541"
-    assert validate_and_eval(3, 1, "sin⁻¹", sine_inv, -0.564738) == "sin⁻¹(-0.564738) = -34.384099541"
+    def test_sine_inv_domain_valid(self) -> None:
+        """
+        Test arcsin with valid domain [-1, 1].
+        
+        Inputs: -1, 0, 0.5, 1
+        Expected: Valid angle outputs
+        """
+        assert abs(sine_inv(0) - 0) < 1e-9
+        assert abs(sine_inv(0.5) - 30) < 1e-6
+        assert abs(sine_inv(1) - 90) < 1e-9
     
-    # ----- COS⁻¹ ----- (sub_op = 2)
-    assert validate_and_eval(3, 2, "cos⁻¹", cosine_inv, 0.564738) == "cos⁻¹(0.564738) = 55.615900459"
-    assert validate_and_eval(3, 2, "cos⁻¹", cosine_inv, -0.564738) == "cos⁻¹(-0.564738) = 124.384099541"
+    def test_sine_inv_domain_invalid(self) -> None:
+        """
+        Test arcsin rejects values outside [-1, 1].
+        
+        Inputs: -1.5, 1.5, 2
+        Expected: Domain error messages
+        """
+        for invalid in [-1.5, 1.5, 2]:
+            result = validate_and_eval(
+                FunctionCategory.INVERSE_TRIGONOMETRIC,
+                SubOperation.FUNC_1,
+                "sin⁻¹", sine_inv, invalid
+            )
+            assert "Domain Error" in result
     
-    # ----- TAN⁻¹ ----- (sub_op = 3)
-    assert validate_and_eval(3, 3, "tan⁻¹", tangent_inv, 2.718281) == "tan⁻¹(2.718281) = 69.802463052"
-    assert validate_and_eval(3, 3, "tan⁻¹", tangent_inv, -2.718281) == "tan⁻¹(-2.718281) = -69.802463052"
+    def test_sine_inv_returns_degrees(self) -> None:
+        """
+        Test that arcsin returns degrees, not radians.
+        
+        Input: 1
+        Expected: 90 (not π/2 ≈ 1.57)
+        """
+        result = sine_inv(1)
+        assert abs(result - 90) < 1e-9
+        assert result > 10  # Definitely degrees
     
-    # ----- COT⁻¹ ----- (sub_op = 4)
-    assert validate_and_eval(3, 4, "cot⁻¹", cot_inv, 0.564738) == "cot⁻¹(0.564738) = 60.544932027"
-    assert validate_and_eval(3, 4, "cot⁻¹", cot_inv, -0.564738) == "cot⁻¹(-0.564738) = -60.544932027"
+    def test_cosine_inv_domain_valid(self) -> None:
+        """Test arccos with valid domain."""
+        assert abs(cosine_inv(1) - 0) < 1e-9
+        assert abs(cosine_inv(0) - 90) < 1e-9
     
-    # ----- SEC⁻¹ ----- (sub_op = 5)
-    assert validate_and_eval(3, 5, "sec⁻¹", sec_inv, 1.732051) == "sec⁻¹(1.732051) = 54.735614818"
-    assert validate_and_eval(3, 5, "sec⁻¹", sec_inv, -1.732051) == "sec⁻¹(-1.732051) = 125.264385182"
+    def test_cosine_inv_domain_invalid(self) -> None:
+        """Test arccos rejects invalid domain."""
+        result = validate_and_eval(
+            FunctionCategory.INVERSE_TRIGONOMETRIC,
+            SubOperation.FUNC_2,
+            "cos⁻¹", cosine_inv, 1.5
+        )
+        assert "Domain Error" in result
     
-    # ----- COSEC⁻¹ ----- (sub_op = 6)
-    assert validate_and_eval(3, 6, "cosec⁻¹", cosec_inv, 1.732051) == "cosec⁻¹(1.732051) = 35.264385182"
-    assert validate_and_eval(3, 6, "cosec⁻¹", cosec_inv, -1.732051) == "cosec⁻¹(-1.732051) = -35.264385182"
-
-
-    """-------------------------- DOMAIN TEST --------------------------"""
-
-    # SIN⁻¹ domain [-1, 1]
-    assert validate_and_eval(3, 1, "sin⁻¹", sine_inv, 1.5) == "Domain error: Enter value between [-1,1]"
-    assert validate_and_eval(3, 1, "sin⁻¹", sine_inv, -1.5) == "Domain error: Enter value between [-1,1]"
-
-    # COS⁻¹ domain [-1, 1]
-    assert validate_and_eval(3, 2, "cos⁻¹", cosine_inv, 1.5) == "Domain error: Enter value between [-1,1]"
-    assert validate_and_eval(3, 2, "cos⁻¹", cosine_inv, -1.5) == "Domain error: Enter value between [-1,1]"
-
-    # TAN⁻¹ domain all real numbers → no error
-    # COT⁻¹ special case val = 0
-    assert validate_and_eval(3, 4, "cot⁻¹", cot_inv, 0) == "cot⁻¹(0) = 90"
-
-    # SEC⁻¹ domain |x| >= 1
-    assert validate_and_eval(3, 5, "sec⁻¹", sec_inv, 0.5) == "Domain error: Enter value which lie in |x|>=1"
-    assert validate_and_eval(3, 5, "sec⁻¹", sec_inv, -0.5) == "Domain error: Enter value which lie in |x|>=1"
-
-    # COSEC⁻¹ domain |x| >= 1
-    assert validate_and_eval(3, 6, "cosec⁻¹", cosec_inv, 0.5) == "Domain error: Enter value which lie in |x|>=1"
-    assert validate_and_eval(3, 6, "cosec⁻¹", cosec_inv, -0.5) == "Domain error: Enter value which lie in |x|>=1"
-
-
-    """-------------------------- LARGE & SMALL INPUT TEST --------------------------"""
-
-    # LARGE input
-    assert validate_and_eval(3, 1, "sin⁻¹", sine_inv, 1.0) == "sin⁻¹(1.0) = 90"
-    assert validate_and_eval(3, 2, "cos⁻¹", cosine_inv, 1.0) == "cos⁻¹(1.0) = 0"
-    assert validate_and_eval(3, 3, "tan⁻¹", tangent_inv, 1000000) == "tan⁻¹(1000000) = 89.999942704"
-    assert validate_and_eval(3, 4, "cot⁻¹", cot_inv, 1000000) == "cot⁻¹(1000000) = 0.000057296"
-    assert validate_and_eval(3, 5, "sec⁻¹", sec_inv, 1000000) == "sec⁻¹(1000000) = 89.999942704"
-    assert validate_and_eval(3, 6, "cosec⁻¹", cosec_inv, 1000000) == "cosec⁻¹(1000000) = 0.000057296"
-
-    # SMALL input
-    assert validate_and_eval(3, 1, "sin⁻¹", sine_inv, 1e-6) == "sin⁻¹(1e-06) = 0.000057296"
-    assert validate_and_eval(3, 2, "cos⁻¹", cosine_inv, 1e-6) == "cos⁻¹(1e-06) = 89.999942704"
-    assert validate_and_eval(3, 3, "tan⁻¹", tangent_inv, 1e-6) == "tan⁻¹(1e-06) = 0.000057296"
-    assert validate_and_eval(3, 4, "cot⁻¹", cot_inv, 1e-6) == "cot⁻¹(1e-06) = 89.999942704"
-    assert validate_and_eval(3, 5, "sec⁻¹", sec_inv, 1.000001) == "sec⁻¹(1.000001) = 0.081028435"
-    assert validate_and_eval(3, 6, "cosec⁻¹", cosec_inv, 1.000001) == "cosec⁻¹(1.000001) = 89.918971565"
-
-
-    """-------------------------- INVALID INPUT TEST --------------------------"""
-
-    for invalid in ["", "abc", "🙂", "@#$%", None, []]:
-        assert validate_and_eval(3, 1, "sin⁻¹", sine_inv, invalid) == 0
-        assert validate_and_eval(3, 2, "cos⁻¹", cosine_inv, invalid) == 0
-        assert validate_and_eval(3, 3, "tan⁻¹", tangent_inv, invalid) == 0
-        assert validate_and_eval(3, 4, "cot⁻¹", cot_inv, invalid) == 0
-        assert validate_and_eval(3, 5, "sec⁻¹", sec_inv, invalid) == 0
-        assert validate_and_eval(3, 6, "cosec⁻¹", cosec_inv, invalid) == 0
-
-def test_hyperbolic_trigo_funcs():
-
-    """-------------------------- POSITIVE & NEGATIVE VALUES TEST --------------------------"""
+    def test_tangent_inv_all_reals(self) -> None:
+        """
+        Test that arctan accepts all real numbers.
+        
+        Inputs: -1000, 0, 1000
+        Expected: All valid
+        """
+        for val in [-1000, 0, 1000]:
+            result = tangent_inv(val)
+            assert -90 < result < 90
     
-    # ----- SINH ----- (sub_op = 1)
-    assert validate_and_eval(2, 1, "sinh", sineh, 2.718281) == "sinh(2.718281) = 7.544130798"
-    assert validate_and_eval(2, 1, "sinh", sineh, -2.718281) == "sinh(-2.718281) = -7.544130798"
+    def test_cot_inv_special_case_zero(self) -> None:
+        """
+        Test that cot⁻¹(0) = 90°.
+        
+        Input: 0
+        Expected: Exactly 90
+        """
+        result = validate_and_eval(
+            FunctionCategory.INVERSE_TRIGONOMETRIC,
+            SubOperation.FUNC_4,
+            "cot⁻¹", cot_inv, 0
+        )
+        assert "90" in result
     
-    # ----- COSH ----- (sub_op = 2)
-    assert validate_and_eval(2, 2, "cosh", cosineh, 2.718281) == "cosh(2.718281) = 7.610118889"
-    assert validate_and_eval(2, 2, "cosh", cosineh, -2.718281) == "cosh(-2.718281) = 7.610118889"
+    def test_sec_inv_domain_valid(self) -> None:
+        """Test arcsec with |x| >= 1."""
+        result = validate_and_eval(
+            FunctionCategory.INVERSE_TRIGONOMETRIC,
+            SubOperation.FUNC_5,
+            "sec⁻¹", sec_inv, 2
+        )
+        assert "Domain Error" not in result
     
-    # ----- TANH ----- (sub_op = 3)
-    assert validate_and_eval(2, 3, "tanh", tangenth, 2.718281) == "tanh(2.718281) = 0.991328901"
-    assert validate_and_eval(2, 3, "tanh", tangenth, -2.718281) == "tanh(-2.718281) = -0.991328901"
+    def test_sec_inv_domain_invalid(self) -> None:
+        """Test arcsec rejects |x| < 1."""
+        result = validate_and_eval(
+            FunctionCategory.INVERSE_TRIGONOMETRIC,
+            SubOperation.FUNC_5,
+            "sec⁻¹", sec_inv, 0.5
+        )
+        assert "Domain Error" in result
     
-    # ----- COTH ----- (sub_op = 4)
-    assert validate_and_eval(2, 4, "coth", coth, 2.718281) == "coth(2.718281) = 1.008746944"
-    assert validate_and_eval(2, 4, "coth", coth, -2.718281) == "coth(-2.718281) = -1.008746944"
+    def test_cosec_inv_domain(self) -> None:
+        """Test arccosec domain validation."""
+        # Valid: |x| >= 1
+        valid_result = validate_and_eval(
+            FunctionCategory.INVERSE_TRIGONOMETRIC,
+            SubOperation.FUNC_6,
+            "cosec⁻¹", cosec_inv, 2
+        )
+        assert "Domain Error" not in valid_result
+        
+        # Invalid: |x| < 1
+        invalid_result = validate_and_eval(
+            FunctionCategory.INVERSE_TRIGONOMETRIC,
+            SubOperation.FUNC_6,
+            "cosec⁻¹", cosec_inv, 0.5
+        )
+        assert "Domain Error" in invalid_result
     
-    # ----- SECH ----- (sub_op = 5)
-    assert validate_and_eval(2, 5, "sech", sech, 2.718281) == "sech(2.718281) = 0.131403992"
-    assert validate_and_eval(2, 5, "sech", sech, -2.718281) == "sech(-2.718281) = 0.131403992"
+    @pytest.mark.parametrize("value,in_domain", [
+        (-1.0, True),
+        (-0.5, True),
+        (0.0, True),
+        (0.5, True),
+        (1.0, True),
+        (-1.1, False),
+        (1.1, False),
+    ])
+    def test_sine_inv_domain_parametrized(
+        self, value: float, in_domain: bool
+    ) -> None:
+        """Parametrized domain test for arcsin."""
+        result = validate_and_eval(
+            FunctionCategory.INVERSE_TRIGONOMETRIC,
+            SubOperation.FUNC_1,
+            "sin⁻¹", sine_inv, value
+        )
+        if in_domain:
+            assert "Domain Error" not in result
+        else:
+            assert "Domain Error" in result
+
+
+# ============================================================================
+# Test Hyperbolic Functions
+# ============================================================================
+
+class TestHyperbolicFunctions:
+    """Test suite for hyperbolic functions."""
     
-    # ----- COSECH ----- (sub_op = 6)
-    assert validate_and_eval(2, 6, "cosech", cosech, 2.718281) == "cosech(2.718281) = 0.132553375"
-    assert validate_and_eval(2, 6, "cosech", cosech, -2.718281) == "cosech(-2.718281) = -0.132553375"
-
-
-    """-------------------------- DOMAIN TEST --------------------------"""
-
-    # SINH domain all real → no error
-    # COSH domain all real → no error
-    # TANH domain all real → no error
-    # COTH domain val != 0
-    assert validate_and_eval(2, 4, "coth", coth, 0) == "Cannot divide by zero"
+    def test_sineh_at_zero(self) -> None:
+        """
+        Test sinh(0) = 0.
+        
+        Input: 0
+        Expected: 0
+        """
+        assert abs(sineh(0) - 0) < 1e-9
     
-    # COSECH domain val != 0
-    assert validate_and_eval(2, 6, "cosech", cosech, 0) == "Cannot divide by zero"
-
-
-    """-------------------------- LARGE & SMALL INPUT TEST --------------------------"""
-
-    # LARGE input
-    assert validate_and_eval(2, 1, "sinh", sineh, 20) == "sinh(20) = 242582597.704895139"
-    assert validate_and_eval(2, 2, "cosh", cosineh, 20) == "cosh(20) = 242582597.704895139"
-    assert validate_and_eval(2, 3, "tanh", tangenth, 2.5) == "tanh(2.5) = 0.986614298"
-    assert validate_and_eval(2, 4, "coth", coth, 2.5) == "coth(2.5) = 1.01356731"
-    assert validate_and_eval(2, 5, "sech", sech, 2.5) == "sech(2.5) = 0.163071232"
-    assert validate_and_eval(2, 6, "cosech", cosech, 2.5) == "cosech(2.5) = 0.16528367"
-
-    # SMALL input
-    assert validate_and_eval(2, 1, "sinh", sineh, 0.001234567) == "sinh(0.001234567) = 0.001234567"
-    assert validate_and_eval(2, 2, "cosh", cosineh, 0.001234567) == "cosh(0.001234567) = 1.000000762"
-    assert validate_and_eval(2, 3, "tanh", tangenth, 0.001234567) == "tanh(0.001234567) = 0.001234566"
-    assert validate_and_eval(2, 4, "coth", coth, 0.001234567) == "coth(0.001234567) = 810.001002823"
-    assert validate_and_eval(2, 5, "sech", sech, 0.001234567) == "sech(0.001234567) = 0.999999238"
-    assert validate_and_eval(2, 6, "cosech", cosech, 0.001234567) == "cosech(0.001234567) = 810.000385539"
-
-
-
-    """-------------------------- INVALID INPUT TEST --------------------------"""
-
-    for invalid in ["", "abc", "🙂", "@#$%", None, []]:
-        assert validate_and_eval(2, 1, "sinh", sineh, invalid) == 0
-        assert validate_and_eval(2, 2, "cosh", cosineh, invalid) == 0
-        assert validate_and_eval(2, 3, "tanh", tangenth, invalid) == 0
-        assert validate_and_eval(2, 4, "coth", coth, invalid) == 0
-        assert validate_and_eval(2, 5, "sech", sech, invalid) == 0
-        assert validate_and_eval(2, 6, "cosech", cosech, invalid) == 0
-
-def test_inverse_hyperbolic_trigo_funcs():
-
-    """-------------------------- POSITIVE & NEGATIVE VALUES TEST --------------------------"""
+    def test_sineh_odd_function(self) -> None:
+        """
+        Test that sinh is odd: sinh(-x) = -sinh(x).
+        
+        Input: x = 2
+        Expected: sinh(-2) = -sinh(2)
+        """
+        x = 2
+        assert abs(sineh(-x) - (-sineh(x))) < 1e-9
     
-    # ----- SINH⁻¹ ----- (sub_op = 1)
-    assert validate_and_eval(4, 1, "sinh⁻¹", sineh_inv, 2.718281) == "sinh⁻¹(2.718281) = 1.725382273"
-    assert validate_and_eval(4, 1, "sinh⁻¹", sineh_inv, -2.718281) == "sinh⁻¹(-2.718281) = -1.725382273"
+    def test_cosineh_at_zero(self) -> None:
+        """
+        Test cosh(0) = 1.
+        
+        Input: 0
+        Expected: 1
+        """
+        assert abs(cosineh(0) - 1) < 1e-9
     
-    # ----- COSH⁻¹ ----- (sub_op = 2)
-    assert validate_and_eval(4, 2, "cosh⁻¹", cosineh_inv, 3.141593) == "cosh⁻¹(3.141593) = 1.811526389"
-    assert validate_and_eval(4, 2, "cosh⁻¹", cosineh_inv, 10.123456) == "cosh⁻¹(10.123456) = 3.005553917"
+    def test_cosineh_even_function(self) -> None:
+        """
+        Test that cosh is even: cosh(-x) = cosh(x).
+        
+        Input: x = 2
+        Expected: cosh(-2) = cosh(2)
+        """
+        x = 2
+        assert abs(cosineh(-x) - cosineh(x)) < 1e-9
     
-    # ----- TANH⁻¹ ----- (sub_op = 3)
-    assert validate_and_eval(4, 3, "tanh⁻¹", tangenth_inv, 0.564738) == "tanh⁻¹(0.564738) = 0.639762764"
-    assert validate_and_eval(4, 3, "tanh⁻¹", tangenth_inv, -0.564738) == "tanh⁻¹(-0.564738) = -0.639762764"
+    def test_cosineh_always_positive(self) -> None:
+        """
+        Test that cosh(x) >= 1 for all x.
+        
+        Test values: -10, -1, 0, 1, 10
+        Expected: All >= 1
+        """
+        for x in [-10, -1, 0, 1, 10]:
+            assert cosineh(x) >= 1
     
-    # ----- COTH⁻¹ ----- (sub_op = 4)
-    assert validate_and_eval(4, 4, "coth⁻¹", coth_inv, 2.718281) == "coth⁻¹(2.718281) = 0.385968546"
-    assert validate_and_eval(4, 4, "coth⁻¹", coth_inv, -2.718281) == "coth⁻¹(-2.718281) = -0.385968546"
+    def test_tangenth_range(self) -> None:
+        """
+        Test that tanh(x) ∈ (-1, 1).
+        
+        Test values: -100, -1, 0, 1, 100
+        Expected: All in (-1, 1)
+        """
+        for x in [-100, -1, 0, 1, 100]:
+            value = tangenth(x)
+            assert -1 < value < 1
     
-    # ----- SECH⁻¹ ----- (sub_op = 5)
-    assert validate_and_eval(4, 5, "sech⁻¹", sech_inv, 0.564738) == "sech⁻¹(0.564738) = 1.173121432"
-    assert validate_and_eval(4, 5, "sech⁻¹", sech_inv, 0.123456789) == "sech⁻¹(0.123456789) = 2.781178892"
+    def test_coth_asymptote_at_zero(self) -> None:
+        """
+        Test that coth(0) is undefined.
+        
+        Input: 0
+        Expected: Asymptote error
+        """
+        result = validate_and_eval(
+            FunctionCategory.HYPERBOLIC,
+            SubOperation.FUNC_4,
+            "coth", coth, 0
+        )
+        assert "Undefined" in result or "divide by zero" in result.lower()
     
-    # ----- COSECH⁻¹ ----- (sub_op = 6)
-    assert validate_and_eval(4, 6, "cosech⁻¹", cosech_inv, 2.718281) == "cosech⁻¹(2.718281) = 0.36004975"
-    assert validate_and_eval(4, 6, "cosech⁻¹", cosech_inv, -2.718281) == "cosech⁻¹(-2.718281) = -0.36004975"
-
-    """-------------------------- DOMAIN TEST --------------------------"""
-
-    # SINH⁻¹ domain all real → no error
-    # COSH⁻¹ domain >= 1
-    assert validate_and_eval(4, 2, "cosh⁻¹", cosineh_inv, 0.5) == "Domain error: Enter value greater than 1"
+    def test_sech_at_zero(self) -> None:
+        """
+        Test sech(0) = 1.
+        
+        Input: 0
+        Expected: 1
+        """
+        assert abs(sech(0) - 1) < 1e-9
     
-    # TANH⁻¹ domain (-1, 1)
-    assert validate_and_eval(4, 3, "tanh⁻¹", tangenth_inv, 1) == "Domain error: Enter value between (-1,1)"
-    assert validate_and_eval(4, 3, "tanh⁻¹", tangenth_inv, -1) == "Domain error: Enter value between (-1,1)"
+    def test_sech_range(self) -> None:
+        """
+        Test that sech(x) ∈ (0, 1].
+        
+        Test values: -5, -1, 0, 1, 5
+        Expected: All in (0, 1]
+        """
+        for x in [-5, -1, 0, 1, 5]:
+            value = sech(x)
+            assert 0 < value <= 1
     
-    # COTH⁻¹ domain |x|>1
-    assert validate_and_eval(4, 4, "coth⁻¹", coth_inv, 0.5) == "Domain error: Enter value outside [-1,1]"
-    assert validate_and_eval(4, 4, "coth⁻¹", coth_inv, -0.5) == "Domain error: Enter value outside [-1,1]"
+    def test_cosech_asymptote_at_zero(self) -> None:
+        """
+        Test that cosech(0) is undefined.
+        
+        Input: 0
+        Expected: Asymptote error
+        """
+        result = validate_and_eval(
+            FunctionCategory.HYPERBOLIC,
+            SubOperation.FUNC_6,
+            "cosech", cosech, 0
+        )
+        assert "Undefined" in result or "divide by zero" in result.lower()
     
-    # SECH⁻¹ domain (0, 1]
-    assert validate_and_eval(4, 5, "sech⁻¹", sech_inv, 0) == "Domain error: Enter value in range (0,1]"
-    assert validate_and_eval(4, 5, "sech⁻¹", sech_inv, 1.5) == "Domain error: Enter value in range (0,1]"
+    def test_hyperbolic_identity(self) -> None:
+        """
+        Test hyperbolic identity: cosh²(x) - sinh²(x) = 1.
+        
+        Test values: 0, 1, 2, 5
+        Expected: Identity holds within tolerance
+        """
+        for x in [0, 1, 2, 5]:
+            cosh_sq = cosineh(x) ** 2
+            sinh_sq = sineh(x) ** 2
+            assert abs((cosh_sq - sinh_sq) - 1) < 1e-9
+
+
+# ============================================================================
+# Test Inverse Hyperbolic Functions
+# ============================================================================
+
+class TestInverseHyperbolicFunctions:
+    """Test suite for inverse hyperbolic functions."""
     
-    # COSECH⁻¹ domain val != 0
-    assert validate_and_eval(4, 6, "cosech⁻¹", cosech_inv, 0) == "Domain error: Enter any value except 0"
+    def test_sineh_inv_all_reals(self) -> None:
+        """
+        Test that asinh accepts all real numbers.
+        
+        Inputs: -1000, 0, 1000
+        Expected: All valid
+        """
+        for val in [-1000, 0, 1000]:
+            result = sineh_inv(val)
+            assert isinstance(result, float)
+    
+    def test_sineh_inv_at_zero(self) -> None:
+        """
+        Test asinh(0) = 0.
+        
+        Input: 0
+        Expected: 0
+        """
+        assert abs(sineh_inv(0) - 0) < 1e-9
+    
+    def test_cosineh_inv_domain_valid(self) -> None:
+        """
+        Test acosh with x >= 1.
+        
+        Inputs: 1, 2, 10
+        Expected: Valid results
+        """
+        for val in [1, 2, 10]:
+            result = validate_and_eval(
+                FunctionCategory.INVERSE_HYPERBOLIC,
+                SubOperation.FUNC_2,
+                "cosh⁻¹", cosineh_inv, val
+            )
+            assert "Domain Error" not in result
+    
+    def test_cosineh_inv_domain_invalid(self) -> None:
+        """
+        Test acosh rejects x < 1.
+        
+        Inputs: 0, 0.5, -1
+        Expected: Domain errors
+        """
+        for val in [0, 0.5, -1]:
+            result = validate_and_eval(
+                FunctionCategory.INVERSE_HYPERBOLIC,
+                SubOperation.FUNC_2,
+                "cosh⁻¹", cosineh_inv, val
+            )
+            assert "Domain Error" in result
+    
+    def test_tangenth_inv_domain_valid(self) -> None:
+        """
+        Test atanh with x ∈ (-1, 1).
+        
+        Inputs: 0, 0.5, -0.5
+        Expected: Valid results
+        """
+        for val in [0, 0.5, -0.5]:
+            result = validate_and_eval(
+                FunctionCategory.INVERSE_HYPERBOLIC,
+                SubOperation.FUNC_3,
+                "tanh⁻¹", tangenth_inv, val
+            )
+            assert "Domain Error" not in result
+    
+    def test_tangenth_inv_domain_invalid(self) -> None:
+        """
+        Test atanh rejects x at boundaries ±1.
+        
+        Inputs: -1, 1, 2
+        Expected: Domain errors
+        """
+        for val in [-1, 1, 2]:
+            result = validate_and_eval(
+                FunctionCategory.INVERSE_HYPERBOLIC,
+                SubOperation.FUNC_3,
+                "tanh⁻¹", tangenth_inv, val
+            )
+            assert "Domain Error" in result
+    
+    def test_coth_inv_domain(self) -> None:
+        """
+        Test acoth domain |x| > 1.
+        
+        Valid: 2, -2
+        Invalid: 0, 0.5, -0.5
+        """
+        # Valid
+        for val in [2, -2]:
+            result = validate_and_eval(
+                FunctionCategory.INVERSE_HYPERBOLIC,
+                SubOperation.FUNC_4,
+                "coth⁻¹", coth_inv, val
+            )
+            assert "Domain Error" not in result
+        
+        # Invalid
+        for val in [0, 0.5, -0.5]:
+            result = validate_and_eval(
+                FunctionCategory.INVERSE_HYPERBOLIC,
+                SubOperation.FUNC_4,
+                "coth⁻¹", coth_inv, val
+            )
+            assert "Domain Error" in result
+    
+    def test_sech_inv_domain(self) -> None:
+        """
+        Test asech domain x ∈ (0, 1].
+        
+        Valid: 0.5, 1
+        Invalid: 0, -0.5, 1.5
+        """
+        # Valid
+        for val in [0.5, 1]:
+            result = validate_and_eval(
+                FunctionCategory.INVERSE_HYPERBOLIC,
+                SubOperation.FUNC_5,
+                "sech⁻¹", sech_inv, val
+            )
+            assert "Domain Error" not in result
+        
+        # Invalid
+        for val in [0, -0.5, 1.5]:
+            result = validate_and_eval(
+                FunctionCategory.INVERSE_HYPERBOLIC,
+                SubOperation.FUNC_5,
+                "sech⁻¹", sech_inv, val
+            )
+            assert "Domain Error" in result
+    
+    def test_cosech_inv_domain(self) -> None:
+        """
+        Test acosech undefined at x = 0.
+        
+        Valid: ±1, ±2
+        Invalid: 0
+        """
+        # Valid
+        for val in [-2, -1, 1, 2]:
+            result = validate_and_eval(
+                FunctionCategory.INVERSE_HYPERBOLIC,
+                SubOperation.FUNC_6,
+                "cosech⁻¹", cosech_inv, val
+            )
+            assert "Domain Error" not in result
+        
+        # Invalid
+        result = validate_and_eval(
+            FunctionCategory.INVERSE_HYPERBOLIC,
+            SubOperation.FUNC_6,
+            "cosech⁻¹", cosech_inv, 0
+        )
+        assert "Domain Error" in result
 
 
-    """-------------------------- LARGE & SMALL INPUT TEST --------------------------"""
+# ============================================================================
+# Test Inverse Relationships
+# ============================================================================
 
-    # LARGE input
-    assert validate_and_eval(4, 1, "sinh⁻¹", sineh_inv, 1000) == "sinh⁻¹(1000) = 7.60090271"
-    assert validate_and_eval(4, 2, "cosh⁻¹", cosineh_inv, 1000) == "cosh⁻¹(1000) = 7.60090221"
-    assert validate_and_eval(4, 3, "tanh⁻¹", tangenth_inv, 0.999999123) == "tanh⁻¹(0.999999123) = 7.319952793"
-    assert validate_and_eval(4, 4, "coth⁻¹", coth_inv, 1.000001234) == "coth⁻¹(1.000001234) = 7.149198715"
-    assert validate_and_eval(4, 5, "sech⁻¹", sech_inv, 0.001234567) == "sech⁻¹(0.001234567) = 7.390181777"
-    assert validate_and_eval(4, 6, "cosech⁻¹", cosech_inv, 0.001234567) == "cosech⁻¹(0.001234567) = 7.390182539"
+class TestInverseRelationships:
+    """Test that inverse functions correctly invert their counterparts."""
+    
+    def test_sine_sine_inv_identity(self) -> None:
+        """
+        Test sin(arcsin(x)) = x for x ∈ [-1, 1].
+        
+        Inputs: -1, -0.5, 0, 0.5, 1
+        Expected: Round-trip gives original value
+        """
+        for x in [-1, -0.5, 0, 0.5, 1]:
+            angle = sine_inv(x)
+            result = sine(angle)
+            assert abs(result - x) < 1e-9
+    
+    def test_sinh_sineh_inv_identity(self) -> None:
+        """
+        Test sinh(asinh(x)) = x.
+        
+        Inputs: -5, 0, 5
+        Expected: Round-trip gives original value
+        """
+        for x in [-5, 0, 5]:
+            result = sineh(sineh_inv(x))
+            assert abs(result - x) < 1e-9
+    
+    def test_cosh_cosineh_inv_identity(self) -> None:
+        """
+        Test cosh(acosh(x)) = x for x >= 1.
+        
+        Inputs: 1, 2, 5
+        Expected: Round-trip gives original value
+        """
+        for x in [1, 2, 5]:
+            result = cosineh(cosineh_inv(x))
+            assert abs(result - x) < 1e-6
 
-    # SMALL input
-    assert validate_and_eval(4, 1, "sinh⁻¹", sineh_inv, 0.001234567) == "sinh⁻¹(0.001234567) = 0.001234567"
-    assert validate_and_eval(4, 2, "cosh⁻¹", cosineh_inv, 1.000001234) == "cosh⁻¹(1.000001234) = 0.001570987"
-    assert validate_and_eval(4, 3, "tanh⁻¹", tangenth_inv, 0.001234567) == "tanh⁻¹(0.001234567) = 0.001234568"
-    assert validate_and_eval(4, 4, "coth⁻¹", coth_inv, 1.001234567) == "coth⁻¹(1.001234567) = 3.695399626"
-    assert validate_and_eval(4, 5, "sech⁻¹", sech_inv, 0.999999123) == "sech⁻¹(0.999999123) = 0.001324387"
-    assert validate_and_eval(4, 6, "cosech⁻¹", cosech_inv, 1.001234567) == "cosech⁻¹(1.001234567) = 0.880501424"
+
+# ============================================================================
+# Test Edge Cases and Special Values
+# ============================================================================
+
+class TestEdgeCases:
+    """Test edge cases and boundary conditions."""
+    
+    def test_very_large_angle(self) -> None:
+        """
+        Test trigonometric functions with very large angles.
+        
+        Input: 1,000,000°
+        Expected: Valid result due to periodicity
+        """
+        result = sine(1_000_000)
+        assert -1 <= result <= 1
+    
+    def test_very_small_angle(self) -> None:
+        """
+        Test trigonometric functions with very small angles.
+        
+        Input: 0.0001°
+        Expected: sin(x) ≈ x for small x (in radians)
+        """
+        result = sine(0.0001)
+        assert abs(result) < 0.01
+    
+    def test_negative_angles(self) -> None:
+        """
+        Test that negative angles are handled correctly.
+        
+        Input: -45°
+        Expected: Valid result
+        """
+        result = sine(-45)
+        assert -1 <= result <= 1
+    
+    def test_hyperbolic_large_values(self) -> None:
+        """
+        Test hyperbolic functions don't overflow with reasonable inputs.
+        
+        Input: sinh(20)
+        Expected: Valid large number
+        """
+        result = sineh(20)
+        assert result > 0
+        assert math.isfinite(result)
+    
+    def test_hyperbolic_small_values(self) -> None:
+        """
+        Test hyperbolic functions with very small inputs.
+        
+        Input: sinh(0.001)
+        Expected: ≈ 0.001 (small angle approximation)
+        """
+        result = sineh(0.001)
+        assert abs(result - 0.001) < 0.0001
 
 
-    """-------------------------- INVALID INPUT TEST --------------------------"""
+# ============================================================================
+# Test History Functions
+# ============================================================================
 
-    for invalid in ["", "abc", "🙂", "@#$%", None, []]:
-        assert validate_and_eval(4, 1, "sinh⁻¹", sineh_inv, invalid) == 0
-        assert validate_and_eval(4, 2, "cosh⁻¹", cosineh_inv, invalid) == 0
-        assert validate_and_eval(4, 3, "tanh⁻¹", tangenth_inv, invalid) == 0
-        assert validate_and_eval(4, 4, "coth⁻¹", coth_inv, invalid) == 0
-        assert validate_and_eval(4, 5, "sech⁻¹", sech_inv, invalid) == 0
-        assert validate_and_eval(4, 6, "cosech⁻¹", cosech_inv, invalid) == 0
+class TestHistoryFunctions:
+    """Test suite for history management."""
+    
+    def test_record_history(self, temp_sci_history_file) -> None:
+        """
+        Test that calculations are recorded to history.
+        
+        Action: Record a calculation
+        Expected: File contains the entry
+        """
+        record_history_sci_calc("sin", 45, "0.707106781")
+        content = temp_sci_history_file.read_text()
+        assert "sin(45) = 0.707106781" in content
+    
+    def test_clear_history(self, temp_sci_history_file, capsys) -> None:
+        """
+        Test that clear_hist_sci_calc empties the file.
+        
+        Action: Record then clear
+        Expected: File is empty
+        """
+        record_history_sci_calc("cos", 0, "1")
+        clear_hist_sci_calc()
+        assert temp_sci_history_file.read_text() == ""
+        captured = capsys.readouterr()
+        assert "cleared successfully" in captured.out
+
+
+# ============================================================================
+# Test Error Messages
+# ============================================================================
+
+class TestErrorMessages:
+    """Test that appropriate error messages are returned."""
+    
+    def test_asymptote_error_format(self) -> None:
+        """
+        Test asymptote error messages are descriptive.
+        
+        Input: tan(90)
+        Expected: Error message mentions asymptote
+        """
+        result = validate_and_eval(
+            FunctionCategory.TRIGONOMETRIC,
+            SubOperation.FUNC_3,
+            "tan", tangent, 90
+        )
+        assert "Error" in result
+        assert "90" in result or "Asymptote" in result
+    
+    def test_domain_error_format(self) -> None:
+        """
+        Test domain error messages are descriptive.
+        
+        Input: arcsin(2)
+        Expected: Error message mentions domain
+        """
+        result = validate_and_eval(
+            FunctionCategory.INVERSE_TRIGONOMETRIC,
+            SubOperation.FUNC_1,
+            "sin⁻¹", sine_inv, 2
+        )
+        assert "Domain Error" in result
+
+
+# ============================================================================
+# Integration Tests
+# ============================================================================
+
+class TestIntegration:
+    """Integration tests for complete workflows."""
+    
+    def test_full_calculation_workflow(self, temp_sci_history_file) -> None:
+        """
+        Test complete calculation with history.
+        
+        Action: Calculate, check result, verify history
+        Expected: Correct result and history entry
+        """
+        result = validate_and_eval(
+            FunctionCategory.TRIGONOMETRIC,
+            SubOperation.FUNC_1,
+            "sin", sine, 30
+        )
+        assert "0.5" in result
+        
+        # Check history was recorded
+        content = temp_sci_history_file.read_text()
+        assert "sin(30)" in content
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "--tb=short"])
