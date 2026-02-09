@@ -26,11 +26,18 @@ class TempUnit(IntEnum):
     FAHRENHEIT = 3
     QUIT = 4
 
+class WeightUnit(IntEnum):
+    """Weight unit types."""
+    KILOGRAM = 1
+    GRAM = 2
+    QUIT = 3
+
 class MenuOptions(IntEnum):
     """Conversion unit types."""
     ANGLE_CONVERSION = 1
     TEMPERATURE_CONVERSION = 2
-    QUIT = 3
+    WEIGHT_CONVERSION = 3
+    QUIT = 4
 
 # ============================================================================
 # Menu Display Functions
@@ -39,7 +46,7 @@ class MenuOptions(IntEnum):
 def converter_menuMsg() -> None:
     """Display main converter menu."""
     print("\n|=====>Convertion Operations<=====|\n")
-    print("1. Angle.\n2. Temperature.\n3. Quit Converter.")
+    print("1. Angle.\n2. Temperature.\n3. Weight.\n4. Quit Converter.")
 
 def angle_conversion_menuMsg() -> None:
     """Display angle conversion menu."""
@@ -53,6 +60,11 @@ def temp_conv_menuMsg() -> None:
     print("Select a input choice\n")
     print("1. Celsius.\n2. Kelvin \n3. Fahrenheit\n4. Quit Temperature Converter.")
 
+def weight_conv_menuMsg() -> None:
+    """Display weight conversion menu."""
+    print("\n|=====>Input choices<=====|\n")
+    print("Select a input choice\n")
+    print("1. Kilogram.\n2. Gram\n3. Quit Weight Converter.")
 
 # ============================================================================
 # Angle Conversion Functions
@@ -133,6 +145,20 @@ def F_to_kelvin(tmp: float) -> float:
 
 
 # ============================================================================
+# Weight Conversion Functions
+# ============================================================================
+
+def kg_to_grams(weight: float) -> float:
+    """Convert kilograms to grams."""
+    return weight * 1000
+
+
+def grams_to_kg(weight: float) -> float:
+    """Convert grams to kilograms."""
+    return weight / 1000
+
+
+# ============================================================================
 # Conversion Lookup Tables
 # ============================================================================
 
@@ -155,6 +181,12 @@ temp_conv_funcs: Dict[Tuple[int, int], Tuple[str, str, Callable]] = {
     (TempUnit.FAHRENHEIT,TempUnit.KELVIN): ("Fahrenheit", "Kelvin", F_to_kelvin)
     }
 
+# Weight conversion: (from_unit, to_unit, conversion_function)
+weight_conv_funcs: Dict[Tuple[int, int], Tuple[str, str, Callable]] = {
+    (WeightUnit.KILOGRAM, WeightUnit.GRAM): ("Kilogram", "Gram", kg_to_grams),
+    (WeightUnit.GRAM, WeightUnit.KILOGRAM): ("Gram", "Kilogram", grams_to_kg)
+}
+
 
 # ============================================================================
 # Main Converter Function
@@ -162,7 +194,7 @@ temp_conv_funcs: Dict[Tuple[int, int], Tuple[str, str, Callable]] = {
 
 def angle_converter() -> None:
     """
-    Main angle and temperature conversion interface.
+    Main angle, temperature, and weight conversion interface.
     Provides interactive menu for conversions.
     """
     while(True):
@@ -181,8 +213,6 @@ def angle_converter() -> None:
 
                 if choice == AngleUnit.QUIT:
                     continue
-                # else:
-                #     errmsg()
 
                 if choice in angle_conv_funcs:
                     name1, func1, name2, func2 = angle_conv_funcs[choice]
@@ -214,6 +244,27 @@ def angle_converter() -> None:
                         from_tmp, to_tmp, tmp_func = temp_conv_funcs[key]
                         result = tmp_func(input_tmp)
                         print(f"{input_tmp} {from_tmp} = {result} {to_tmp}")
+                    else:
+                        errmsg()
+                else:
+                    errmsg()
+
+            elif op_num == MenuOptions.WEIGHT_CONVERSION:
+                # Weight conversion
+                weight_conv_menuMsg()
+                input_choice = int(input("Enter input choice: "))
+                output_choice = int(input("Enter output choice: "))
+
+                key = (input_choice, output_choice)
+
+                if key in weight_conv_funcs:
+                    print("Enter weight: ", end='')
+                    input_weight = get_val()
+
+                    if input_weight is not None:
+                        from_unit, to_unit, weight_func = weight_conv_funcs[key]
+                        result = weight_func(input_weight)
+                        print(f"{input_weight} {from_unit} = {result} {to_unit}")
                     else:
                         errmsg()
                 else:
