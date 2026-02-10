@@ -643,7 +643,7 @@ class TestConverterErrorMessages:
         Expected: "Invalid choice. select between 1-3"
         """
         # Simulate user input: main menu choice 1, tehn invalid angle choice 99
-        inputs = iter(['1', '99', '3']) # 1=angle, 99=invalid, 3=quit
+        inputs = iter(['1', '99', '4']) # 1=angle, 99=invalid, 3=quit
         monkeypatch.setattr('builtins.input', lambda _: next(inputs))
 
         # Run converter
@@ -663,7 +663,7 @@ class TestConverterErrorMessages:
         """
         # Mock get_val to return None (Simluating invalid input)
         with patch('converter.get_val', return_value=None):
-            inputs = iter(['1', '1', '3'])
+            inputs = iter(['1', '1', '4'])
             monkeypatch.setattr('builtins.input', lambda _:next(inputs))
 
             angle_converter()
@@ -677,7 +677,7 @@ class TestConverterErrorMessages:
         
         Expected: "Converter menu closed"
         """
-        inputs = iter(['3'])
+        inputs = iter(['4'])
         monkeypatch.setattr('builtins.input', lambda _: next(inputs))
 
         angle_converter()
@@ -894,7 +894,7 @@ class TestConverterErrorMessageFormats:
         
         Expected: "Invalid choice. select between 1-3"
         """
-        inputs = iter(['1', '999', '3'])
+        inputs = iter(['1', '999', '4'])
         monkeypatch.setattr('builtins.input', lambda _: next(inputs))
         
         angle_converter()
@@ -910,7 +910,7 @@ class TestConverterErrorMessageFormats:
         Expected: "No angle given"
         """
         with patch('converter.get_val', return_value=None):
-            inputs = iter(['1', '1', '3'])
+            inputs = iter(['1', '1', '4'])
             monkeypatch.setattr('builtins.input', lambda _: next(inputs))
             
             angle_converter()

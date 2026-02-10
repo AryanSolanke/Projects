@@ -1,7 +1,7 @@
 """
 Converter Module
 
-Provides angle and temperature conversion functionality.
+Provides angle, temperature, and weight conversion functionality.
 """
 
 from math import radians, degrees, log
@@ -30,7 +30,8 @@ class WeightUnit(IntEnum):
     """Weight unit types."""
     KILOGRAM = 1
     GRAM = 2
-    QUIT = 3
+    POUND = 3
+    QUIT = 4
 
 class MenuOptions(IntEnum):
     """Conversion unit types."""
@@ -64,7 +65,8 @@ def weight_conv_menuMsg() -> None:
     """Display weight conversion menu."""
     print("\n|=====>Input choices<=====|\n")
     print("Select a input choice\n")
-    print("1. Kilogram.\n2. Gram\n3. Quit Weight Converter.")
+    print("1. Kilogram.\n2. Gram\n3. Pound\n4. Quit Weight Converter.")
+
 
 # ============================================================================
 # Angle Conversion Functions
@@ -158,6 +160,38 @@ def grams_to_kg(weight: float) -> float:
     return weight / 1000
 
 
+def kg_to_pounds(weight: float) -> float:
+    """Convert kilograms to pounds.
+    
+    Conversion: 1 kg = 2.20462 pounds
+    """
+    return weight * 2.20462
+
+
+def pounds_to_kg(weight: float) -> float:
+    """Convert pounds to kilograms.
+    
+    Conversion: 1 pound = 0.453592 kg
+    """
+    return weight * 0.453592
+
+
+def grams_to_pounds(weight: float) -> float:
+    """Convert grams to pounds.
+    
+    Conversion: 1 gram = 0.00220462 pounds
+    """
+    return weight * 0.00220462
+
+
+def pounds_to_grams(weight: float) -> float:
+    """Convert pounds to grams.
+    
+    Conversion: 1 pound = 453.592 grams
+    """
+    return weight * 453.592
+
+
 # ============================================================================
 # Conversion Lookup Tables
 # ============================================================================
@@ -183,8 +217,17 @@ temp_conv_funcs: Dict[Tuple[int, int], Tuple[str, str, Callable]] = {
 
 # Weight conversion: (from_unit, to_unit, conversion_function)
 weight_conv_funcs: Dict[Tuple[int, int], Tuple[str, str, Callable]] = {
+    # Kilogram conversions
     (WeightUnit.KILOGRAM, WeightUnit.GRAM): ("Kilogram", "Gram", kg_to_grams),
-    (WeightUnit.GRAM, WeightUnit.KILOGRAM): ("Gram", "Kilogram", grams_to_kg)
+    (WeightUnit.KILOGRAM, WeightUnit.POUND): ("Kilogram", "Pound", kg_to_pounds),
+    
+    # Gram conversions
+    (WeightUnit.GRAM, WeightUnit.KILOGRAM): ("Gram", "Kilogram", grams_to_kg),
+    (WeightUnit.GRAM, WeightUnit.POUND): ("Gram", "Pound", grams_to_pounds),
+    
+    # Pound conversions
+    (WeightUnit.POUND, WeightUnit.KILOGRAM): ("Pound", "Kilogram", pounds_to_kg),
+    (WeightUnit.POUND, WeightUnit.GRAM): ("Pound", "Gram", pounds_to_grams),
 }
 
 
