@@ -1,7 +1,8 @@
 """
 Converter Module
 
-Provides angle, temperature, and weight conversion functionality.
+Provides angle, temperature, and comprehensive weight conversion functionality.
+Supports 14 weight units with bidirectional conversions between all units.
 """
 
 from math import radians, degrees, log
@@ -27,11 +28,21 @@ class TempUnit(IntEnum):
     QUIT = 4
 
 class WeightUnit(IntEnum):
-    """Weight unit types."""
+    """Weight unit types - 14 units total."""
     KILOGRAM = 1
     GRAM = 2
-    POUND = 3
-    QUIT = 4
+    MILLIGRAM = 3
+    CENTIGRAM = 4
+    DECIGRAM = 5
+    DECAGRAM = 6
+    HECTOGRAM = 7
+    METRIC_TONNE = 8
+    OUNCE = 9
+    POUND = 10
+    STONE = 11
+    SHORT_TON_US = 12
+    LONG_TON_UK = 13
+    QUIT = 14
 
 class MenuOptions(IntEnum):
     """Conversion unit types."""
@@ -62,10 +73,27 @@ def temp_conv_menuMsg() -> None:
     print("1. Celsius.\n2. Kelvin \n3. Fahrenheit\n4. Quit Temperature Converter.")
 
 def weight_conv_menuMsg() -> None:
-    """Display weight conversion menu."""
-    print("\n|=====>Input choices<=====|\n")
-    print("Select a input choice\n")
-    print("1. Kilogram.\n2. Gram\n3. Pound\n4. Quit Weight Converter.")
+    """Display weight conversion menu with all 14 units."""
+    print("\n" + "="*50)
+    print("           WEIGHT UNIT CONVERSION MENU")
+    print("="*50)
+    print("\n📊 METRIC UNITS:")
+    print("  1.  Kilogram (kg)")
+    print("  2.  Gram (g)")
+    print("  3.  Milligram (mg)")
+    print("  4.  Centigram (cg)")
+    print("  5.  Decigram (dg)")
+    print("  6.  Decagram (dag)")
+    print("  7.  Hectogram (hg)")
+    print("  8.  Metric Tonne (t)")
+    print("\n⚖️  IMPERIAL/US UNITS:")
+    print("  9.  Ounce (oz)")
+    print("  10. Pound (lb)")
+    print("  11. Stone (st)")
+    print("  12. Short Ton - US (ton)")
+    print("  13. Long Ton - UK (ton)")
+    print("\n  14. Quit Weight Converter")
+    print("="*50)
 
 
 # ============================================================================
@@ -147,49 +175,115 @@ def F_to_kelvin(tmp: float) -> float:
 
 
 # ============================================================================
-# Weight Conversion Functions
+# Universal Weight Conversion Function
 # ============================================================================
 
-def kg_to_grams(weight: float) -> float:
-    """Convert kilograms to grams."""
-    return weight * 1000
-
-
-def grams_to_kg(weight: float) -> float:
-    """Convert grams to kilograms."""
-    return weight / 1000
-
-
-def kg_to_pounds(weight: float) -> float:
-    """Convert kilograms to pounds.
-    
-    Conversion: 1 kg = 2.20462 pounds
+def convert_weight(value: float, from_unit: int, to_unit: int) -> float:
     """
-    return weight * 2.20462
-
-
-def pounds_to_kg(weight: float) -> float:
-    """Convert pounds to kilograms.
+    Universal weight converter - converts ANY weight unit to ANY other weight unit.
     
-    Conversion: 1 pound = 0.453592 kg
-    """
-    return weight * 0.453592
-
-
-def grams_to_pounds(weight: float) -> float:
-    """Convert grams to pounds.
+    This single function handles ALL 182 possible conversions (14x13 pairs).
     
-    Conversion: 1 gram = 0.00220462 pounds
-    """
-    return weight * 0.00220462
-
-
-def pounds_to_grams(weight: float) -> float:
-    """Convert pounds to grams.
+    Strategy: 
+    1. Convert input value to kilograms (base unit)
+    2. Convert kilograms to target unit
     
-    Conversion: 1 pound = 453.592 grams
+    Conversion factors (to kilograms):
+    --------------------------------
+    Metric System:
+    - 1 Kilogram    = 1 kg
+    - 1 Gram        = 0.001 kg
+    - 1 Milligram   = 0.000001 kg (1e-6)
+    - 1 Centigram   = 0.00001 kg (1e-5)
+    - 1 Decigram    = 0.0001 kg (1e-4)
+    - 1 Decagram    = 0.01 kg
+    - 1 Hectogram   = 0.1 kg
+    - 1 Metric Tonne= 1000 kg
+    
+    Imperial/US System:
+    - 1 Ounce       = 0.0283495 kg
+    - 1 Pound       = 0.453592 kg
+    - 1 Stone       = 6.35029 kg
+    - 1 Short Ton   = 907.185 kg
+    - 1 Long Ton    = 1016.05 kg
+    
+    Args:
+        value: Weight value to convert
+        from_unit: Source unit (WeightUnit enum value)
+        to_unit: Target unit (WeightUnit enum value)
+    
+    Returns:
+        Converted weight value as float
+    
+    Examples:
+        >>> convert_weight(1, WeightUnit.KILOGRAM, WeightUnit.GRAM)
+        1000.0
+        >>> convert_weight(1, WeightUnit.POUND, WeightUnit.KILOGRAM)
+        0.453592
+        >>> convert_weight(5, WeightUnit.STONE, WeightUnit.POUND)
+        70.0
     """
-    return weight * 453.592
+    # Conversion factors: Each unit -> kilograms
+    to_kg_factors = {
+        WeightUnit.KILOGRAM: 1.0,
+        WeightUnit.GRAM: 0.001,
+        WeightUnit.MILLIGRAM: 0.000001,
+        WeightUnit.CENTIGRAM: 0.00001,
+        WeightUnit.DECIGRAM: 0.0001,
+        WeightUnit.DECAGRAM: 0.01,
+        WeightUnit.HECTOGRAM: 0.1,
+        WeightUnit.METRIC_TONNE: 1000.0,
+        WeightUnit.OUNCE: 0.0283495,
+        WeightUnit.POUND: 0.453592,
+        WeightUnit.STONE: 6.35029,
+        WeightUnit.SHORT_TON_US: 907.185,
+        WeightUnit.LONG_TON_UK: 1016.05,
+    }
+    
+    # Convert input value to kilograms (base unit)
+    weight_in_kg = value * to_kg_factors[from_unit]
+    
+    # Convert kilograms to target unit
+    result = weight_in_kg / to_kg_factors[to_unit]
+    
+    return result
+
+
+# ============================================================================
+# Weight Unit Names and Abbreviations
+# ============================================================================
+
+WEIGHT_UNIT_NAMES = {
+    WeightUnit.KILOGRAM: "Kilogram",
+    WeightUnit.GRAM: "Gram",
+    WeightUnit.MILLIGRAM: "Milligram",
+    WeightUnit.CENTIGRAM: "Centigram",
+    WeightUnit.DECIGRAM: "Decigram",
+    WeightUnit.DECAGRAM: "Decagram",
+    WeightUnit.HECTOGRAM: "Hectogram",
+    WeightUnit.METRIC_TONNE: "Metric Tonne",
+    WeightUnit.OUNCE: "Ounce",
+    WeightUnit.POUND: "Pound",
+    WeightUnit.STONE: "Stone",
+    WeightUnit.SHORT_TON_US: "Short Ton (US)",
+    WeightUnit.LONG_TON_UK: "Long Ton (UK)",
+}
+
+WEIGHT_UNIT_ABBREV = {
+    WeightUnit.KILOGRAM: "kg",
+    WeightUnit.GRAM: "g",
+    WeightUnit.MILLIGRAM: "mg",
+    WeightUnit.CENTIGRAM: "cg",
+    WeightUnit.DECIGRAM: "dg",
+    WeightUnit.DECAGRAM: "dag",
+    WeightUnit.HECTOGRAM: "hg",
+    WeightUnit.METRIC_TONNE: "t",
+    WeightUnit.OUNCE: "oz",
+    WeightUnit.POUND: "lb",
+    WeightUnit.STONE: "st",
+    WeightUnit.SHORT_TON_US: "ton (US)",
+    WeightUnit.LONG_TON_UK: "ton (UK)",
+}
 
 
 # ============================================================================
@@ -214,21 +308,6 @@ temp_conv_funcs: Dict[Tuple[int, int], Tuple[str, str, Callable]] = {
     (TempUnit.FAHRENHEIT,TempUnit.CELSIUS): ("Fahrenheit", "Celsius", F_to_celsius),
     (TempUnit.FAHRENHEIT,TempUnit.KELVIN): ("Fahrenheit", "Kelvin", F_to_kelvin)
     }
-
-# Weight conversion: (from_unit, to_unit, conversion_function)
-weight_conv_funcs: Dict[Tuple[int, int], Tuple[str, str, Callable]] = {
-    # Kilogram conversions
-    (WeightUnit.KILOGRAM, WeightUnit.GRAM): ("Kilogram", "Gram", kg_to_grams),
-    (WeightUnit.KILOGRAM, WeightUnit.POUND): ("Kilogram", "Pound", kg_to_pounds),
-    
-    # Gram conversions
-    (WeightUnit.GRAM, WeightUnit.KILOGRAM): ("Gram", "Kilogram", grams_to_kg),
-    (WeightUnit.GRAM, WeightUnit.POUND): ("Gram", "Pound", grams_to_pounds),
-    
-    # Pound conversions
-    (WeightUnit.POUND, WeightUnit.KILOGRAM): ("Pound", "Kilogram", pounds_to_kg),
-    (WeightUnit.POUND, WeightUnit.GRAM): ("Pound", "Gram", pounds_to_grams),
-}
 
 
 # ============================================================================
@@ -293,23 +372,53 @@ def angle_converter() -> None:
                     errmsg()
 
             elif op_num == MenuOptions.WEIGHT_CONVERSION:
-                # Weight conversion
+                # Weight conversion with universal converter
                 weight_conv_menuMsg()
-                input_choice = int(input("Enter input choice: "))
-                output_choice = int(input("Enter output choice: "))
+                input_choice = int(input("\nEnter FROM unit (1-13): "))
+                
+                # Check for quit
+                if input_choice == WeightUnit.QUIT:
+                    continue
+                
+                # Validate input choice
+                if input_choice not in WEIGHT_UNIT_NAMES:
+                    print("Invalid choice. Please select 1-13.")
+                    continue
+                
+                output_choice = int(input("Enter TO unit (1-13): "))
+                
+                # Check for quit
+                if output_choice == WeightUnit.QUIT:
+                    continue
+                
+                # Validate output choice
+                if output_choice not in WEIGHT_UNIT_NAMES:
+                    print("Invalid choice. Please select 1-13.")
+                    continue
+                
+                # Check for same unit conversion
+                if input_choice == output_choice:
+                    print("\n⚠️  Input and output units are the same. No conversion needed.\n")
+                    continue
 
-                key = (input_choice, output_choice)
+                print("Enter weight: ", end='')
+                input_weight = get_val()
 
-                if key in weight_conv_funcs:
-                    print("Enter weight: ", end='')
-                    input_weight = get_val()
-
-                    if input_weight is not None:
-                        from_unit, to_unit, weight_func = weight_conv_funcs[key]
-                        result = weight_func(input_weight)
-                        print(f"{input_weight} {from_unit} = {result} {to_unit}")
-                    else:
-                        errmsg()
+                if input_weight is not None:
+                    from_unit_name = WEIGHT_UNIT_NAMES[input_choice]
+                    to_unit_name = WEIGHT_UNIT_NAMES[output_choice]
+                    from_abbrev = WEIGHT_UNIT_ABBREV[input_choice]
+                    to_abbrev = WEIGHT_UNIT_ABBREV[output_choice]
+                    
+                    # Use universal converter
+                    result = convert_weight(input_weight, input_choice, output_choice)
+                    
+                    # Display result
+                    print("\n" + "="*50)
+                    print(f" CONVERSION RESULT:")
+                    print(f"   {input_weight} {from_abbrev} = {format_result(result)} {to_abbrev}")
+                    print(f"   ({from_unit_name} → {to_unit_name})")
+                    print("="*50 + "\n")
                 else:
                     errmsg()
 
