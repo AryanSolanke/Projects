@@ -22,20 +22,18 @@ import math
 from typing import Tuple
 from unittest.mock import patch
 
-from converter import (
-    # Angle conversion functions
+# Angle conversion imports
+from converter.angle_converter import (
     to_rads, to_deg, to_grad, convert_angle, angle_converter,
+    AngleUnit, angle_conv_funcs,
+)
 
-    # Temperature conversion functions
+# Temperature conversion imports
+from converter.temp_converter import (
     C_to_kelvin, C_to_Fahrenheit,
     K_to_celsius, K_to_Fahrenheit,
     F_to_celsius, F_to_kelvin,
-
-    # Enums
-    AngleUnit, TempUnit,
-
-    # Lookup tables
-    angle_conv_funcs, temp_conv_funcs,
+    TempUnit, temp_conv_funcs,
 )
 
 from std import errmsg

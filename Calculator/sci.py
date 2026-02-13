@@ -14,9 +14,59 @@ from pathlib import Path
 from typing import Callable, Tuple, Optional, Union
 from dataclasses import dataclass
 from enum import IntEnum
+import textwrap
 
 # Import error message utility from std module
 from std import errmsg
+
+
+# ============================================================================
+# Menu Display Function(s)
+# ============================================================================
+
+def sci_calc_menuMsg() -> None:
+    """Display scientific calculator menu with all functions."""
+    print(textwrap.dedent("""
+                |============================>Operations<============================|\n
+                          
+                1. Basic trigo functions
+                    │──1.1 sin(x)
+                    │──1.2 cos(x)
+                    │──1.3 tan(x)
+                    │──1.4 cot(x)
+                    │──1.5 sec(x)
+                    │──1.6 cosec(x)
+                          
+                2. Inverse trigo functions
+                    │──2.1 sin⁻¹(x)
+                    │──2.2 cos⁻¹(x)
+                    │──2.3 tan⁻¹(x)
+                    │──2.4 cot⁻¹(x)
+                    │──2.5 sec⁻¹(x)
+                    │──2.6 cosec⁻¹(x)
+                          
+                3. Hyperbolic trigo functions
+                    │──3.1 sinh(x)
+                    │──3.2 cosh(x)
+                    │──3.3 tanh(x)
+                    │──3.4 coth(x)
+                    │──3.5 sech(x)
+                    │──3.6 cosech(x)
+                          
+                4. Inverse Hyperbolic trigo functions
+                    │──4.1 sinh⁻¹(x)
+                    │──4.2 cosh⁻¹(x)
+                    │──4.3 tanh⁻¹(x)
+                    │──4.4 coth⁻¹(x)
+                    │──4.5 sech⁻¹(x)
+                    │──4.6 cosech⁻¹(x)
+                          
+                5. Show operations.
+                6. Show history.
+                7. Clear history.
+                8. Quit scientific calculator.
+                |====================================================================|
+"""))
 
 
 # ============================================================================
