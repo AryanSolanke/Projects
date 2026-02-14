@@ -637,61 +637,60 @@ class TestConverterErrorMessages:
     def test_invalid_angle_choice_message(self, capsys, monkeypatch) -> None:
         """Test error message for invalid angle unit choice.
         
-        Scenario: User enters a invalid choice(e.g., 99) for angle conversion
-        Expected: "Invalid choice. select between 1-3"
+        Scenario: User enters invalid choice (99) for angle unit selection
+        Expected: "❌ Invalid choice. Please select 1-3"
         """
-        # Simulate user input: main menu choice 1, tehn invalid angle choice 99
-        inputs = iter(['1', '99', '5']) # 1=angle, 99=invalid, 3=quit
+        # Simulate user input: invalid choice 99, then quit with 4
+        inputs = iter(['99', '4'])
         monkeypatch.setattr('builtins.input', lambda _: next(inputs))
 
         # Run converter
         angle_converter()
 
-        # Cpature output
+        # Capture output
         captured = capsys.readouterr()
 
-        #Verify exact error message
-        assert "Invalid choice. select between 1-3" in captured.out
+        # Verify exact error message
+        assert "❌ Invalid choice. Please select 1-3" in captured.out
 
     def test_no_angle_given_error_message(self, capsys, monkeypatch) -> None:
         """
         Test error message when no angle value is entered.
 
-        Expected: "No angle given"
+        Expected: "⚠️  No angle given"
         """
-        # Mock get_val to return None (Simluating invalid input)
-        with patch('converter.get_val', return_value=None):
-            inputs = iter(['1', '1', '5'])
-            monkeypatch.setattr('builtins.input', lambda _:next(inputs))
+        with patch('sci.get_val', return_value=None):
+            inputs = iter(['1', '4'])  # 1 = degree, 4 = quit
+            monkeypatch.setattr('builtins.input', lambda _: next(inputs))
 
             angle_converter()
 
             captured = capsys.readouterr()
-            assert "No angle given" in captured.out
+            assert "⚠️  No angle given" in captured.out
     
     def test_converter_menu_closed_message(self, capsys, monkeypatch) -> None:
         """
-        Test success message when converte is closed.
+        Test that angle_converter closes properly.
         
-        Expected: "Converter menu closed"
+        Expected: Menu displays, then converter returns (no specific message)
         """
-        inputs = iter(['5'])
+        inputs = iter(['4'])  # 4 = Quit Angle Converter
         monkeypatch.setattr('builtins.input', lambda _: next(inputs))
 
         angle_converter()
 
         captured = capsys.readouterr()
-        assert "Converter menu closed" in captured.out
+        assert "ANGLE CONVERSION" in captured.out
 
     def test_error_invalid_input_from_message(self, capsys) -> None:
         """
         Test generic error message from errmsg() function.
 
-        Expected: "Error: Invalid input."
+        Expected: "❌ Error: Invalid input."
         """
         errmsg()
         captured = capsys.readouterr()
-        assert captured.out.strip() == "Error: Invalid input."
+        assert captured.out.strip() == "❌ Error: Invalid input."
 
 
 class TestConverterInvalidInputs:
@@ -890,42 +889,42 @@ class TestConverterErrorMessageFormats:
         """
         Test exact format of invalid choice message.
         
-        Expected: "Invalid choice. select between 1-3"
+        Expected: "❌ Invalid choice. Please select 1-3"
         """
-        inputs = iter(['1', '999', '5'])
+        inputs = iter(['999', '4'])  # 999=invalid choice, 4=quit
         monkeypatch.setattr('builtins.input', lambda _: next(inputs))
         
         angle_converter()
         
         captured = capsys.readouterr()
-        assert "Invalid choice" in captured.out
+        assert "❌ Invalid choice" in captured.out
         assert "1-3" in captured.out
     
     def test_no_angle_given_message_format(self, capsys, monkeypatch) -> None:
         """
         Test exact format of "no angle given" message.
         
-        Expected: "No angle given"
+        Expected: "⚠️  No angle given"
         """
-        with patch('converter.get_val', return_value=None):
-            inputs = iter(['1', '1', '5'])
+        with patch('sci.get_val', return_value=None):
+            inputs = iter(['1', '4'])  # 1 = degree, 4 = quit
             monkeypatch.setattr('builtins.input', lambda _: next(inputs))
             
             angle_converter()
             
             captured = capsys.readouterr()
-            assert "No angle given" in captured.out
+            assert "⚠️  No angle given" in captured.out
     
     def test_error_message_from_std_module(self, capsys) -> None:
         """
         Test that errmsg() from std module produces expected format.
         
-        Expected: "Error: Invalid input." with period
+        Expected: "❌ Error: Invalid input." with period
         """
         errmsg()
         captured = capsys.readouterr()
         
-        assert captured.out.strip() == "Error: Invalid input."
+        assert captured.out.strip() == "❌ Error: Invalid input."
 
 
 class TestConverterBoundaryErrors:
