@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Callable, Tuple, Optional, Union
 from dataclasses import dataclass
 from enum import IntEnum
-import textwrap
+from textwrap import dedent
 
 # Import error message utility from std module
 from std import errmsg
@@ -26,7 +26,7 @@ from std import errmsg
 
 def sci_calc_menuMsg() -> None:
     """Display scientific calculator menu with all functions."""
-    print(textwrap.dedent("""
+    print(dedent("""
                 |============================>Operations<============================|\n
                           
                 1. Basic trigo functions
