@@ -12,12 +12,20 @@ Coverage:
 
 import pytest
 import math
+from decimal import Decimal
 
 from converter.pressure_converter import (
     pressure_converter, pressure_conv_menuMsg,
     PRESSURE_UNIT_ABBREV, PRESSURE_UNIT_NAMES,
-    PressureUnit, convert_pressure,
+    PressureUnit, convert_pressure as _convert_pressure,
 )
+
+def _to_float(value):
+    return float(value) if isinstance(value, Decimal) else value
+
+
+def convert_pressure(*args, **kwargs):
+    return _to_float(_convert_pressure(*args, **kwargs))
 
 
 # ============================================================================

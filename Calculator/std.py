@@ -4,8 +4,9 @@ Standard Calculator Module
 Provides expression evaluation with history tracking and error handling.
 """
 
+from decimal import Decimal, InvalidOperation, DivisionByZero, localcontext
 from pathlib import Path
-from typing import Optional
+import re
 
 # ============================================================================
 # Constants
@@ -13,6 +14,9 @@ from typing import Optional
 
 HISTORY_FILE = Path("std_calc_history_file.txt")
 DECIMAL_PRECISION = 14
+FLOAT_LIKE_MAX_EXP = 308
+
+_NUMBER_PATTERN = re.compile(r"(?:\d+\.\d+|\d+|(?<![\d.])\.\d+)")
 
 
 # ============================================================================
@@ -21,14 +25,14 @@ DECIMAL_PRECISION = 14
 
 def errmsg() -> None:
     """Display standard error message for invalid input."""
-    print("❌ Error: Invalid input.")
+    print("Error: Invalid input.")
 
 
 # ============================================================================
 # Result Formatting
 # ============================================================================
 
-def format_answer(result: float) -> str:
+def format_answer(result: Decimal) -> str:
     """
     Format numerical result removing trailing zeros and artifacts.
     
@@ -38,6 +42,8 @@ def format_answer(result: float) -> str:
     Returns:
         Formatted string representation
     """
+    if not isinstance(result, Decimal):
+        result = Decimal(str(result))
     formatted_res = f"{result:.{DECIMAL_PRECISION}f}"
     stripped_res = formatted_res.rstrip("0").rstrip(".")
     # Normalize negative zero
@@ -51,7 +57,7 @@ def format_answer(result: float) -> str:
 def std_calc_menuMsg() -> None:
     """Display standard calculator menu options."""
     print("\n" + "="*40)
-    print("📊 STANDARD CALCULATOR")
+    print("STANDARD CALCULATOR")
     print("="*40)
     print("1. Type expression")
     print("2. Show history")
@@ -76,7 +82,7 @@ def record_history_std_calc(exp: str, result: str) -> None:
         with HISTORY_FILE.open('a', encoding="utf-8") as f:
             f.write(f"{exp} = {result}\n")
     except FileNotFoundError:
-        print("⚠️  Failed to record history")
+        print("Failed to record history")
     except Exception:
         errmsg()
 
@@ -85,16 +91,16 @@ def display_hist_std_calc() -> None:
     """Display calculation history from file."""
     try:
         if not HISTORY_FILE.exists():
-            print("📝 No history available.")
+            print("No history available.")
             return
         
         history = HISTORY_FILE.read_text(encoding="utf-8").splitlines()
         if not history:
-            print("📝 History is empty.")
+            print("History is empty.")
             return
             
         print("\n" + "="*40)
-        print("📜 CALCULATION HISTORY")
+        print("CALCULATION HISTORY")
         print("="*40)
         for line in history:
             print(f"  {line}")
@@ -109,7 +115,7 @@ def clear_hist_std_calc() -> None:
         HISTORY_FILE.write_text("", encoding="utf-8")
         print("   History cleared successfully!")
     except FileNotFoundError:
-        print("⚠️  Failed to clear history")
+        print("Failed to clear history")
     except Exception:
         errmsg()
 
@@ -125,7 +131,7 @@ def exp_input() -> str:
     Returns:
         Expression string entered by user
     """
-    exp = input("➤ Enter expression (e.g., 2+3*4): ")
+    exp = input("Enter expression (e.g., 2+3*4): ")
     return exp
 
 
@@ -141,19 +147,19 @@ def validate_exp(exp: str) -> bool:
     """
     # Check for empty input
     if not exp.strip():
-        print("⚠️  No input given")
+        print("No input given")
         return False
     
     # Check for unbalanced parentheses
     if exp.count('(') != exp.count(')'):
-        print("❌ Error: Unbalanced parentheses")
+        print("Error: Unbalanced parentheses")
         return False
     
     # Check for allowed characters
     allowed_chars = "0123456789+-*/%(). "
     for char in exp:
         if char not in allowed_chars:
-            print(f"❌ Error: Character '{char}' not allowed")
+            print(f"Error: Character '{char}' not allowed")
             return False
         
     return True
@@ -177,10 +183,21 @@ def evaluate_expression(exp: str) -> str:
         return "0"
     
     try:
-        result = float(f"{eval(exp)}")
+        decimal_exp = _NUMBER_PATTERN.sub(
+            lambda m: f"Decimal('{m.group(0)}')", exp
+        )
+        with localcontext() as ctx:
+            ctx.prec = max(DECIMAL_PRECISION, 28)
+            result = eval(decimal_exp, {"Decimal": Decimal})
+        if not isinstance(result, Decimal):
+            result = Decimal(str(result))
+        if not result.is_finite():
+            raise InvalidOperation
+        if result.is_finite() and result.adjusted() > FLOAT_LIKE_MAX_EXP:
+            raise OverflowError
         formatted_result = format_answer(result)
         record_history_std_calc(exp, formatted_result)
         return formatted_result
-    except (SyntaxError, ZeroDivisionError, TypeError, OverflowError):
+    except (SyntaxError, ZeroDivisionError, TypeError, OverflowError, InvalidOperation, DivisionByZero):
         errmsg()
         return "0"

@@ -32,7 +32,7 @@ class MenuOptions(IntEnum):
 def converter_menuMsg() -> None:
     """Display main converter menu."""
     print("\n" + "="*50)
-    print("🔄 UNIT CONVERTER")
+    print("UNIT CONVERTER")
     print("="*50)
     print("1. Angle Conversion")
     print("2. Temperature Conversion")
@@ -52,7 +52,7 @@ def converter_menu() -> None:
     while True:
         try:
             converter_menuMsg()
-            op_num = int(input("\n➤ Enter your choice: "))
+            op_num = int(input("\nEnter your choice: "))
 
             if op_num == MenuOptions.QUIT:
                 print("\n   Converter menu closed\n")

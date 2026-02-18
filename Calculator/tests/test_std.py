@@ -185,7 +185,7 @@ class TestValidateExp:
         """
         assert validate_exp("((2+2)") is False
         captured = capsys.readouterr()
-        assert "❌ Error: Unbalanced parentheses" in captured.out
+        assert "Error: Unbalanced parentheses" in captured.out
     
     def test_validate_exp_rejects_unbalanced_parentheses_right(self, capsys) -> None:
         """
@@ -196,7 +196,7 @@ class TestValidateExp:
         """
         assert validate_exp("(2+2))") is False
         captured = capsys.readouterr()
-        assert "❌ Error: Unbalanced parentheses" in captured.out
+        assert "Error: Unbalanced parentheses" in captured.out
     
     def test_validate_exp_rejects_empty_string(self, capsys) -> None:
         """
@@ -229,7 +229,7 @@ class TestValidateExp:
         """
         assert validate_exp("a+b") is False
         captured = capsys.readouterr()
-        assert "❌ Error: Character" in captured.out
+        assert "Error: Character" in captured.out
         assert "not allowed" in captured.out
     
     def test_validate_exp_rejects_special_characters(self, capsys) -> None:
@@ -241,19 +241,19 @@ class TestValidateExp:
         """
         assert validate_exp("2+2@3") is False
         captured = capsys.readouterr()
-        assert "❌ Error: Character" in captured.out
+        assert "Error: Character" in captured.out
         assert "not allowed" in captured.out
     
-    def test_validate_exp_rejects_emoji(self, capsys) -> None:
+    def test_validate_exp_rejects_symbols(self, capsys) -> None:
         """
-        Test rejection of expressions containing emoji.
+        Test rejection of expressions containing disallowed symbols.
         
-        Input: "🙄🙄🙄"
+        Input: "###"
         Expected: False with error message
         """
-        assert validate_exp("🙄🙄🙄") is False
+        assert validate_exp("###") is False
         captured = capsys.readouterr()
-        assert "❌ Error: Character" in captured.out
+        assert "Error: Character" in captured.out
         assert "not allowed" in captured.out
     
     def test_validate_exp_accepts_all_allowed_operators(self) -> None:
@@ -521,7 +521,7 @@ class TestHistoryManagement:
         """
         display_hist_std_calc()
         captured = capsys.readouterr()
-        assert "📜 CALCULATION HISTORY" in captured.out
+        assert "CALCULATION HISTORY" in captured.out
         assert "2+2 = 4" in captured.out
         assert "3*3 = 9" in captured.out
         assert "10/2 = 5" in captured.out
@@ -536,7 +536,7 @@ class TestHistoryManagement:
         temp_history_file.write_text("")
         display_hist_std_calc()
         captured = capsys.readouterr()
-        assert "📝 History is empty" in captured.out
+        assert "History is empty" in captured.out
     
     def test_display_history_nonexistent_file(self, capsys, monkeypatch) -> None:
         """
@@ -549,7 +549,7 @@ class TestHistoryManagement:
         monkeypatch.setattr('std.HISTORY_FILE', nonexistent)
         display_hist_std_calc()
         captured = capsys.readouterr()
-        assert "📝 No history available" in captured.out
+        assert "No history available" in captured.out
     
     def test_clear_history_removes_content(self, history_with_data) -> None:
         """

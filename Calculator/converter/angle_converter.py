@@ -5,12 +5,41 @@ Provides angle conversion functionality.
 Supports degree, radian, and gradian conversions.
 """
 
-from math import radians, degrees
+from decimal import Decimal, localcontext
 from typing import Tuple, Callable, Dict
 from enum import IntEnum
 
 from std import errmsg
 from sci import get_val, format_result
+
+INTERNAL_PRECISION = 60
+
+
+def _compute_pi() -> Decimal:
+    with localcontext() as ctx:
+        ctx.prec = INTERNAL_PRECISION
+        a = Decimal(1)
+        b = Decimal(1) / Decimal(2).sqrt()
+        t = Decimal(1) / Decimal(4)
+        p = Decimal(1)
+        for _ in range(7):
+            an = (a + b) / 2
+            b = (a * b).sqrt()
+            t = t - p * (a - an) * (a - an)
+            a = an
+            p = p * 2
+        return (a + b) * (a + b) / (Decimal(4) * t)
+
+
+PI = _compute_pi()
+
+
+def _to_decimal(value: float | int | Decimal) -> Decimal:
+    if isinstance(value, Decimal):
+        return value
+    if isinstance(value, (int, float)):
+        return Decimal(str(value))
+    raise TypeError("Angle value must be numeric.")
 
 
 class AngleUnit(IntEnum):
@@ -28,7 +57,7 @@ class AngleUnit(IntEnum):
 def angle_conversion_menuMsg() -> None:
     """Display angle conversion menu."""
     print("\n" + "="*50)
-    print("📐 ANGLE CONVERSION")
+    print("ANGLE CONVERSION")
     print("="*50)
     print("1. Degree (°)")
     print("2. Radian (rad)")
@@ -41,19 +70,20 @@ def angle_conversion_menuMsg() -> None:
 # Angle Conversion Functions
 # ============================================================================
 
-def to_rads(angle: float) -> float:
+def to_rads(angle: float) -> Decimal:
     """Convert degrees to radians."""
-    return radians(angle)
+    return _to_decimal(angle) * PI / Decimal(180)
 
 
-def to_deg(angle: float) -> float:
+def to_deg(angle: float) -> Decimal:
     """Convert radians to degrees."""
-    return degrees(angle)
+    return _to_decimal(angle) * Decimal(180) / PI
 
 
-def to_grad(angle: float) -> float:
+def to_grad(angle: float) -> Decimal:
     """Convert degrees to gradians."""
-    return (angle * 200) / 180
+    angle_dec = _to_decimal(angle)
+    return angle_dec * Decimal(200) / Decimal(180)
 
 
 def convert_angle(
@@ -103,7 +133,7 @@ def angle_converter() -> None:
     """Main angle conversion interface."""
     try:
         angle_conversion_menuMsg()
-        choice = int(input("\n➤ Enter your choice: "))
+        choice = int(input("\nEnter your choice: "))
 
         if choice == AngleUnit.QUIT:
             return
@@ -111,7 +141,7 @@ def angle_converter() -> None:
         if choice in angle_conv_funcs:
             name1, func1, name2, func2 = angle_conv_funcs[choice]
             unit_name = angle_conv_choices[choice - 1]
-            print(f"\n📏 Enter angle in {unit_name}: ", end="")
+            print(f"\nEnter angle in {unit_name}: ", end="")
             angle = get_val()
 
             if angle is not None:
@@ -119,9 +149,9 @@ def angle_converter() -> None:
                 print(f"\n   {ans1}")
                 print(f"   {ans2}\n")
             else:
-                print("⚠️  No angle given\n")
+                print("No angle given\n")
         else:
-            print("❌ Invalid choice. Please select 1-3\n")
+            print("Invalid choice. Please select 1-3\n")
 
     except (TypeError, UnboundLocalError, SyntaxError, ValueError):
         errmsg()

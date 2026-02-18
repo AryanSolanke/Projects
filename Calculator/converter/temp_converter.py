@@ -5,11 +5,19 @@ Provides temperature conversion functionality.
 Supports Celsius, Kelvin, and Fahrenheit conversions.
 """
 
+from decimal import Decimal
 from enum import IntEnum
 from typing import Callable, Dict, Tuple
 
 from std import errmsg
 from sci import get_val
+
+def _to_decimal(value: float | int | Decimal) -> Decimal:
+    if isinstance(value, Decimal):
+        return value
+    if isinstance(value, (int, float)):
+        return Decimal(str(value))
+    raise TypeError("Temperature value must be numeric.")
 
 
 class TempUnit(IntEnum):
@@ -27,7 +35,7 @@ class TempUnit(IntEnum):
 def temp_conv_menuMsg() -> None:
     """Display temperature conversion menu."""
     print("\n" + "="*50)
-    print("🌡️  TEMPERATURE CONVERSION")
+    print("TEMPERATURE CONVERSION")
     print("="*50)
     print("1. Celsius (°C)")
     print("2. Kelvin (K)")
@@ -40,34 +48,34 @@ def temp_conv_menuMsg() -> None:
 # Temperature Conversion Functions
 # ============================================================================
 
-def C_to_kelvin(tmp: float) -> float:
+def C_to_kelvin(tmp: float) -> Decimal:
     """Convert Celsius to Kelvin."""
-    return tmp + 273.15
+    return _to_decimal(tmp) + Decimal("273.15")
 
 
-def C_to_Fahrenheit(tmp: float) -> float:
+def C_to_Fahrenheit(tmp: float) -> Decimal:
     """Convert Celsius to Fahrenheit."""
-    return ((9 / 5) * tmp) + 32
+    return (_to_decimal(tmp) * Decimal(9) / Decimal(5)) + Decimal(32)
 
 
-def K_to_celsius(tmp: float) -> float:
+def K_to_celsius(tmp: float) -> Decimal:
     """Convert Kelvin to Celsius."""
-    return tmp - 273.15
+    return _to_decimal(tmp) - Decimal("273.15")
 
 
-def K_to_Fahrenheit(tmp: float) -> float:
+def K_to_Fahrenheit(tmp: float) -> Decimal:
     """Convert Kelvin to Fahrenheit."""
     return C_to_Fahrenheit(K_to_celsius(tmp))
 
 
 def F_to_celsius(tmp: float) -> float:
     """Convert Fahrenheit to Celsius."""
-    return (5 / 9) * (tmp - 32)
+    return (_to_decimal(tmp) - Decimal(32)) * Decimal(5) / Decimal(9)
 
 
-def F_to_kelvin(tmp: float) -> float:
+def F_to_kelvin(tmp: float) -> Decimal:
     """Convert Fahrenheit to Kelvin."""
-    return F_to_celsius(tmp) + 273.15
+    return _to_decimal(F_to_celsius(tmp)) + Decimal("273.15")
 
 
 # ============================================================================
@@ -93,12 +101,12 @@ def temperature_converter() -> None:
     """Main temperature conversion interface."""
     try:
         temp_conv_menuMsg()
-        input_choice = int(input("\n➤ Enter input unit (1-3): "))
+        input_choice = int(input("\nEnter input unit (1-3): "))
 
         if input_choice == TempUnit.QUIT:
             return
 
-        output_choice = int(input("➤ Enter output unit (1-3): "))
+        output_choice = int(input("Enter output unit (1-3): "))
 
         if output_choice == TempUnit.QUIT:
             return
@@ -106,7 +114,7 @@ def temperature_converter() -> None:
         key = (input_choice, output_choice)
 
         if key in temp_conv_funcs:
-            print("\n🌡️  Enter temperature: ", end="")
+            print("\nEnter temperature: ", end="")
             input_tmp = get_val()
 
             if input_tmp is not None:

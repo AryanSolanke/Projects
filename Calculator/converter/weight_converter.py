@@ -5,10 +5,18 @@ Provides weight conversion functionality.
 Supports comprehensive bidirectional conversions for all units.
 """
 
+from decimal import Decimal
 from enum import IntEnum
 
 from std import errmsg
 from sci import get_val, format_result
+
+def _to_decimal(value: float | int | Decimal) -> Decimal:
+    if isinstance(value, Decimal):
+        return value
+    if isinstance(value, (int, float)):
+        return Decimal(str(value))
+    raise TypeError("Weight value must be numeric.")
 
 
 class WeightUnit(IntEnum):
@@ -36,9 +44,9 @@ class WeightUnit(IntEnum):
 def weight_conv_menuMsg() -> None:
     """Display weight conversion menu with all 13 units."""
     print("\n" + "="*50)
-    print("⚖️  WEIGHT CONVERSION")
+    print("WEIGHT CONVERSION")
     print("="*50)
-    print("\n📊 METRIC UNITS:")
+    print("\nMETRIC UNITS:")
     print("  1.  Kilogram (kg)")
     print("  2.  Gram (g)")
     print("  3.  Milligram (mg)")
@@ -47,7 +55,7 @@ def weight_conv_menuMsg() -> None:
     print("  6.  Decagram (dag)")
     print("  7.  Hectogram (hg)")
     print("  8.  Metric Tonne (t)")
-    print("\n🔷 IMPERIAL/US UNITS:")
+    print("\nIMPERIAL/US UNITS:")
     print("  9.  Ounce (oz)")
     print("  10. Pound (lb)")
     print("  11. Stone (st)")
@@ -61,7 +69,7 @@ def weight_conv_menuMsg() -> None:
 # Universal Weight Conversion Function
 # ============================================================================
 
-def convert_weight(value: float, from_unit: int, to_unit: int) -> float:
+def convert_weight(value: float, from_unit: int, to_unit: int) -> Decimal:
     """
     Universal weight converter - converts ANY weight unit to ANY other weight unit.
 
@@ -78,22 +86,22 @@ def convert_weight(value: float, from_unit: int, to_unit: int) -> float:
         Converted weight value as float
     """
     to_kg_factors = {
-        WeightUnit.KILOGRAM: 1.0,
-        WeightUnit.GRAM: 0.001,
-        WeightUnit.MILLIGRAM: 0.000001,
-        WeightUnit.CENTIGRAM: 0.00001,
-        WeightUnit.DECIGRAM: 0.0001,
-        WeightUnit.DECAGRAM: 0.01,
-        WeightUnit.HECTOGRAM: 0.1,
-        WeightUnit.METRIC_TONNE: 1000.0,
-        WeightUnit.OUNCE: 0.0283495,
-        WeightUnit.POUND: 0.453592,
-        WeightUnit.STONE: 6.35029,
-        WeightUnit.SHORT_TON_US: 907.185,
-        WeightUnit.LONG_TON_UK: 1016.05,
+        WeightUnit.KILOGRAM: Decimal("1"),
+        WeightUnit.GRAM: Decimal("0.001"),
+        WeightUnit.MILLIGRAM: Decimal("0.000001"),
+        WeightUnit.CENTIGRAM: Decimal("0.00001"),
+        WeightUnit.DECIGRAM: Decimal("0.0001"),
+        WeightUnit.DECAGRAM: Decimal("0.01"),
+        WeightUnit.HECTOGRAM: Decimal("0.1"),
+        WeightUnit.METRIC_TONNE: Decimal("1000"),
+        WeightUnit.OUNCE: Decimal("0.0283495"),
+        WeightUnit.POUND: Decimal("0.453592"),
+        WeightUnit.STONE: Decimal("6.35029"),
+        WeightUnit.SHORT_TON_US: Decimal("907.185"),
+        WeightUnit.LONG_TON_UK: Decimal("1016.05"),
     }
 
-    weight_in_kg = value * to_kg_factors[from_unit]
+    weight_in_kg = _to_decimal(value) * to_kg_factors[from_unit]
     return weight_in_kg / to_kg_factors[to_unit]
 
 
@@ -142,29 +150,29 @@ def weight_converter() -> None:
     """Main weight conversion interface."""
     try:
         weight_conv_menuMsg()
-        input_choice = int(input("\n➤ Enter FROM unit (1-13): "))
+        input_choice = int(input("\nEnter FROM unit (1-13): "))
 
         if input_choice == WeightUnit.QUIT:
             return
 
         if input_choice not in WEIGHT_UNIT_NAMES:
-            print("❌ Invalid choice. Please select 1-13.")
+            print("Invalid choice. Please select 1-13.")
             return
 
-        output_choice = int(input("➤ Enter TO unit (1-13): "))
+        output_choice = int(input("Enter TO unit (1-13): "))
 
         if output_choice == WeightUnit.QUIT:
             return
 
         if output_choice not in WEIGHT_UNIT_NAMES:
-            print("❌ Invalid choice. Please select 1-13.")
+            print("Invalid choice. Please select 1-13.")
             return
 
         if input_choice == output_choice:
-            print("\n⚠️  Input and output units are the same. No conversion needed.\n")
+            print("\nInput and output units are the same. No conversion needed.\n")
             return
 
-        print("\n⚖️  Enter weight: ", end="")
+        print("\nEnter weight: ", end="")
         input_weight = get_val()
 
         if input_weight is not None:
@@ -178,7 +186,7 @@ def weight_converter() -> None:
             print("\n" + "="*50)
             print("   CONVERSION RESULT:")
             print(f"   {input_weight} {from_abbrev} = {format_result(result)} {to_abbrev}")
-            print(f"   ({from_unit_name} → {to_unit_name})")
+            print(f"   ({from_unit_name} -> {to_unit_name})")
             print("="*50 + "\n")
         else:
             errmsg()

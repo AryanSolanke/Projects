@@ -5,10 +5,18 @@ Provides pressure conversion functionality.
 Supports comprehensive bidirectional conversions for all units.
 """
 
+from decimal import Decimal
 from enum import IntEnum
 
 from std import errmsg
 from sci import get_val, format_result
+
+def _to_decimal(value: float | int | Decimal) -> Decimal:
+    if isinstance(value, Decimal):
+        return value
+    if isinstance(value, (int, float)):
+        return Decimal(str(value))
+    raise TypeError("Pressure value must be numeric.")
 
 
 class PressureUnit(IntEnum):
@@ -29,9 +37,9 @@ class PressureUnit(IntEnum):
 def pressure_conv_menuMsg() -> None:
     """Display pressure conversion menu with all 6 units."""
     print("\n" + "="*50)
-    print("🌡️  PRESSURE CONVERSION")
+    print("PRESSURE CONVERSION")
     print("="*50)
-    print("\n💨 PRESSURE UNITS:")
+    print("\nPRESSURE UNITS:")
     print("  1. Atmosphere (atm)")
     print("  2. Bar (bar)")
     print("  3. Kilopascal (kPa)")
@@ -46,7 +54,7 @@ def pressure_conv_menuMsg() -> None:
 # Universal Pressure Conversion Function
 # ============================================================================
 
-def convert_pressure(value: float, from_unit: int, to_unit: int) -> float:
+def convert_pressure(value: float, from_unit: int, to_unit: int) -> Decimal:
     """
     Universal pressure converter - converts ANY pressure unit to ANY other pressure unit.
 
@@ -63,15 +71,15 @@ def convert_pressure(value: float, from_unit: int, to_unit: int) -> float:
         Converted pressure value as float
     """
     to_pascal_factors = {
-        PressureUnit.ATMOSPHERE: 101325.0,
-        PressureUnit.BAR: 100000.0,
-        PressureUnit.KILOPASCAL: 1000.0,
-        PressureUnit.MM_MERCURY: 133.322,
-        PressureUnit.PASCAL: 1.0,
-        PressureUnit.PSI: 6894.76,
+        PressureUnit.ATMOSPHERE: Decimal("101325"),
+        PressureUnit.BAR: Decimal("100000"),
+        PressureUnit.KILOPASCAL: Decimal("1000"),
+        PressureUnit.MM_MERCURY: Decimal("133.322"),
+        PressureUnit.PASCAL: Decimal("1"),
+        PressureUnit.PSI: Decimal("6894.76"),
     }
 
-    pressure_in_pa = value * to_pascal_factors[from_unit]
+    pressure_in_pa = _to_decimal(value) * to_pascal_factors[from_unit]
     return pressure_in_pa / to_pascal_factors[to_unit]
 
 
@@ -106,29 +114,29 @@ def pressure_converter() -> None:
     """Main pressure conversion interface."""
     try:
         pressure_conv_menuMsg()
-        input_choice = int(input("\n➤ Enter FROM unit (1-6): "))
+        input_choice = int(input("\nEnter FROM unit (1-6): "))
 
         if input_choice == PressureUnit.QUIT:
             return
 
         if input_choice not in PRESSURE_UNIT_NAMES:
-            print("❌ Invalid choice. Please select 1-6.")
+            print("Invalid choice. Please select 1-6.")
             return
 
-        output_choice = int(input("➤ Enter TO unit (1-6): "))
+        output_choice = int(input("Enter TO unit (1-6): "))
 
         if output_choice == PressureUnit.QUIT:
             return
 
         if output_choice not in PRESSURE_UNIT_NAMES:
-            print("❌ Invalid choice. Please select 1-6.")
+            print("Invalid choice. Please select 1-6.")
             return
 
         if input_choice == output_choice:
-            print("\n⚠️  Input and output units are the same. No conversion needed.\n")
+            print("\nInput and output units are the same. No conversion needed.\n")
             return
 
-        print("\n💨 Enter pressure: ", end="")
+        print("\nEnter pressure: ", end="")
         input_pressure = get_val()
 
         if input_pressure is not None:
@@ -142,7 +150,7 @@ def pressure_converter() -> None:
             print("\n" + "="*50)
             print("   CONVERSION RESULT:")
             print(f"   {input_pressure} {from_abbrev} = {format_result(result)} {to_abbrev}")
-            print(f"   ({from_unit_name} → {to_unit_name})")
+            print(f"   ({from_unit_name} -> {to_unit_name})")
             print("="*50 + "\n")
         else:
             errmsg()

@@ -12,11 +12,19 @@ Units:
 - Binary Bytes: Kibibytes, Mebibytes, Gibibytes, Tebibytes, Pebibytes, Exbibytes, Zebibytes, Yobibytes
 """
 
+from decimal import Decimal, InvalidOperation
 from enum import IntEnum
 from typing import Dict
 
 # Import from std module for error handling
 from std import errmsg
+
+def _to_decimal(value: float | int | Decimal) -> Decimal:
+    if isinstance(value, Decimal):
+        return value
+    if isinstance(value, (int, float)):
+        return Decimal(str(value))
+    raise TypeError("Data value must be numeric.")
 
 class DataUnit(IntEnum):
     """Data unit types - 35 units total."""
@@ -73,12 +81,12 @@ def data_converter_menuMsg() -> None:
     print("\n" + "="*60)
     print("           DATA UNIT CONVERSION MENU")
     print("="*60)
-    print("\n📟 BASE UNITS:")
+    print("\nBASE UNITS:")
     print("  1.  Bit (b)")
     print("  2.  Nibble (4 bits)")
     print("  3.  Byte (B)")
     
-    print("\n💾 DECIMAL BITS (SI - Base 1000):")
+    print("\nDECIMAL BITS (SI - Base 1000):")
     print("  4.  Kilobit (kb)")
     print("  6.  Megabit (Mb)")
     print("  8.  Gigabit (Gb)")
@@ -88,7 +96,7 @@ def data_converter_menuMsg() -> None:
     print("  16. Zettabit (Zb)")
     print("  18. Yottabit (Yb)")
     
-    print("\n🔢 BINARY BITS (IEC - Base 1024):")
+    print("\nBINARY BITS (IEC - Base 1024):")
     print("  5.  Kibibit (Kib)")
     print("  7.  Mebibit (Mib)")
     print("  9.  Gibibit (Gib)")
@@ -98,7 +106,7 @@ def data_converter_menuMsg() -> None:
     print("  17. Zebibit (Zib)")
     print("  19. Yobibit (Yib)")
     
-    print("\n💿 DECIMAL BYTES (SI - Base 1000):")
+    print("\nDECIMAL BYTES (SI - Base 1000):")
     print("  20. Kilobyte (KB)")
     print("  22. Megabyte (MB)")
     print("  24. Gigabyte (GB)")
@@ -108,7 +116,7 @@ def data_converter_menuMsg() -> None:
     print("  32. Zettabyte (ZB)")
     print("  34. Yottabyte (YB)")
     
-    print("\n🗄️  BINARY BYTES (IEC - Base 1024):")
+    print("\nBINARY BYTES (IEC - Base 1024):")
     print("  21. Kibibyte (KiB)")
     print("  23. Mebibyte (MiB)")
     print("  25. Gibibyte (GiB)")
@@ -126,7 +134,7 @@ def data_converter_menuMsg() -> None:
 # Universal Data Conversion Function
 # ============================================================================
 
-def convert_data(value: float, from_unit: int, to_unit: int) -> float:
+def convert_data(value: float | int | Decimal, from_unit: int, to_unit: int) -> Decimal:
     """
     Universal data converter - converts ANY data unit to ANY other data unit.
     
@@ -194,53 +202,53 @@ def convert_data(value: float, from_unit: int, to_unit: int) -> float:
     # Conversion factors: Each unit -> bits
     to_bits_factors = {
         # Base units
-        DataUnit.BIT: 1.0,
-        DataUnit.NIBBLE: 4.0,
-        DataUnit.BYTE: 8.0,
+        DataUnit.BIT: Decimal("1"),
+        DataUnit.NIBBLE: Decimal("4"),
+        DataUnit.BYTE: Decimal("8"),
         
         # Decimal bits (SI - base 1000)
-        DataUnit.KILOBIT: 1_000.0,                    # 10^3
-        DataUnit.MEGABIT: 1_000_000.0,                # 10^6
-        DataUnit.GIGABIT: 1_000_000_000.0,            # 10^9
-        DataUnit.TERABIT: 1_000_000_000_000.0,        # 10^12
-        DataUnit.PETABIT: 1_000_000_000_000_000.0,    # 10^15
-        DataUnit.EXABIT: 1e18,                         # 10^18
-        DataUnit.ZETTABIT: 1e21,                       # 10^21
-        DataUnit.YOTTABIT: 1e24,                       # 10^24
+        DataUnit.KILOBIT: Decimal("1000"),                # 10^3
+        DataUnit.MEGABIT: Decimal("1000000"),             # 10^6
+        DataUnit.GIGABIT: Decimal("1000000000"),          # 10^9
+        DataUnit.TERABIT: Decimal("1000000000000"),       # 10^12
+        DataUnit.PETABIT: Decimal("1000000000000000"),    # 10^15
+        DataUnit.EXABIT: Decimal("1e18"),                 # 10^18
+        DataUnit.ZETTABIT: Decimal("1e21"),               # 10^21
+        DataUnit.YOTTABIT: Decimal("1e24"),               # 10^24
         
         # Binary bits (IEC - base 1024)
-        DataUnit.KIBIBIT: 1_024.0,                    # 2^10
-        DataUnit.MEBIBIT: 1_048_576.0,                # 2^20
-        DataUnit.GIBIBIT: 1_073_741_824.0,            # 2^30
-        DataUnit.TEBIBIT: 1_099_511_627_776.0,        # 2^40
-        DataUnit.PEBIBIT: 1_125_899_906_842_624.0,    # 2^50
-        DataUnit.EXBIBIT: 1_152_921_504_606_846_976.0,# 2^60
-        DataUnit.ZEBIBIT: 2**70,                       # 2^70
-        DataUnit.YOBIBIT: 2**80,                       # 2^80
+        DataUnit.KIBIBIT: Decimal(2) ** 10,              # 2^10
+        DataUnit.MEBIBIT: Decimal(2) ** 20,              # 2^20
+        DataUnit.GIBIBIT: Decimal(2) ** 30,              # 2^30
+        DataUnit.TEBIBIT: Decimal(2) ** 40,              # 2^40
+        DataUnit.PEBIBIT: Decimal(2) ** 50,              # 2^50
+        DataUnit.EXBIBIT: Decimal(2) ** 60,              # 2^60
+        DataUnit.ZEBIBIT: Decimal(2) ** 70,              # 2^70
+        DataUnit.YOBIBIT: Decimal(2) ** 80,              # 2^80
         
         # Decimal bytes (SI - base 1000, x8 for bytes)
-        DataUnit.KILOBYTE: 8_000.0,                   # 1000 x 8
-        DataUnit.MEGABYTE: 8_000_000.0,               # 10^6 x 8
-        DataUnit.GIGABYTE: 8_000_000_000.0,           # 10^9 x 8
-        DataUnit.TERABYTE: 8_000_000_000_000.0,       # 10^12 x 8
-        DataUnit.PETABYTE: 8_000_000_000_000_000.0,   # 10^15 x 8
-        DataUnit.EXABYTE: 8e18,                        # 10^18 x 8
-        DataUnit.ZETTABYTE: 8e21,                      # 10^21 x 8
-        DataUnit.YOTTABYTE: 8e24,                      # 10^24 x 8
+        DataUnit.KILOBYTE: Decimal("8000"),                # 1000 x 8
+        DataUnit.MEGABYTE: Decimal("8000000"),             # 10^6 x 8
+        DataUnit.GIGABYTE: Decimal("8000000000"),          # 10^9 x 8
+        DataUnit.TERABYTE: Decimal("8000000000000"),       # 10^12 x 8
+        DataUnit.PETABYTE: Decimal("8000000000000000"),    # 10^15 x 8
+        DataUnit.EXABYTE: Decimal("8e18"),                 # 10^18 x 8
+        DataUnit.ZETTABYTE: Decimal("8e21"),               # 10^21 x 8
+        DataUnit.YOTTABYTE: Decimal("8e24"),               # 10^24 x 8
         
         # Binary bytes (IEC - base 1024, x8 for bytes)
-        DataUnit.KIBIBYTE: 8_192.0,                   # 1024 x 8
-        DataUnit.MEBIBYTE: 8_388_608.0,               # 2^20 x 8
-        DataUnit.GIBIBYTE: 8_589_934_592.0,           # 2^30 x 8
-        DataUnit.TEBIBYTE: 8_796_093_022_208.0,       # 2^40 x 8
-        DataUnit.PEBIBYTE: 9_007_199_254_740_992.0,   # 2^50 x 8
-        DataUnit.EXBIBYTE: 9_223_372_036_854_775_808.0, # 2^60 x 8
-        DataUnit.ZEBIBYTE: 2**70 * 8,                  # 2^70 x 8
-        DataUnit.YOBIBYTE: 2**80 * 8,                  # 2^80 x 8
+        DataUnit.KIBIBYTE: Decimal(2) ** 10 * Decimal(8),  # 1024 x 8
+        DataUnit.MEBIBYTE: Decimal(2) ** 20 * Decimal(8),  # 2^20 x 8
+        DataUnit.GIBIBYTE: Decimal(2) ** 30 * Decimal(8),  # 2^30 x 8
+        DataUnit.TEBIBYTE: Decimal(2) ** 40 * Decimal(8),  # 2^40 x 8
+        DataUnit.PEBIBYTE: Decimal(2) ** 50 * Decimal(8),  # 2^50 x 8
+        DataUnit.EXBIBYTE: Decimal(2) ** 60 * Decimal(8),  # 2^60 x 8
+        DataUnit.ZEBIBYTE: Decimal(2) ** 70 * Decimal(8),  # 2^70 x 8
+        DataUnit.YOBIBYTE: Decimal(2) ** 80 * Decimal(8),  # 2^80 x 8
     }
     
     # Step 1: Convert input value to bits (base unit)
-    data_in_bits = value * to_bits_factors[from_unit]
+    data_in_bits = _to_decimal(value) * to_bits_factors[from_unit]
     
     # Step 2: Convert bits to target unit
     result = data_in_bits / to_bits_factors[to_unit]
@@ -351,7 +359,7 @@ DATA_UNIT_ABBREV = {
 # Helper Functions
 # ============================================================================
 
-def get_data_value() -> float:
+def get_data_value() -> Decimal:
     """
     Prompt user for numeric input with error handling.
     
@@ -359,14 +367,14 @@ def get_data_value() -> float:
         float if valid, None otherwise
     """
     try:
-        val = float(input())
+        val = Decimal(input().strip())
         return val
-    except (ValueError, SyntaxError, TypeError):
+    except (InvalidOperation, ValueError, SyntaxError, TypeError):
         errmsg()
         return None
 
 
-def format_data_result(result: float) -> str:
+def format_data_result(result: float | int | Decimal) -> str:
     """
     Format data conversion result with intelligent precision.
     
@@ -376,13 +384,16 @@ def format_data_result(result: float) -> str:
     Returns:
         String representation with appropriate precision
     """
-    # Use scientific notation for very large or very small numbers
-    if result >= 1e15 or (0 < result < 1e-6):
-        return f"{result:.6e}"
-    elif result >= 1000:
-        return f"{result:.2f}"
-    else:
-        return f"{result:.9g}"
+    result_dec = _to_decimal(result)
+    if not result_dec.is_finite():
+        return str(result_dec)
+
+    abs_val = abs(result_dec)
+    if abs_val >= Decimal("1e15") or (abs_val != 0 and abs_val < Decimal("1e-6")):
+        return format(result_dec, ".6E").lower()
+    if abs_val >= Decimal("1000"):
+        return format(result_dec, ".2f")
+    return format(result_dec, ".9g")
 
 
 # ============================================================================
@@ -397,7 +408,7 @@ def data_converter() -> None:
     while True:
         try:
             data_converter_menuMsg()
-            input_choice = int(input("\n➤ Enter FROM unit (1-35): "))
+            input_choice = int(input("\nEnter FROM unit (1-35): "))
             
             # Check for quit
             if input_choice == DataUnit.QUIT:
@@ -406,10 +417,10 @@ def data_converter() -> None:
             
             # Validate input choice
             if input_choice not in DATA_UNIT_NAMES:
-                print("❌ Invalid choice. Please select 1-35.")
+                print("Invalid choice. Please select 1-35.")
                 continue
             
-            output_choice = int(input("➤ Enter TO unit (1-35): "))
+            output_choice = int(input("Enter TO unit (1-35): "))
             
             # Check for quit
             if output_choice == DataUnit.QUIT:
@@ -418,15 +429,15 @@ def data_converter() -> None:
             
             # Validate output choice
             if output_choice not in DATA_UNIT_NAMES:
-                print("❌ Invalid choice. Please select 1-35.")
+                print("Invalid choice. Please select 1-35.")
                 continue
             
             # Check for same unit conversion
             if input_choice == output_choice:
-                print("\n⚠️  Input and output units are the same. No conversion needed.\n")
+                print("\nInput and output units are the same. No conversion needed.\n")
                 continue
 
-            print("\n💾 Enter data amount: ", end='')
+            print("\nEnter data amount: ", end='')
             input_data = get_data_value()
 
             if input_data is not None:
@@ -442,7 +453,7 @@ def data_converter() -> None:
                 print("\n" + "="*60)
                 print("   CONVERSION RESULT:")
                 print(f"   {input_data} {from_abbrev} = {format_data_result(result)} {to_abbrev}")
-                print(f"   ({from_unit_name} → {to_unit_name})")
+                print(f"   ({from_unit_name} -> {to_unit_name})")
                 print("="*60 + "\n")
             else:
                 errmsg()

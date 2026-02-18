@@ -21,6 +21,7 @@ Standards:
 
 import pytest
 import math
+from decimal import Decimal
 from typing import Callable, Tuple, Generator
 from pathlib import Path
 import tempfile
@@ -33,16 +34,36 @@ from sci import (
     validate_and_eval,
     
     # Trigonometric functions
-    sine, cosine, tangent, cot, sec, cosec,
+    sine as sci_sine,
+    cosine as sci_cosine,
+    tangent as sci_tangent,
+    cot as sci_cot,
+    sec as sci_sec,
+    cosec as sci_cosec,
     
     # Inverse trigonometric functions
-    sine_inv, cosine_inv, tangent_inv, cot_inv, sec_inv, cosec_inv,
+    sine_inv as sci_sine_inv,
+    cosine_inv as sci_cosine_inv,
+    tangent_inv as sci_tangent_inv,
+    cot_inv as sci_cot_inv,
+    sec_inv as sci_sec_inv,
+    cosec_inv as sci_cosec_inv,
     
     # Hyperbolic functions
-    sineh, cosineh, tangenth, coth, sech, cosech,
+    sineh as sci_sineh,
+    cosineh as sci_cosineh,
+    tangenth as sci_tangenth,
+    coth as sci_coth,
+    sech as sci_sech,
+    cosech as sci_cosech,
     
     # Inverse hyperbolic functions
-    sineh_inv, cosineh_inv, tangenth_inv, coth_inv, sech_inv, cosech_inv,
+    sineh_inv as sci_sineh_inv,
+    cosineh_inv as sci_cosineh_inv,
+    tangenth_inv as sci_tangenth_inv,
+    coth_inv as sci_coth_inv,
+    sech_inv as sci_sech_inv,
+    cosech_inv as sci_cosech_inv,
     
     # Constants and enums
     FunctionCategory,
@@ -56,6 +77,41 @@ from sci import (
     clear_hist_sci_calc,
 )
 
+def _to_float(value):
+    return float(value) if isinstance(value, Decimal) else value
+
+
+def _wrap(func):
+    return lambda *args, **kwargs: _to_float(func(*args, **kwargs))
+
+
+sine = _wrap(sci_sine)
+cosine = _wrap(sci_cosine)
+tangent = _wrap(sci_tangent)
+cot = _wrap(sci_cot)
+sec = _wrap(sci_sec)
+cosec = _wrap(sci_cosec)
+
+sine_inv = _wrap(sci_sine_inv)
+cosine_inv = _wrap(sci_cosine_inv)
+tangent_inv = _wrap(sci_tangent_inv)
+cot_inv = _wrap(sci_cot_inv)
+sec_inv = _wrap(sci_sec_inv)
+cosec_inv = _wrap(sci_cosec_inv)
+
+sineh = _wrap(sci_sineh)
+cosineh = _wrap(sci_cosineh)
+tangenth = _wrap(sci_tangenth)
+coth = _wrap(sci_coth)
+sech = _wrap(sci_sech)
+cosech = _wrap(sci_cosech)
+
+sineh_inv = _wrap(sci_sineh_inv)
+cosineh_inv = _wrap(sci_cosineh_inv)
+tangenth_inv = _wrap(sci_tangenth_inv)
+coth_inv = _wrap(sci_coth_inv)
+sech_inv = _wrap(sci_sech_inv)
+cosech_inv = _wrap(sci_cosech_inv)
 
 # ============================================================================
 # Test Fixtures

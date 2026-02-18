@@ -11,13 +11,33 @@ Coverage:
 """
 
 import pytest
+from decimal import Decimal
 import math
 from unittest.mock import patch
 
 from converter.angle_converter import (
-    to_rads, to_deg, to_grad, convert_angle, angle_converter,
+    to_rads as _to_rads,
+    to_deg as _to_deg,
+    to_grad as _to_grad,
+    convert_angle,
+    angle_converter,
     AngleUnit, angle_conv_funcs,
 )
+
+def _to_float(value):
+    return float(value) if isinstance(value, Decimal) else value
+
+
+def to_rads(value):
+    return _to_float(_to_rads(value))
+
+
+def to_deg(value):
+    return _to_float(_to_deg(value))
+
+
+def to_grad(value):
+    return _to_float(_to_grad(value))
 from std import errmsg
 
 
@@ -433,26 +453,26 @@ class TestAngleConverterUI:
         Test error message for invalid angle unit choice.
         
         Scenario: User enters invalid choice (99) for angle conversion
-        Expected: "❌ Invalid choice. Please select 1-3"
+        Expected: "Invalid choice. Please select 1-3"
         """
         inputs = iter(['99', '4'])
         monkeypatch.setattr('builtins.input', lambda _: next(inputs))
         angle_converter()
         captured = capsys.readouterr()
-        assert "❌ Invalid choice. Please select 1-3" in captured.out
+        assert "Invalid choice. Please select 1-3" in captured.out
 
     def test_no_angle_given_error_message(self, capsys, monkeypatch) -> None:
         """
         Test error message when no angle value is entered.
 
-        Expected: "⚠️  No angle given"
+        Expected: "No angle given"
         """
         with patch('sci.get_val', return_value=None):
             inputs = iter(['1', '4'])
             monkeypatch.setattr('builtins.input', lambda _: next(inputs))
             angle_converter()
             captured = capsys.readouterr()
-            assert "⚠️  No angle given" in captured.out
+            assert "No angle given" in captured.out
 
     def test_converter_menu_closed_message(self, capsys, monkeypatch) -> None:
         """
@@ -468,47 +488,47 @@ class TestAngleConverterUI:
         """
         Test generic error message from errmsg() function.
 
-        Expected: "❌ Error: Invalid input."
+        Expected: "Error: Invalid input."
         """
         errmsg()
         captured = capsys.readouterr()
-        assert captured.out.strip() == "❌ Error: Invalid input."
+        assert captured.out.strip() == "Error: Invalid input."
 
     def test_invalid_choice_message_format(self, capsys, monkeypatch) -> None:
         """
         Test exact format of invalid choice message.
         
-        Expected: "❌ Invalid choice. Please select 1-3"
+        Expected: "Invalid choice. Please select 1-3"
         """
         inputs = iter(['999', '4'])
         monkeypatch.setattr('builtins.input', lambda _: next(inputs))
         angle_converter()
         captured = capsys.readouterr()
-        assert "❌ Invalid choice" in captured.out
+        assert "Invalid choice" in captured.out
         assert "1-3" in captured.out
 
     def test_no_angle_given_message_format(self, capsys, monkeypatch) -> None:
         """
         Test exact format of "no angle given" message.
         
-        Expected: "⚠️  No angle given"
+        Expected: "No angle given"
         """
         with patch('sci.get_val', return_value=None):
             inputs = iter(['1', '4'])
             monkeypatch.setattr('builtins.input', lambda _: next(inputs))
             angle_converter()
             captured = capsys.readouterr()
-            assert "⚠️  No angle given" in captured.out
+            assert "No angle given" in captured.out
 
     def test_error_message_from_std_module(self, capsys) -> None:
         """
         Test that errmsg() produces expected format.
         
-        Expected: "❌ Error: Invalid input." with period
+        Expected: "Error: Invalid input." with period
         """
         errmsg()
         captured = capsys.readouterr()
-        assert captured.out.strip() == "❌ Error: Invalid input."
+        assert captured.out.strip() == "Error: Invalid input."
 
 
 if __name__ == "__main__":

@@ -60,7 +60,7 @@ class SciOperation(IntEnum):
 def mode_choice_menu() -> None:
     """Display main menu options."""
     print("\n" + "="*50)
-    print("🧮 ADVANCED MODULAR CALCULATOR")
+    print("ADVANCED MODULAR CALCULATOR")
     print("="*50)
     print("1. Standard Calculator")
     print("2. Scientific Calculator")
@@ -81,7 +81,7 @@ def std_calc() -> None:
     while True:
         std_calc_menuMsg()
         try:
-            op_num = int(input("\n➤ Enter your choice: "))
+            op_num = int(input("\nEnter your choice: "))
 
             if op_num == StdOperation.EVALUATE:
                 exp = exp_input()
@@ -112,12 +112,12 @@ def sci_calc() -> None:
     """
     while True:
         try:
-            op_num = int(input("\n➤ Enter operation number: "))
+            op_num = int(input("\nEnter operation number: "))
 
             if op_num in (SciOperation.TRIG, SciOperation.INVERSE_TRIG,
                           SciOperation.HYPERBOLIC, SciOperation.INVERSE_HYPERBOLIC):
                 # Get sub-operation for function categories 1-4
-                sub_op_num = int(input("➤ Enter sub-operation number: "))
+                sub_op_num = int(input("Enter sub-operation number: "))
 
                 if validate_subOpNum(sub_op_num) == 0:
                     continue
@@ -159,7 +159,7 @@ def main() -> None:
         while True:
             mode_choice_menu()
             try:
-                mode_choice = int(input("\n➤ Select a mode: "))
+                mode_choice = int(input("\nSelect a mode: "))
             except (ValueError, TypeError):
                 errmsg()
                 continue
@@ -183,7 +183,7 @@ def main() -> None:
                 errmsg()
 
     except (KeyboardInterrupt, EOFError):
-        print("\n⚠️  Program interrupted by user. Thank you for using Calculator!")
+        print("\nProgram interrupted by user. Thank you for using Calculator!")
 
 
 if __name__ == '__main__':

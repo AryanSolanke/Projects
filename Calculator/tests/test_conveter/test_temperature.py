@@ -12,13 +12,44 @@ Coverage:
 
 import pytest
 import math
+from decimal import Decimal
 
 from converter.temp_converter import (
-    C_to_kelvin, C_to_Fahrenheit,
-    K_to_celsius, K_to_Fahrenheit,
-    F_to_celsius, F_to_kelvin,
+    C_to_kelvin as _C_to_kelvin,
+    C_to_Fahrenheit as _C_to_Fahrenheit,
+    K_to_celsius as _K_to_celsius,
+    K_to_Fahrenheit as _K_to_Fahrenheit,
+    F_to_celsius as _F_to_celsius,
+    F_to_kelvin as _F_to_kelvin,
     TempUnit, temp_conv_funcs,
 )
+
+def _to_float(value):
+    return float(value) if isinstance(value, Decimal) else value
+
+
+def C_to_kelvin(value):
+    return _to_float(_C_to_kelvin(value))
+
+
+def C_to_Fahrenheit(value):
+    return _to_float(_C_to_Fahrenheit(value))
+
+
+def K_to_celsius(value):
+    return _to_float(_K_to_celsius(value))
+
+
+def K_to_Fahrenheit(value):
+    return _to_float(_K_to_Fahrenheit(value))
+
+
+def F_to_celsius(value):
+    return _to_float(_F_to_celsius(value))
+
+
+def F_to_kelvin(value):
+    return _to_float(_F_to_kelvin(value))
 
 
 # ============================================================================
