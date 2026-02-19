@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="aryan-s-advanced-calculator",
-    version="2.1.0",
+    name="aryan-advanced-calculator",
+    version="1.2.0",
     packages=find_packages(),
     entry_points={
         "console_scripts": [
