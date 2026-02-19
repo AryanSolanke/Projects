@@ -128,7 +128,7 @@ def data_converter_menuMsg() -> None:
 # Universal Data Conversion Function
 # ============================================================================
 
-def convert_data(value: float | int | Decimal, from_unit: int, to_unit: int) -> float:
+def convert_data(value, from_unit: int, to_unit: int) -> Decimal:
     """
     Universal data converter - converts ANY data unit to ANY other data unit.
     
@@ -183,7 +183,7 @@ def convert_data(value: float | int | Decimal, from_unit: int, to_unit: int) -> 
         to_unit: Target unit (DataUnit enum value)
     
     Returns:
-        Converted data value as float
+        Converted data value as Decimal
     
     Examples:
         >>> convert_data(1, DataUnit.BYTE, DataUnit.BIT)
@@ -247,7 +247,7 @@ def convert_data(value: float | int | Decimal, from_unit: int, to_unit: int) -> 
     # Step 2: Convert bits to target unit
     result = data_in_bits / to_bits_factors[to_unit]
     
-    return float(result)
+    return result
 
 
 # ============================================================================
@@ -353,12 +353,12 @@ DATA_UNIT_ABBREV = {
 # Helper Functions
 # ============================================================================
 
-def get_data_value() -> float | None:
+def get_data_value() -> "Decimal | None":
     """
     Prompt user for numeric input with error handling.
     
     Returns:
-        float if valid, None otherwise
+        Decimal if valid, None otherwise
     """
     try:
         val = get_numeric_input()
@@ -370,7 +370,7 @@ def get_data_value() -> float | None:
         return None
 
 
-def format_data_result(result: float | int | Decimal) -> str:
+def format_data_result(result) -> str:
     """
     Format data conversion result with intelligent precision.
     
@@ -403,7 +403,7 @@ class DataConverter(BaseConverter):
     emoji = ""
     units = {unit: (DATA_UNIT_NAMES[unit], DATA_UNIT_ABBREV[unit]) for unit in DATA_UNIT_NAMES}
 
-    def convert(self, value: float, from_unit: int, to_unit: int) -> float:
+    def convert(self, value: Decimal, from_unit: int, to_unit: int) -> Decimal:
         return convert_data(value, from_unit, to_unit)
 
     def display_menu(self) -> None:
@@ -412,7 +412,7 @@ class DataConverter(BaseConverter):
     def get_value_prompt(self, unit_name: str) -> str:
         return "\nEnter data amount: "
 
-    def format_result(self, result: float) -> str:
+    def format_result(self, result) -> str:
         return format_data_result(result)
 
 def data_converter() -> None:

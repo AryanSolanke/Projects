@@ -114,7 +114,7 @@ Calculator/
 ## 🚀 Installation & Usage
 
 ### Prerequisites
-- Python 3.8 or higher
+- Python 3.10 or higher
 - No external dependencies for running the calculator
 - pytest required for running tests (optional)
 
@@ -227,7 +227,7 @@ This project demonstrates:
 
 ## 🛠️ Technology Stack
 
-- **Language**: Python 3.8+
+- **Language**: Python 3.10+
 - **Standard Library**: math, pathlib, enum, typing
 - **Testing**: pytest framework
 - **Architecture**: Modular, function-dispatch based

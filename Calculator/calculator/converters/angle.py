@@ -1,7 +1,7 @@
 """
 Angle Converter Module
 
-Provides angle conversion functionality.
+Provides angle conversion functionality using Decimal arithmetic.
 Supports degree, radian, and gradian conversions.
 """
 
@@ -59,31 +59,30 @@ def angle_conversion_menuMsg() -> None:
 
 
 # ============================================================================
-# Angle Conversion Functions
+# Angle Conversion Functions (pure Decimal)
 # ============================================================================
 
-def to_rads(angle: float) -> float:
+def to_rads(angle: Decimal) -> Decimal:
     """Convert degrees to radians."""
-    return float(to_decimal(angle, "Angle") * PI / Decimal(180))
+    return to_decimal(angle, "Angle") * PI / Decimal(180)
 
 
-def to_deg(angle: float) -> float:
+def to_deg(angle: Decimal) -> Decimal:
     """Convert radians to degrees."""
-    return float(to_decimal(angle, "Angle") * Decimal(180) / PI)
+    return to_decimal(angle, "Angle") * Decimal(180) / PI
 
 
-def to_grad(angle: float) -> float:
+def to_grad(angle: Decimal) -> Decimal:
     """Convert degrees to gradians."""
-    angle_dec = to_decimal(angle, "Angle")
-    return float(angle_dec * Decimal(200) / Decimal(180))
+    return to_decimal(angle, "Angle") * Decimal(200) / Decimal(180)
 
 
 def convert_angle(
     name1: str,
-    func1: Callable[[float], float],
+    func1: Callable[[Decimal], Decimal],
     name2: str,
-    func2: Callable[[float], float],
-    angle: float,
+    func2: Callable[[Decimal], Decimal],
+    angle: Decimal,
 ) -> Tuple[str, str]:
     """
     Convert angles to two different units.

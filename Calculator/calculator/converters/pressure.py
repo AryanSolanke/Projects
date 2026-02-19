@@ -48,7 +48,7 @@ def pressure_conv_menuMsg() -> None:
 # Universal Pressure Conversion Function
 # ============================================================================
 
-def convert_pressure(value: float, from_unit: int, to_unit: int) -> float:
+def convert_pressure(value: Decimal, from_unit: int, to_unit: int) -> Decimal:
     """
     Universal pressure converter - converts ANY pressure unit to ANY other pressure unit.
 
@@ -62,7 +62,7 @@ def convert_pressure(value: float, from_unit: int, to_unit: int) -> float:
         to_unit: Target unit (PressureUnit enum value)
 
     Returns:
-        Converted pressure value as float
+        Converted pressure value as Decimal
     """
     to_pascal_factors = {
         PressureUnit.ATMOSPHERE: Decimal("101325"),
@@ -74,7 +74,7 @@ def convert_pressure(value: float, from_unit: int, to_unit: int) -> float:
     }
 
     pressure_in_pa = to_decimal(value, "Pressure") * to_pascal_factors[from_unit]
-    return float(pressure_in_pa / to_pascal_factors[to_unit])
+    return pressure_in_pa / to_pascal_factors[to_unit]
 
 
 # ============================================================================
@@ -111,7 +111,7 @@ class PressureConverter(BaseConverter):
     emoji = ""
     units = {unit: (PRESSURE_UNIT_NAMES[unit], PRESSURE_UNIT_ABBREV[unit]) for unit in PRESSURE_UNIT_NAMES}
 
-    def convert(self, value: float, from_unit: int, to_unit: int) -> float:
+    def convert(self, value: Decimal, from_unit: int, to_unit: int) -> Decimal:
         return convert_pressure(value, from_unit, to_unit)
 
     def display_menu(self) -> None:

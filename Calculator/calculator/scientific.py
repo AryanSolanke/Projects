@@ -6,7 +6,7 @@ Supports history tracking and precise numerical formatting.
 """
 
 from decimal import Decimal, InvalidOperation, localcontext
-from typing import Callable, Tuple, Optional, Union
+from typing import Callable, Tuple, Optional
 from dataclasses import dataclass
 from enum import IntEnum
 from textwrap import dedent
@@ -109,12 +109,15 @@ class AsymptoteError(ValueError):
 # Input/Output Utilities
 # ============================================================================
 
-def _to_decimal(value: float | int | Decimal) -> Decimal:
+def _to_decimal(value: Decimal | int | str) -> Decimal:
     if isinstance(value, Decimal):
         return value
-    if isinstance(value, (int, float)):
+    if isinstance(value, int):
+        return Decimal(value)
+    try:
         return Decimal(str(value))
-    raise TypeError("Value must be numeric.")
+    except (InvalidOperation, TypeError, ValueError):
+        raise TypeError("Value must be numeric.")
 
 
 def _compute_pi() -> Decimal:
@@ -265,7 +268,7 @@ def get_val() -> Optional[Decimal]:
     """Prompt user for numeric input with error handling.
     
     Returns:
-        float if valid, None otherwise
+        Decimal if valid, None otherwise
     """
     try:
         val = Decimal(input().strip())
@@ -275,7 +278,7 @@ def get_val() -> Optional[Decimal]:
         return None
     
 
-def format_result(result: float | Decimal) -> str:
+def format_result(result: Decimal | int | str) -> str:
     """Format numerical result with intelligent precision.
 
     Removes trailing zeros and floating-point artifacts.
@@ -312,7 +315,7 @@ def display_hist_sci_calc() -> None:
         print(f"Error reading history: {e}")
 
 
-def record_history_sci_calc(name: str, val: float, answer: str) -> None:
+def record_history_sci_calc(name: str, val: Decimal | int | str, answer: str) -> None:
     """
     Append calculation to history file.
     
@@ -360,7 +363,7 @@ def validate_subOpNum(sub_op_num: int) -> int:
 # Domain Validators
 # ============================================================================
 
-def _validate_trig_asymptote(sub_op_num: int, angle: float | Decimal) -> None:
+def _validate_trig_asymptote(sub_op_num: int, angle: Decimal | int | str) -> None:
     """
     Check for asymptotes in regular trigonometric functions.
     
@@ -384,7 +387,7 @@ def _validate_trig_asymptote(sub_op_num: int, angle: float | Decimal) -> None:
             raise AsymptoteError("Error: Division by zero (Asymptote at n*180° + 90°)")
 
 
-def _validate_hyperbolic_asymptote(sub_op_num: int, val: float | Decimal) -> None:
+def _validate_hyperbolic_asymptote(sub_op_num: int, val: Decimal | int | str) -> None:
     """
     Check for asymptotes in hyperbolic functions.
     
@@ -401,7 +404,7 @@ def _validate_hyperbolic_asymptote(sub_op_num: int, val: float | Decimal) -> Non
         raise AsymptoteError("Error: Division by zero (Undefined at x=0)")
 
 
-def _validate_inverse_trig_domain(sub_op_num: int, val: float | Decimal) -> None:
+def _validate_inverse_trig_domain(sub_op_num: int, val: Decimal | int | str) -> None:
     """
     Validate domain for inverse trigonometric functions.
 
@@ -424,7 +427,7 @@ def _validate_inverse_trig_domain(sub_op_num: int, val: float | Decimal) -> None
             raise DomainError("Domain Error: Input x must satisfy |x| >= 1")
 
 
-def _validate_inverse_hyperbolic_domain(sub_op_num: int, val: float | Decimal) -> None:
+def _validate_inverse_hyperbolic_domain(sub_op_num: int, val: Decimal | int | str) -> None:
     """
     Validate domain for inverse hyperbolic functions.
 
@@ -469,128 +472,128 @@ def _validate_inverse_hyperbolic_domain(sub_op_num: int, val: float | Decimal) -
 # ============================================================================
 
 # Standard Trigonometric Functions (input in degrees)
-def sine(angle: float | Decimal) -> Decimal: 
+def sine(angle: Decimal | int | str) -> Decimal: 
     """Calculate sine of angle in degrees."""
     return _sin_decimal(_radians(_to_decimal(angle)))
 
 
-def cosine(angle: float | Decimal) -> Decimal: 
+def cosine(angle: Decimal | int | str) -> Decimal: 
     """Calculate cosine of angle in degrees."""
     return _cos_decimal(_radians(_to_decimal(angle)))
 
 
-def tangent(angle: float | Decimal) -> Decimal: 
+def tangent(angle: Decimal | int | str) -> Decimal: 
     """Calculate tangent of angle in degrees."""
     return _sin_decimal(_radians(_to_decimal(angle))) / _cos_decimal(_radians(_to_decimal(angle)))
 
 
-def cot(angle: float | Decimal) -> Decimal: 
+def cot(angle: Decimal | int | str) -> Decimal: 
     """Calculate cotangent of angle in degrees."""
     rad = _radians(_to_decimal(angle))
     return _cos_decimal(rad) / _sin_decimal(rad)
 
 
-def sec(angle: float | Decimal) -> Decimal: 
+def sec(angle: Decimal | int | str) -> Decimal: 
     """Calculate secant of angle in degrees."""
     return Decimal(1) / _cos_decimal(_radians(_to_decimal(angle)))
 
 
-def cosec(angle: float | Decimal) -> Decimal: 
+def cosec(angle: Decimal | int | str) -> Decimal: 
     """Calculate cosecant of angle in degrees."""
     return Decimal(1) / _sin_decimal(_radians(_to_decimal(angle)))
 
 
 # Inverse Trigonometric Functions (output in degrees)
-def sine_inv(val: float | Decimal) -> Decimal: 
+def sine_inv(val: Decimal | int | str) -> Decimal: 
     """Calculate arcsine, returns result in degrees."""
     return _degrees(_asin_decimal(_to_decimal(val)))
 
 
-def cosine_inv(val: float | Decimal) -> Decimal: 
+def cosine_inv(val: Decimal | int | str) -> Decimal: 
     """Calculate arccosine, returns result in degrees."""
     return _degrees(_acos_decimal(_to_decimal(val)))
 
 
-def tangent_inv(val: float | Decimal) -> Decimal: 
+def tangent_inv(val: Decimal | int | str) -> Decimal: 
     """Calculate arctangent, returns result in degrees."""
     return _degrees(_atan_decimal(_to_decimal(val)))
 
 
-def cot_inv(val: float | Decimal) -> Decimal: 
+def cot_inv(val: Decimal | int | str) -> Decimal: 
     """Calculate arccotangent, returns result in degrees."""
     return _degrees(_atan_decimal(Decimal(1) / _to_decimal(val)))
 
 
-def sec_inv(val: float | Decimal) -> Decimal: 
+def sec_inv(val: Decimal | int | str) -> Decimal: 
     """Calculate arcsecant, returns result in degrees."""
     return _degrees(_acos_decimal(Decimal(1) / _to_decimal(val)))
 
 
-def cosec_inv(val: float | Decimal) -> Decimal: 
+def cosec_inv(val: Decimal | int | str) -> Decimal: 
     """Calculate arccosecant, returns result in degrees."""
     return _degrees(_asin_decimal(Decimal(1) / _to_decimal(val)))
 
 
 # Hyperbolic Functions
-def sineh(val: float | Decimal) -> Decimal:
+def sineh(val: Decimal | int | str) -> Decimal:
     """Calculate hyperbolic sine."""
     return _sinh_decimal(_to_decimal(val))
 
 
-def cosineh(val: float | Decimal) -> Decimal:
+def cosineh(val: Decimal | int | str) -> Decimal:
     """Calculate hyperbolic cosine."""
     return _cosh_decimal(_to_decimal(val))
 
 
-def tangenth(val: float | Decimal) -> Decimal:
+def tangenth(val: Decimal | int | str) -> Decimal:
     """Calculate hyperbolic tangent."""
     return _tanh_decimal(_to_decimal(val))
 
 
-def coth(val: float | Decimal) -> Decimal:
+def coth(val: Decimal | int | str) -> Decimal:
     """Calculate hyperbolic cotangent."""
     val_dec = _to_decimal(val)
     return _cosh_decimal(val_dec) / _sinh_decimal(val_dec)
 
 
-def sech(val: float | Decimal) -> Decimal:
+def sech(val: Decimal | int | str) -> Decimal:
     """Calculate hyperbolic secant."""
     return Decimal(1) / _cosh_decimal(_to_decimal(val))
 
 
-def cosech(val: float | Decimal) -> Decimal:
+def cosech(val: Decimal | int | str) -> Decimal:
     """Calculate hyperbolic cosecant."""
     return Decimal(1) / _sinh_decimal(_to_decimal(val))
 
 
 # Inverse Hyperbolic Functions
-def sineh_inv(val: float | Decimal) -> Decimal:
+def sineh_inv(val: Decimal | int | str) -> Decimal:
     """Calculate inverse hyperbolic sine."""
     return _asinh_decimal(_to_decimal(val))
 
 
-def cosineh_inv(val: float | Decimal) -> Decimal:
+def cosineh_inv(val: Decimal | int | str) -> Decimal:
     """Calculate inverse hyperbolic cosine."""
     return _acosh_decimal(_to_decimal(val))
 
 
-def tangenth_inv(val: float | Decimal) -> Decimal:
+def tangenth_inv(val: Decimal | int | str) -> Decimal:
     """Calculate inverse hyperbolic tangent."""
     return _atanh_decimal(_to_decimal(val))
 
 
-def coth_inv(val: float | Decimal) -> Decimal:
+def coth_inv(val: Decimal | int | str) -> Decimal:
     """Calculate inverse hyperbolic cotangent."""
     val_dec = _to_decimal(val)
     return _atanh_decimal(Decimal(1) / val_dec)
 
 
-def sech_inv(val: float | Decimal) -> Decimal:
+def sech_inv(val: Decimal | int | str) -> Decimal:
     """Calculate inverse hyperbolic secant."""
     return _acosh_decimal(Decimal(1) / _to_decimal(val))
 
 
-def cosech_inv(val: float | Decimal) -> Decimal:
+def cosech_inv(val: Decimal | int | str) -> Decimal:
     """Calculate inverse hyperbolic cosecant."""
     return _asinh_decimal(Decimal(1) / _to_decimal(val))
 
@@ -600,7 +603,7 @@ def cosech_inv(val: float | Decimal) -> Decimal:
 # ============================================================================
 
 #Dictionary mapping (category, sub_op) tuples to (name, function) pairs
-trigo_funcs: dict[Tuple[int, int], Tuple[str, Callable[[float], float]]]= {
+trigo_funcs: dict[Tuple[int, int], Tuple[str, Callable[[Decimal | int | str], Decimal]]]= {
     # Standard Trigonometric
     (FunctionCategory.TRIGONOMETRIC, SubOperation.FUNC_1): ("sin", sine),
     (FunctionCategory.TRIGONOMETRIC, SubOperation.FUNC_2): ("cos", cosine),
@@ -644,7 +647,7 @@ def validate_and_eval(
         sub_op_num: int,
         name: str,
         func: Callable[[Decimal], Decimal],
-        val: float | Decimal
+        val: Decimal | int | str
 ) -> str:
     """
     Validate input domain and execute scientific calculation.

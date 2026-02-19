@@ -12,13 +12,20 @@ Coverage:
 """
 
 import pytest
-import math
+from decimal import Decimal
 
 from calculator.converters.weight import (
     convert_weight, weight_converter,
     WeightUnit, WEIGHT_UNIT_NAMES, WEIGHT_UNIT_ABBREV,
 )
 
+def _dec(value: Decimal | int | str) -> Decimal:
+    if isinstance(value, Decimal):
+        return value
+    return Decimal(str(value))
+
+def _assert_close(actual: Decimal, expected: Decimal | int | str, tol: Decimal | int | str = "1e-9") -> None:
+    assert abs(actual - _dec(expected)) < _dec(tol)
 
 # ============================================================================
 # Conversion Functions
@@ -36,7 +43,7 @@ class TestWeightConversions:
         Expected: 1000 g
         """
         result = convert_weight(1, WeightUnit.KILOGRAM, WeightUnit.GRAM)
-        assert abs(result - 1000) < 1e-9
+        _assert_close(result, 1000)
 
     def test_gram_to_milligram(self) -> None:
         """
@@ -46,7 +53,7 @@ class TestWeightConversions:
         Expected: 1000 mg
         """
         result = convert_weight(1, WeightUnit.GRAM, WeightUnit.MILLIGRAM)
-        assert abs(result - 1000) < 1e-9
+        _assert_close(result, 1000)
 
     def test_kg_to_metric_tonne(self) -> None:
         """
@@ -56,7 +63,7 @@ class TestWeightConversions:
         Expected: 1 t
         """
         result = convert_weight(1000, WeightUnit.KILOGRAM, WeightUnit.METRIC_TONNE)
-        assert abs(result - 1) < 1e-9
+        _assert_close(result, 1)
 
     # Metric to Imperial conversions
     def test_kg_to_pound(self) -> None:
@@ -67,7 +74,7 @@ class TestWeightConversions:
         Expected: ~2.20462 lb
         """
         result = convert_weight(1, WeightUnit.KILOGRAM, WeightUnit.POUND)
-        assert abs(result - 2.20462) < 0.001
+        _assert_close(result, "2.20462", "0.001")
 
     def test_pound_to_kg(self) -> None:
         """
@@ -77,7 +84,7 @@ class TestWeightConversions:
         Expected: 0.453592 kg
         """
         result = convert_weight(1, WeightUnit.POUND, WeightUnit.KILOGRAM)
-        assert abs(result - 0.453592) < 1e-6
+        _assert_close(result, "0.453592", "1e-6")
 
     def test_ounce_to_gram(self) -> None:
         """
@@ -87,7 +94,7 @@ class TestWeightConversions:
         Expected: 28.3495 g
         """
         result = convert_weight(1, WeightUnit.OUNCE, WeightUnit.GRAM)
-        assert abs(result - 28.3495) < 0.001
+        _assert_close(result, "28.3495", "0.001")
 
     def test_stone_to_kg(self) -> None:
         """
@@ -97,7 +104,7 @@ class TestWeightConversions:
         Expected: 6.35029 kg
         """
         result = convert_weight(1, WeightUnit.STONE, WeightUnit.KILOGRAM)
-        assert abs(result - 6.35029) < 1e-5
+        _assert_close(result, "6.35029", "1e-5")
 
     # Imperial unit conversions
     def test_pound_to_ounce(self) -> None:
@@ -108,7 +115,7 @@ class TestWeightConversions:
         Expected: 16 oz
         """
         result = convert_weight(1, WeightUnit.POUND, WeightUnit.OUNCE)
-        assert abs(result - 16) < 0.01
+        _assert_close(result, 16, "0.01")
 
     def test_stone_to_pound(self) -> None:
         """
@@ -118,7 +125,7 @@ class TestWeightConversions:
         Expected: 14 lb
         """
         result = convert_weight(1, WeightUnit.STONE, WeightUnit.POUND)
-        assert abs(result - 14) < 0.01
+        _assert_close(result, 14, "0.01")
 
     def test_short_ton_to_pound(self) -> None:
         """
@@ -128,7 +135,7 @@ class TestWeightConversions:
         Expected: 2000 lb
         """
         result = convert_weight(1, WeightUnit.SHORT_TON_US, WeightUnit.POUND)
-        assert abs(result - 2000) < 0.1
+        _assert_close(result, 2000, "0.1")
 
     def test_long_ton_to_pound(self) -> None:
         """
@@ -138,7 +145,7 @@ class TestWeightConversions:
         Expected: 2240 lb
         """
         result = convert_weight(1, WeightUnit.LONG_TON_UK, WeightUnit.POUND)
-        assert abs(result - 2240) < 0.1
+        _assert_close(result, 2240, "0.1")
 
     # Round-trip conversions
     def test_kg_to_lb_to_kg_roundtrip(self) -> None:
@@ -151,7 +158,7 @@ class TestWeightConversions:
         original = 10
         pounds = convert_weight(original, WeightUnit.KILOGRAM, WeightUnit.POUND)
         back = convert_weight(pounds, WeightUnit.POUND, WeightUnit.KILOGRAM)
-        assert abs(back - original) < 1e-9
+        _assert_close(back, original)
 
     def test_gram_to_ounce_to_gram_roundtrip(self) -> None:
         """
@@ -163,7 +170,7 @@ class TestWeightConversions:
         original = 100
         ounces = convert_weight(original, WeightUnit.GRAM, WeightUnit.OUNCE)
         back = convert_weight(ounces, WeightUnit.OUNCE, WeightUnit.GRAM)
-        assert abs(back - original) < 1e-6
+        _assert_close(back, original, "1e-6")
 
     def test_stone_to_kg_to_stone_roundtrip(self) -> None:
         """
@@ -175,7 +182,7 @@ class TestWeightConversions:
         original = 12
         kg = convert_weight(original, WeightUnit.STONE, WeightUnit.KILOGRAM)
         back = convert_weight(kg, WeightUnit.KILOGRAM, WeightUnit.STONE)
-        assert abs(back - original) < 1e-9
+        _assert_close(back, original)
 
     # Edge cases
     def test_zero_weight_conversion(self) -> None:
@@ -205,8 +212,8 @@ class TestWeightConversions:
         Input: 0.000001 kg (1 mg)
         Expected: 1 mg
         """
-        result = convert_weight(0.000001, WeightUnit.KILOGRAM, WeightUnit.MILLIGRAM)
-        assert abs(result - 1) < 1e-9
+        result = convert_weight(Decimal("0.000001"), WeightUnit.KILOGRAM, WeightUnit.MILLIGRAM)
+        _assert_close(result, 1)
 
     def test_very_large_weight_conversion(self) -> None:
         """
@@ -216,7 +223,7 @@ class TestWeightConversions:
         Expected: 1000 metric tonnes
         """
         result = convert_weight(1000000, WeightUnit.KILOGRAM, WeightUnit.METRIC_TONNE)
-        assert abs(result - 1000) < 1e-6
+        _assert_close(result, 1000, "1e-6")
 
     # Physical constants and known values
     def test_human_body_weight_conversions(self) -> None:
@@ -228,8 +235,8 @@ class TestWeightConversions:
         kg = 70
         pounds = convert_weight(kg, WeightUnit.KILOGRAM, WeightUnit.POUND)
         stone = convert_weight(kg, WeightUnit.KILOGRAM, WeightUnit.STONE)
-        assert abs(pounds - 154.32) < 0.1
-        assert abs(stone - 11.02) < 0.01
+        _assert_close(pounds, "154.32", "0.1")
+        _assert_close(stone, "11.02", "0.01")
 
     def test_gold_bar_weight_conversion(self) -> None:
         """
@@ -237,8 +244,8 @@ class TestWeightConversions:
         
         400 troy ounces ≈ 12.4 kg (approximate as 12400 g)
         """
-        grams = convert_weight(12.4, WeightUnit.KILOGRAM, WeightUnit.GRAM)
-        assert abs(grams - 12400) < 1e-6
+        grams = convert_weight(Decimal("12.4"), WeightUnit.KILOGRAM, WeightUnit.GRAM)
+        _assert_close(grams, 12400, "1e-6")
 
     def test_ton_comparisons(self) -> None:
         """
@@ -250,20 +257,20 @@ class TestWeightConversions:
         short_ton_kg = convert_weight(1, WeightUnit.SHORT_TON_US, WeightUnit.KILOGRAM)
         long_ton_kg = convert_weight(1, WeightUnit.LONG_TON_UK, WeightUnit.KILOGRAM)
         assert long_ton_kg > short_ton_kg
-        assert abs(short_ton_kg - 907.185) < 0.01
-        assert abs(long_ton_kg - 1016.05) < 0.01
+        _assert_close(short_ton_kg, "907.185", "0.01")
+        _assert_close(long_ton_kg, "1016.05", "0.01")
 
     # Parametrized tests
     @pytest.mark.parametrize("kg,expected_lb", [
-        (1, 2.20462),
-        (10, 22.0462),
-        (50, 110.231),
-        (100, 220.462),
+        (Decimal("1"), Decimal("2.20462")),
+        (Decimal("10"), Decimal("22.0462")),
+        (Decimal("50"), Decimal("110.231")),
+        (Decimal("100"), Decimal("220.462")),
     ])
-    def test_kg_to_lb_parametrized(self, kg: float, expected_lb: float) -> None:
+    def test_kg_to_lb_parametrized(self, kg: Decimal, expected_lb: Decimal) -> None:
         """Parametrized test for kg to pound conversions."""
         result = convert_weight(kg, WeightUnit.KILOGRAM, WeightUnit.POUND)
-        assert abs(result - expected_lb) < 0.01
+        _assert_close(result, expected_lb, "0.01")
 
     @pytest.mark.parametrize("from_unit,to_unit,value,expected", [
         (WeightUnit.KILOGRAM, WeightUnit.GRAM, 1, 1000),
@@ -273,11 +280,11 @@ class TestWeightConversions:
         (WeightUnit.METRIC_TONNE, WeightUnit.KILOGRAM, 1, 1000),
     ])
     def test_common_conversions_parametrized(
-        self, from_unit: int, to_unit: int, value: float, expected: float
+        self, from_unit: int, to_unit: int, value: Decimal, expected: Decimal
     ) -> None:
         """Parametrized test for common weight conversions."""
         result = convert_weight(value, from_unit, to_unit)
-        assert abs(result - expected) < 0.1
+        _assert_close(result, expected, "0.1")
 
     # Precision tests
     def test_high_precision_kg_to_gram(self) -> None:
@@ -288,7 +295,7 @@ class TestWeightConversions:
         Expected: Exactly 1000 g
         """
         result = convert_weight(1, WeightUnit.KILOGRAM, WeightUnit.GRAM)
-        assert abs(result - 1000) < 1e-12
+        _assert_close(result, 1000, "1e-12")
 
     def test_multiple_conversion_precision(self) -> None:
         """
@@ -297,12 +304,12 @@ class TestWeightConversions:
         Action: kg→g→mg→g→kg
         Expected: Minimal precision loss
         """
-        original = 5.123456789
+        original = Decimal("5.123456789")
         g = convert_weight(original, WeightUnit.KILOGRAM, WeightUnit.GRAM)
         mg = convert_weight(g, WeightUnit.GRAM, WeightUnit.MILLIGRAM)
         g2 = convert_weight(mg, WeightUnit.MILLIGRAM, WeightUnit.GRAM)
         kg = convert_weight(g2, WeightUnit.GRAM, WeightUnit.KILOGRAM)
-        assert abs(kg - original) < 1e-9
+        _assert_close(kg, original)
 
 
 # ============================================================================
@@ -366,7 +373,7 @@ class TestWeightEdgeCases:
         Expected: 5 kg (no change)
         """
         result = convert_weight(5, WeightUnit.KILOGRAM, WeightUnit.KILOGRAM)
-        assert abs(result - 5) < 1e-12
+        _assert_close(result, 5, "1e-12")
 
     def test_weight_conversion_with_infinity(self) -> None:
         """
@@ -375,8 +382,8 @@ class TestWeightEdgeCases:
         Input: float('inf')
         Expected: Result is infinity
         """
-        result = convert_weight(float('inf'), WeightUnit.KILOGRAM, WeightUnit.POUND)
-        assert math.isinf(result)
+        result = convert_weight(Decimal("Infinity"), WeightUnit.KILOGRAM, WeightUnit.POUND)
+        assert result.is_infinite()
 
     def test_weight_conversion_with_nan(self) -> None:
         """
@@ -385,8 +392,8 @@ class TestWeightEdgeCases:
         Input: float('nan')
         Expected: Result is NaN
         """
-        result = convert_weight(float('nan'), WeightUnit.KILOGRAM, WeightUnit.GRAM)
-        assert math.isnan(result)
+        result = convert_weight(Decimal("NaN"), WeightUnit.KILOGRAM, WeightUnit.GRAM)
+        assert result.is_nan()
 
     def test_decimal_weight_conversion(self) -> None:
         """
@@ -395,8 +402,8 @@ class TestWeightEdgeCases:
         Input: 2.5 kg
         Expected: 2500 g
         """
-        result = convert_weight(2.5, WeightUnit.KILOGRAM, WeightUnit.GRAM)
-        assert abs(result - 2500) < 1e-9
+        result = convert_weight(Decimal("2.5"), WeightUnit.KILOGRAM, WeightUnit.GRAM)
+        _assert_close(result, 2500)
 
     def test_fractional_weight_conversion(self) -> None:
         """
@@ -405,8 +412,8 @@ class TestWeightEdgeCases:
         Input: 0.5 lb
         Expected: 8 oz
         """
-        result = convert_weight(0.5, WeightUnit.POUND, WeightUnit.OUNCE)
-        assert abs(result - 8) < 0.01
+        result = convert_weight(Decimal("0.5"), WeightUnit.POUND, WeightUnit.OUNCE)
+        _assert_close(result, 8, "0.01")
 
 
 class TestWeightInvalidInputs:

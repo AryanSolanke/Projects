@@ -1,7 +1,7 @@
 """
 Temperature Converter Module
 
-Provides temperature conversion functionality.
+Provides temperature conversion functionality using Decimal arithmetic.
 Supports Celsius, Kelvin, and Fahrenheit conversions.
 """
 
@@ -39,44 +39,43 @@ def temp_conv_menuMsg() -> None:
 
 
 # ============================================================================
-# Temperature Conversion Functions
+# Temperature Conversion Functions (pure Decimal)
 # ============================================================================
 
-def C_to_kelvin(tmp: float) -> float:
+def C_to_kelvin(tmp: Decimal) -> Decimal:
     """Convert Celsius to Kelvin."""
-    return float(to_decimal(tmp, "Temperature") + Decimal("273.15"))
+    return to_decimal(tmp, "Temperature") + Decimal("273.15")
 
 
-def C_to_Fahrenheit(tmp: float) -> float:
+def C_to_Fahrenheit(tmp: Decimal) -> Decimal:
     """Convert Celsius to Fahrenheit."""
-    return float((to_decimal(tmp, "Temperature") * Decimal(9) / Decimal(5)) + Decimal(32))
+    return (to_decimal(tmp, "Temperature") * Decimal(9) / Decimal(5)) + Decimal(32)
 
 
-def K_to_celsius(tmp: float) -> float:
+def K_to_celsius(tmp: Decimal) -> Decimal:
     """Convert Kelvin to Celsius."""
-    return float(to_decimal(tmp, "Temperature") - Decimal("273.15"))
+    return to_decimal(tmp, "Temperature") - Decimal("273.15")
 
 
-def K_to_Fahrenheit(tmp: float) -> float:
+def K_to_Fahrenheit(tmp: Decimal) -> Decimal:
     """Convert Kelvin to Fahrenheit."""
     return C_to_Fahrenheit(K_to_celsius(tmp))
 
 
-def F_to_celsius(tmp: float) -> float:
+def F_to_celsius(tmp: Decimal) -> Decimal:
     """Convert Fahrenheit to Celsius."""
-    return float((to_decimal(tmp, "Temperature") - Decimal(32)) * Decimal(5) / Decimal(9))
+    return (to_decimal(tmp, "Temperature") - Decimal(32)) * Decimal(5) / Decimal(9)
 
 
-def F_to_kelvin(tmp: float) -> float:
+def F_to_kelvin(tmp: Decimal) -> Decimal:
     """Convert Fahrenheit to Kelvin."""
-    return float(to_decimal(F_to_celsius(tmp), "Temperature") + Decimal("273.15"))
+    return F_to_celsius(tmp) + Decimal("273.15")
 
 
 # ============================================================================
 # Conversion Lookup Tables
 # ============================================================================
 
-# Temperature conversion: (from_unit, to_unit) -> (from_name, to_name, conversion_function)
 temp_conv_funcs: Dict[Tuple[int, int], Tuple[str, str, Callable]] = {
     (TempUnit.CELSIUS, TempUnit.KELVIN): ("Celsius", "Kelvin", C_to_kelvin),
     (TempUnit.CELSIUS, TempUnit.FAHRENHEIT): ("Celsius", "Fahrenheit", C_to_Fahrenheit),
@@ -103,7 +102,7 @@ class TemperatureConverter(BaseConverter):
         TempUnit.FAHRENHEIT: ("Fahrenheit", "°F"),
     }
 
-    def convert(self, value: float, from_unit: int, to_unit: int) -> float:
+    def convert(self, value: Decimal, from_unit: int, to_unit: int) -> Decimal:
         key = (from_unit, to_unit)
         if key not in temp_conv_funcs:
             raise KeyError("Invalid temperature conversion.")

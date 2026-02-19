@@ -63,7 +63,7 @@ def weight_conv_menuMsg() -> None:
 # Universal Weight Conversion Function
 # ============================================================================
 
-def convert_weight(value: float, from_unit: int, to_unit: int) -> float:
+def convert_weight(value: Decimal, from_unit: int, to_unit: int) -> Decimal:
     """
     Universal weight converter - converts ANY weight unit to ANY other weight unit.
 
@@ -77,7 +77,7 @@ def convert_weight(value: float, from_unit: int, to_unit: int) -> float:
         to_unit: Target unit (WeightUnit enum value)
 
     Returns:
-        Converted weight value as float
+        Converted weight value as Decimal
     """
     to_kg_factors = {
         WeightUnit.KILOGRAM: Decimal("1"),
@@ -96,7 +96,7 @@ def convert_weight(value: float, from_unit: int, to_unit: int) -> float:
     }
 
     weight_in_kg = to_decimal(value, "Weight") * to_kg_factors[from_unit]
-    return float(weight_in_kg / to_kg_factors[to_unit])
+    return weight_in_kg / to_kg_factors[to_unit]
 
 
 # ============================================================================
@@ -147,7 +147,7 @@ class WeightConverter(BaseConverter):
     emoji = ""
     units = {unit: (WEIGHT_UNIT_NAMES[unit], WEIGHT_UNIT_ABBREV[unit]) for unit in WEIGHT_UNIT_NAMES}
 
-    def convert(self, value: float, from_unit: int, to_unit: int) -> float:
+    def convert(self, value: Decimal, from_unit: int, to_unit: int) -> Decimal:
         return convert_weight(value, from_unit, to_unit)
 
     def display_menu(self) -> None:

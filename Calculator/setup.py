@@ -9,7 +9,7 @@ setup(
             "calculator=calculator.main:main",
         ],
     },
-    python_requires=">=3.8",
+    python_requires=">=3.10",
     author="Aryan Solanke",
     description="Advanced modular calculator",
     long_description=open("README.md", encoding="utf-8").read(),

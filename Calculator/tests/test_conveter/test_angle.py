@@ -11,7 +11,7 @@ Coverage:
 """
 
 import pytest
-import math
+from decimal import Decimal
 from unittest.mock import patch
 
 from calculator.converters.angle import (
@@ -20,10 +20,17 @@ from calculator.converters.angle import (
     to_grad,
     convert_angle,
     angle_converter,
-    AngleUnit, angle_conv_funcs,
+    AngleUnit, angle_conv_funcs, PI,
 )
 from calculator.standard import errmsg
 
+def _dec(value: Decimal | int | str) -> Decimal:
+    if isinstance(value, Decimal):
+        return value
+    return Decimal(str(value))
+
+def _assert_close(actual: Decimal, expected: Decimal | int | str, tol: Decimal | int | str = "1e-9") -> None:
+    assert abs(actual - _dec(expected)) < _dec(tol)
 
 # ============================================================================
 # Conversion Functions
@@ -40,10 +47,10 @@ class TestAngleConversion:
         Inputs: 0°, 90°, 180°, 360°
         Expected: 0, π/2, π, 2π radians
         """
-        assert abs(to_rads(0) - 0) < 1e-9
-        assert abs(to_rads(90) - math.pi/2) < 1e-9
-        assert abs(to_rads(180) - math.pi) < 1e-9
-        assert abs(to_rads(360) - 2*math.pi) < 1e-9
+        _assert_close(to_rads(0), 0)
+        _assert_close(to_rads(90), PI / 2)
+        _assert_close(to_rads(180), PI)
+        _assert_close(to_rads(360), 2 * PI)
 
     def test_to_rads_negative_angles(self) -> None:
         """
@@ -52,7 +59,7 @@ class TestAngleConversion:
         Input: -90°
         Expected: -π/2 radians
         """
-        assert abs(to_rads(-90) - (-math.pi/2)) < 1e-9
+        _assert_close(to_rads(-90), -(PI / 2))
 
     def test_to_rads_decimal_angles(self) -> None:
         """
@@ -61,9 +68,9 @@ class TestAngleConversion:
         Input: 45.5°
         Expected: Correct radian value
         """
-        result = to_rads(45.5)
-        expected = math.radians(45.5)
-        assert abs(result - expected) < 1e-9
+        result = to_rads(Decimal("45.5"))
+        expected = Decimal("45.5") * PI / Decimal(180)
+        _assert_close(result, expected)
 
     # Radian to Degree conversions
     def test_to_deg_standard_radians(self) -> None:
@@ -73,10 +80,10 @@ class TestAngleConversion:
         Inputs: 0, π/2, π, 2π
         Expected: 0°, 90°, 180°, 360°
         """
-        assert abs(to_deg(0) - 0) < 1e-9
-        assert abs(to_deg(math.pi/2) - 90) < 1e-9
-        assert abs(to_deg(math.pi) - 180) < 1e-9
-        assert abs(to_deg(2*math.pi) - 360) < 1e-9
+        _assert_close(to_deg(0), 0)
+        _assert_close(to_deg(PI / 2), 90)
+        _assert_close(to_deg(PI), 180)
+        _assert_close(to_deg(2 * PI), 360)
 
     def test_to_deg_negative_radians(self) -> None:
         """
@@ -85,7 +92,7 @@ class TestAngleConversion:
         Input: -π
         Expected: -180°
         """
-        assert abs(to_deg(-math.pi) - (-180)) < 1e-9
+        _assert_close(to_deg(-PI), -180)
 
     # Degree to Gradian conversions
     def test_to_grad_standard_angles(self) -> None:
@@ -95,10 +102,10 @@ class TestAngleConversion:
         Inputs: 0°, 90°, 180°, 360°
         Expected: 0, 100, 200, 400 gradians
         """
-        assert abs(to_grad(0) - 0) < 1e-9
-        assert abs(to_grad(90) - 100) < 1e-9
-        assert abs(to_grad(180) - 200) < 1e-9
-        assert abs(to_grad(360) - 400) < 1e-9
+        _assert_close(to_grad(0), 0)
+        _assert_close(to_grad(90), 100)
+        _assert_close(to_grad(180), 200)
+        _assert_close(to_grad(360), 400)
 
     def test_to_grad_formula(self) -> None:
         """
@@ -107,7 +114,7 @@ class TestAngleConversion:
         Input: 45°
         Expected: 50 gradians
         """
-        assert abs(to_grad(45) - 50) < 1e-9
+        _assert_close(to_grad(45), 50)
 
     # Round-trip conversion tests
     def test_deg_rad_deg_roundtrip(self) -> None:
@@ -120,7 +127,7 @@ class TestAngleConversion:
         original = 45
         rad = to_rads(original)
         back = to_deg(rad)
-        assert (back - original) < 1e-9
+        _assert_close(back, original)
 
     def test_deg_grad_consistency(self) -> None:
         """
@@ -131,23 +138,23 @@ class TestAngleConversion:
         deg_value = 90
         grad_value = to_grad(deg_value)
         expected = 100
-        assert abs(grad_value - expected) < 1e-9
+        _assert_close(grad_value, expected)
 
     @pytest.mark.parametrize("degrees,radians", [
         (0, 0),
-        (30, math.pi/6),
-        (45, math.pi/4),
-        (60, math.pi/3),
-        (90, math.pi/2),
-        (180, math.pi),
-        (270, 3*math.pi/2),
-        (360, 2*math.pi),
+        (30, PI / 6),
+        (45, PI / 4),
+        (60, PI / 3),
+        (90, PI / 2),
+        (180, PI),
+        (270, 3 * PI / 2),
+        (360, 2 * PI),
     ])
     def test_degree_radian_parametrized(
-        self, degrees: float, radians: float
+        self, degrees: int, radians: Decimal
     ) -> None:
         """Parametrized test for degree-radian conversions."""
-        assert abs(to_rads(degrees) - radians) < 1e-9
+        _assert_close(to_rads(degrees), radians)
 
 
 class TestConvertAngleFunction:
@@ -269,8 +276,8 @@ class TestAngleEdgeCases:
         Expected: Valid results
         """
         result = to_rads(3600)
-        expected = 20 * math.pi
-        assert abs(result - expected) < 1e-6
+        expected = 20 * PI
+        _assert_close(result, expected, "1e-6")
 
     def test_very_small_angle_conversions(self) -> None:
         """
@@ -279,7 +286,7 @@ class TestAngleEdgeCases:
         Input: 0.001 degrees
         Expected: Valid small radian value
         """
-        result = to_rads(0.001)
+        result = to_rads(Decimal("0.001"))
         assert result > 0
         assert result < 0.001
 
@@ -290,10 +297,10 @@ class TestAngleEdgeCases:
         Input: float('inf')
         Expected: Result is infinity
         """
-        result_rad = to_rads(float('inf'))
-        result_grad = to_grad(float('inf'))
-        assert math.isinf(result_rad)
-        assert math.isinf(result_grad)
+        result_rad = to_rads(Decimal("Infinity"))
+        result_grad = to_grad(Decimal("Infinity"))
+        assert result_rad.is_infinite()
+        assert result_grad.is_infinite()
 
     def test_angle_conversion_with_negative_infinity(self) -> None:
         """
@@ -302,8 +309,8 @@ class TestAngleEdgeCases:
         Input: float('-inf')
         Expected: Result is negative infinity
         """
-        result_rad = to_rads(float('-inf'))
-        assert math.isinf(result_rad)
+        result_rad = to_rads(Decimal("-Infinity"))
+        assert result_rad.is_infinite()
         assert result_rad < 0
 
     def test_angle_conversion_with_nan(self) -> None:
@@ -313,10 +320,10 @@ class TestAngleEdgeCases:
         Input: float('nan')
         Expected: Result is NaN
         """
-        result_rad = to_rads(float('nan'))
-        result_grad = to_grad(float('nan'))
-        assert math.isnan(result_rad)
-        assert math.isnan(result_grad)
+        result_rad = to_rads(Decimal("NaN"))
+        result_grad = to_grad(Decimal("NaN"))
+        assert result_rad.is_nan()
+        assert result_grad.is_nan()
 
 
 class TestAnglePhysicalConstants:
@@ -329,8 +336,8 @@ class TestAnglePhysicalConstants:
         90° = π/2 rad = 100 grad
         """
         degrees = 90
-        assert abs(to_rads(degrees) - math.pi/2) < 1e-9
-        assert abs(to_grad(degrees) - 100) < 1e-9
+        _assert_close(to_rads(degrees), PI / 2)
+        _assert_close(to_grad(degrees), 100)
 
     def test_straight_angle_conversions(self) -> None:
         """
@@ -339,8 +346,8 @@ class TestAnglePhysicalConstants:
         180° = π rad = 200 grad
         """
         degrees = 180
-        assert abs(to_rads(degrees) - math.pi) < 1e-9
-        assert abs(to_grad(degrees) - 200) < 1e-9
+        _assert_close(to_rads(degrees), PI)
+        _assert_close(to_grad(degrees), 200)
 
 
 class TestAnglePrecision:
@@ -353,8 +360,8 @@ class TestAnglePrecision:
         Input: π radians
         Expected: Exactly 180 degrees
         """
-        degrees = to_deg(math.pi)
-        assert abs(degrees - 180) < 1e-10
+        degrees = to_deg(PI)
+        _assert_close(degrees, 180, "1e-10")
 
     def test_very_large_positive_angle_no_overflow_error(self) -> None:
         """
@@ -364,7 +371,7 @@ class TestAnglePrecision:
         Expected: Computes without error
         """
         result_rad = to_rads(10**100)
-        assert isinstance(result_rad, float)
+        assert isinstance(result_rad, Decimal)
 
     def test_very_small_positive_angle_no_underflow_error(self) -> None:
         """
@@ -373,8 +380,8 @@ class TestAnglePrecision:
         Input: 10^-100 degrees
         Expected: Computes correctly
         """
-        result_rad = to_rads(10**-100)
-        assert isinstance(result_rad, float)
+        result_rad = to_rads(Decimal("1e-100"))
+        assert isinstance(result_rad, Decimal)
 
 
 # ============================================================================

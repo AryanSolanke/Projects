@@ -2,7 +2,7 @@
 Advanced Modular Calculator - Main Entry Point
 
 Console-based calculator with standard arithmetic, scientific functions,
-and comprehensive unit conversions.
+unit conversions, and a full programmer calculator.
 """
 
 from enum import IntEnum
@@ -23,34 +23,36 @@ from calculator.scientific import (
     sci_calc_menuMsg,
 )
 from calculator.router import converter_menu
+from calculator.programmer import programmer_calc
 
 
 class MainMode(IntEnum):
     """Main calculator modes."""
-    STANDARD = 1
+    STANDARD   = 1
     SCIENTIFIC = 2
-    CONVERTER = 3
-    QUIT = 4
+    CONVERTER  = 3
+    PROGRAMMER = 4
+    QUIT       = 5
 
 
 class StdOperation(IntEnum):
     """Standard calculator operations."""
-    EVALUATE = 1
-    SHOW_HISTORY = 2
+    EVALUATE      = 1
+    SHOW_HISTORY  = 2
     CLEAR_HISTORY = 3
-    QUIT = 4
+    QUIT          = 4
 
 
 class SciOperation(IntEnum):
     """Scientific calculator operations."""
-    TRIG = 1
-    INVERSE_TRIG = 2
-    HYPERBOLIC = 3
+    TRIG               = 1
+    INVERSE_TRIG       = 2
+    HYPERBOLIC         = 3
     INVERSE_HYPERBOLIC = 4
-    SHOW_MENU = 5
-    SHOW_HISTORY = 6
-    CLEAR_HISTORY = 7
-    QUIT = 8
+    SHOW_MENU          = 5
+    SHOW_HISTORY       = 6
+    CLEAR_HISTORY      = 7
+    QUIT               = 8
 
 
 # ============================================================================
@@ -65,7 +67,8 @@ def mode_choice_menu() -> None:
     print("1. Standard Calculator")
     print("2. Scientific Calculator")
     print("3. Unit Converter")
-    print("4. Quit Calculator")
+    print("4. Programmer Calculator")
+    print("5. Quit Calculator")
     print("="*50)
 
 
@@ -173,6 +176,9 @@ def main() -> None:
 
             elif mode_choice == MainMode.CONVERTER:
                 converter_menu()
+
+            elif mode_choice == MainMode.PROGRAMMER:
+                programmer_calc()
 
             elif mode_choice == MainMode.QUIT:
                 print("\n" + "="*50)

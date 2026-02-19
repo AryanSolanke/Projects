@@ -5,6 +5,7 @@ Base converter class.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from decimal import Decimal
 from typing import Dict, Tuple, Optional
 
 from calculator.config import MENU_WIDTH
@@ -32,7 +33,7 @@ class BaseConverter(ABC):
         """Mapping of unit ID to (name, abbreviation)."""
 
     @abstractmethod
-    def convert(self, value: float, from_unit: int, to_unit: int) -> float:
+    def convert(self, value: Decimal, from_unit: int, to_unit: int) -> Decimal:
         """Perform the conversion."""
 
     def display_menu(self) -> None:
@@ -51,7 +52,7 @@ class BaseConverter(ABC):
         """Prompt shown for entering the value."""
         return f"\nEnter {unit_name.lower()}: "
 
-    def format_result(self, result: float) -> str:
+    def format_result(self, result: Decimal) -> str:
         """Format the conversion result."""
         return format_numeric_result(result)
 

@@ -11,7 +11,7 @@ Coverage:
 """
 
 import pytest
-import math
+from decimal import Decimal
 
 from calculator.converters.temperature import (
     C_to_kelvin,
@@ -23,6 +23,13 @@ from calculator.converters.temperature import (
     TempUnit, temp_conv_funcs,
 )
 
+def _dec(value: Decimal | int | str) -> Decimal:
+    if isinstance(value, Decimal):
+        return value
+    return Decimal(str(value))
+
+def _assert_close(actual: Decimal, expected: Decimal | int | str, tol: Decimal | int | str = "1e-9") -> None:
+    assert abs(actual - _dec(expected)) < _dec(tol)
 
 # ============================================================================
 # Conversion Functions
@@ -39,9 +46,9 @@ class TestTemperatureConversions:
         Inputs: 0°C, 100°C, -273.15°C
         Expected: 273.15K, 373.15K, 0K
         """
-        assert abs(C_to_kelvin(0) - 273.15) < 1e-9
-        assert abs(C_to_kelvin(100) - 373.15) < 1e-9
-        assert abs(C_to_kelvin(-273.15) - 0) < 1e-9
+        _assert_close(C_to_kelvin(0), "273.15")
+        _assert_close(C_to_kelvin(100), "373.15")
+        _assert_close(C_to_kelvin(Decimal("-273.15")), 0)
 
     def test_C_to_Fahrenheit_standard(self) -> None:
         """
@@ -50,9 +57,9 @@ class TestTemperatureConversions:
         Inputs: 0°C, 100°C, -40°C
         Expected: 32°F, 212°F, -40°F
         """
-        assert abs(C_to_Fahrenheit(0) - 32) < 1e-9
-        assert abs(C_to_Fahrenheit(100) - 212) < 1e-9
-        assert abs(C_to_Fahrenheit(-40) - (-40)) < 1e-9
+        _assert_close(C_to_Fahrenheit(0), 32)
+        _assert_close(C_to_Fahrenheit(100), 212)
+        _assert_close(C_to_Fahrenheit(-40), -40)
 
     def test_C_to_Fahrenheit_formula(self) -> None:
         """
@@ -61,7 +68,7 @@ class TestTemperatureConversions:
         Input: 25°C
         Expected: 77°F
         """
-        assert abs(C_to_Fahrenheit(25) - 77) < 1e-9
+        _assert_close(C_to_Fahrenheit(25), 77)
 
     # Kelvin conversions
     def test_K_to_celsius_standard(self) -> None:
@@ -71,9 +78,9 @@ class TestTemperatureConversions:
         Inputs: 273.15K, 373.15K, 0K
         Expected: 0°C, 100°C, -273.15°C
         """
-        assert abs(K_to_celsius(273.15) - 0) < 1e-9
-        assert abs(K_to_celsius(373.15) - 100) < 1e-9
-        assert abs(K_to_celsius(0) - (-273.15)) < 1e-9
+        _assert_close(K_to_celsius(Decimal("273.15")), 0)
+        _assert_close(K_to_celsius(Decimal("373.15")), 100)
+        _assert_close(K_to_celsius(0), "-273.15")
 
     def test_K_to_Fahrenheit_standard(self) -> None:
         """
@@ -82,7 +89,7 @@ class TestTemperatureConversions:
         Input: 273.15K
         Expected: 32°F (freezing point)
         """
-        assert abs(K_to_Fahrenheit(273.15) - 32) < 1e-6
+        _assert_close(K_to_Fahrenheit(Decimal("273.15")), 32, "1e-6")
 
     # Fahrenheit conversions
     def test_F_to_celsius_standard(self) -> None:
@@ -92,9 +99,9 @@ class TestTemperatureConversions:
         Inputs: 32°F, 212°F, -40°F
         Expected: 0°C, 100°C, -40°C
         """
-        assert abs(F_to_celsius(32) - 0) < 1e-9
-        assert abs(F_to_celsius(212) - 100) < 1e-9
-        assert abs(F_to_celsius(-40) - (-40)) < 1e-9
+        _assert_close(F_to_celsius(32), 0)
+        _assert_close(F_to_celsius(212), 100)
+        _assert_close(F_to_celsius(-40), -40)
 
     def test_F_to_kelvin_standard(self) -> None:
         """
@@ -103,7 +110,7 @@ class TestTemperatureConversions:
         Input: 32°F
         Expected: 273.15K
         """
-        assert abs(F_to_kelvin(32) - 273.15) < 1e-9
+        _assert_close(F_to_kelvin(32), "273.15")
 
     # Round-trip conversions
     def test_celsius_kelvin_celsius_roundtrip(self) -> None:
@@ -115,7 +122,7 @@ class TestTemperatureConversions:
         """
         original = 25
         back = K_to_celsius(C_to_kelvin(original))
-        assert abs(back - original) < 1e-9
+        _assert_close(back, original)
 
     def test_celsius_fahrenheit_celsius_roundtrip(self) -> None:
         """
@@ -126,7 +133,7 @@ class TestTemperatureConversions:
         """
         original = 30
         back = F_to_celsius(C_to_Fahrenheit(original))
-        assert abs(back - original) < 1e-9
+        _assert_close(back, original)
 
     def test_fahrenheit_kelvin_fahrenheit_roundtrip(self) -> None:
         """
@@ -137,7 +144,7 @@ class TestTemperatureConversions:
         """
         original = 68
         back = C_to_Fahrenheit(K_to_celsius(F_to_kelvin(original)))
-        assert abs(back - original) < 1e-9
+        _assert_close(back, original)
 
     # Physical constants
     def test_absolute_zero_conversions(self) -> None:
@@ -146,9 +153,9 @@ class TestTemperatureConversions:
         
         0K = -273.15°C = -459.67°F
         """
-        abs_zero_C = -273.15
-        assert abs(C_to_kelvin(abs_zero_C) - 0) < 1e-9
-        assert abs(C_to_Fahrenheit(abs_zero_C) - (-459.67)) < 0.01
+        abs_zero_C = Decimal("-273.15")
+        _assert_close(C_to_kelvin(abs_zero_C), 0)
+        _assert_close(C_to_Fahrenheit(abs_zero_C), "-459.67", "0.01")
 
     def test_water_freezing_point_all_scales(self) -> None:
         """
@@ -156,8 +163,8 @@ class TestTemperatureConversions:
         
         0°C = 273.15K = 32°F
         """
-        assert abs(C_to_kelvin(0) - 273.15) < 1e-9
-        assert abs(C_to_Fahrenheit(0) - 32) < 1e-9
+        _assert_close(C_to_kelvin(0), "273.15")
+        _assert_close(C_to_Fahrenheit(0), 32)
 
     def test_water_boiling_point_all_scales(self) -> None:
         """
@@ -165,22 +172,22 @@ class TestTemperatureConversions:
         
         100°C = 373.15K = 212°F
         """
-        assert abs(C_to_kelvin(100) - 373.15) < 1e-9
-        assert abs(C_to_Fahrenheit(100) - 212) < 1e-9
+        _assert_close(C_to_kelvin(100), "373.15")
+        _assert_close(C_to_Fahrenheit(100), 212)
 
     @pytest.mark.parametrize("celsius, kelvin, fahrenheit", [
-        (0, 273.15, 32),
-        (100, 373.15, 212),
-        (-40, 233.15, -40),
-        (25, 298.15, 77),
-        (-273.15, 0, -459.67),
+        (Decimal("0"), Decimal("273.15"), Decimal("32")),
+        (Decimal("100"), Decimal("373.15"), Decimal("212")),
+        (Decimal("-40"), Decimal("233.15"), Decimal("-40")),
+        (Decimal("25"), Decimal("298.15"), Decimal("77")),
+        (Decimal("-273.15"), Decimal("0"), Decimal("-459.67")),
     ])
     def test_temp_triple_parametrized(
-        self, celsius: float, kelvin: float, fahrenheit: float
+        self, celsius: Decimal, kelvin: Decimal, fahrenheit: Decimal
     ) -> None:
         """Parametrized test for temperature conversions across all three scales."""
-        assert abs(C_to_kelvin(celsius) - kelvin) < 1e-6
-        assert abs(C_to_Fahrenheit(celsius) - fahrenheit) < 0.01
+        _assert_close(C_to_kelvin(celsius), kelvin, "1e-6")
+        _assert_close(C_to_Fahrenheit(celsius), fahrenheit, "0.01")
 
 
 # ============================================================================
@@ -261,7 +268,7 @@ class TestTemperatureEdgeCases:
         Expected: Below absolute zero (unphysical but mathematically correct)
         """
         result = K_to_celsius(-10)
-        assert result < -273.15
+        assert result < Decimal("-273.15")
 
     def test_extreme_temperature_celsius(self) -> None:
         """
@@ -270,8 +277,8 @@ class TestTemperatureEdgeCases:
         Input: 1000°C
         Expected: 1273.15K, 1832°F
         """
-        assert abs(C_to_kelvin(1000) - 1273.15) < 1e-9
-        assert abs(C_to_Fahrenheit(1000) - 1832) < 1e-9
+        _assert_close(C_to_kelvin(1000), "1273.15")
+        _assert_close(C_to_Fahrenheit(1000), 1832)
 
     def test_temperature_conversion_with_infinity(self) -> None:
         """
@@ -280,8 +287,8 @@ class TestTemperatureEdgeCases:
         Input: float('inf')
         Expected: Result is infinity
         """
-        assert math.isinf(C_to_kelvin(float('inf')))
-        assert math.isinf(C_to_Fahrenheit(float('inf')))
+        assert C_to_kelvin(Decimal("Infinity")).is_infinite()
+        assert C_to_Fahrenheit(Decimal("Infinity")).is_infinite()
 
     def test_temperature_conversion_with_nan(self) -> None:
         """
@@ -290,7 +297,7 @@ class TestTemperatureEdgeCases:
         Input: float('nan')
         Expected: Result is NaN
         """
-        assert math.isnan(C_to_kelvin(float('nan')))
+        assert C_to_kelvin(Decimal("NaN")).is_nan()
 
     def test_temperature_below_absolute_zero(self) -> None:
         """
@@ -300,7 +307,7 @@ class TestTemperatureEdgeCases:
         Expected: Mathematically computed (negative Kelvin - unphysical)
         """
         result_k = C_to_kelvin(-300)
-        assert isinstance(result_k, float)
+        assert isinstance(result_k, Decimal)
         assert result_k < 0
 
 
@@ -313,8 +320,8 @@ class TestTemperaturePhysicalConstants:
         
         37°C = 310.15K = 98.6°F
         """
-        assert abs(C_to_kelvin(37) - 310.15) < 1e-9
-        assert abs(C_to_Fahrenheit(37) - 98.6) < 0.1
+        _assert_close(C_to_kelvin(37), "310.15")
+        _assert_close(C_to_Fahrenheit(37), "98.6", "0.1")
 
     def test_room_temperature_conversions(self) -> None:
         """
@@ -322,8 +329,8 @@ class TestTemperaturePhysicalConstants:
         
         20°C = 293.15K = 68°F
         """
-        assert abs(C_to_kelvin(20) - 293.15) < 1e-9
-        assert abs(C_to_Fahrenheit(20) - 68) < 1
+        _assert_close(C_to_kelvin(20), "293.15")
+        _assert_close(C_to_Fahrenheit(20), 68, "1")
 
 
 class TestTemperaturePrecision:
@@ -336,7 +343,7 @@ class TestTemperaturePrecision:
         Input: 0°C
         Expected: Exactly 273.15K
         """
-        assert abs(C_to_kelvin(0) - 273.15) < 1e-12
+        _assert_close(C_to_kelvin(0), "273.15", "1e-12")
 
     def test_multiple_conversion_precision_loss(self) -> None:
         """
@@ -345,12 +352,12 @@ class TestTemperaturePrecision:
         Action: C→K→C→F→C
         Expected: Minimal precision loss
         """
-        original = 25.123456789
+        original = Decimal("25.123456789")
         k = C_to_kelvin(original)
         c1 = K_to_celsius(k)
         f = C_to_Fahrenheit(c1)
         c2 = F_to_celsius(f)
-        assert abs(c2 - original) < 1e-9
+        _assert_close(c2, original)
 
     def test_temperature_conversion_at_water_freezing_no_error(self) -> None:
         """
@@ -359,8 +366,8 @@ class TestTemperaturePrecision:
         Input: 0°C
         Expected: Exact conversions without errors
         """
-        assert abs(C_to_kelvin(0) - 273.15) < 1e-12
-        assert abs(C_to_Fahrenheit(0) - 32) < 1e-12
+        _assert_close(C_to_kelvin(0), "273.15", "1e-12")
+        _assert_close(C_to_Fahrenheit(0), 32, "1e-12")
 
     def test_temperature_conversion_at_water_boiling_no_error(self) -> None:
         """
@@ -369,8 +376,8 @@ class TestTemperaturePrecision:
         Input: 100°C
         Expected: Exact conversions without errors
         """
-        assert abs(C_to_kelvin(100) - 373.15) < 1e-12
-        assert abs(C_to_Fahrenheit(100) - 212) < 1e-12
+        _assert_close(C_to_kelvin(100), "373.15", "1e-12")
+        _assert_close(C_to_Fahrenheit(100), 212, "1e-12")
 
 
 # ============================================================================
