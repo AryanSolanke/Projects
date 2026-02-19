@@ -13,19 +13,11 @@ Coverage:
 
 import pytest
 import math
-from decimal import Decimal
 
-from converter.weight_converter import (
-    convert_weight as _convert_weight, weight_converter,
+from calculator.converters.weight import (
+    convert_weight, weight_converter,
     WeightUnit, WEIGHT_UNIT_NAMES, WEIGHT_UNIT_ABBREV,
 )
-
-def _to_float(value):
-    return float(value) if isinstance(value, Decimal) else value
-
-
-def convert_weight(*args, **kwargs):
-    return _to_float(_convert_weight(*args, **kwargs))
 
 
 # ============================================================================

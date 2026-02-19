@@ -9,15 +9,9 @@ from decimal import Decimal
 from enum import IntEnum
 from typing import Callable, Dict, Tuple
 
-from std import errmsg
-from sci import get_val
-
-def _to_decimal(value: float | int | Decimal) -> Decimal:
-    if isinstance(value, Decimal):
-        return value
-    if isinstance(value, (int, float)):
-        return Decimal(str(value))
-    raise TypeError("Temperature value must be numeric.")
+from calculator.standard import errmsg
+from calculator.converters.base import BaseConverter
+from calculator.converters.utils import to_decimal
 
 
 class TempUnit(IntEnum):
@@ -48,34 +42,34 @@ def temp_conv_menuMsg() -> None:
 # Temperature Conversion Functions
 # ============================================================================
 
-def C_to_kelvin(tmp: float) -> Decimal:
+def C_to_kelvin(tmp: float) -> float:
     """Convert Celsius to Kelvin."""
-    return _to_decimal(tmp) + Decimal("273.15")
+    return float(to_decimal(tmp, "Temperature") + Decimal("273.15"))
 
 
-def C_to_Fahrenheit(tmp: float) -> Decimal:
+def C_to_Fahrenheit(tmp: float) -> float:
     """Convert Celsius to Fahrenheit."""
-    return (_to_decimal(tmp) * Decimal(9) / Decimal(5)) + Decimal(32)
+    return float((to_decimal(tmp, "Temperature") * Decimal(9) / Decimal(5)) + Decimal(32))
 
 
-def K_to_celsius(tmp: float) -> Decimal:
+def K_to_celsius(tmp: float) -> float:
     """Convert Kelvin to Celsius."""
-    return _to_decimal(tmp) - Decimal("273.15")
+    return float(to_decimal(tmp, "Temperature") - Decimal("273.15"))
 
 
-def K_to_Fahrenheit(tmp: float) -> Decimal:
+def K_to_Fahrenheit(tmp: float) -> float:
     """Convert Kelvin to Fahrenheit."""
     return C_to_Fahrenheit(K_to_celsius(tmp))
 
 
 def F_to_celsius(tmp: float) -> float:
     """Convert Fahrenheit to Celsius."""
-    return (_to_decimal(tmp) - Decimal(32)) * Decimal(5) / Decimal(9)
+    return float((to_decimal(tmp, "Temperature") - Decimal(32)) * Decimal(5) / Decimal(9))
 
 
-def F_to_kelvin(tmp: float) -> Decimal:
+def F_to_kelvin(tmp: float) -> float:
     """Convert Fahrenheit to Kelvin."""
-    return _to_decimal(F_to_celsius(tmp)) + Decimal("273.15")
+    return float(to_decimal(F_to_celsius(tmp), "Temperature") + Decimal("273.15"))
 
 
 # ============================================================================
@@ -97,34 +91,34 @@ temp_conv_funcs: Dict[Tuple[int, int], Tuple[str, str, Callable]] = {
 # Main Temperature Converter Function
 # ============================================================================
 
+class TemperatureConverter(BaseConverter):
+    """Temperature converter implementation."""
+
+    name = "TEMPERATURE"
+    emoji = ""
+
+    units = {
+        TempUnit.CELSIUS: ("Celsius", "°C"),
+        TempUnit.KELVIN: ("Kelvin", "K"),
+        TempUnit.FAHRENHEIT: ("Fahrenheit", "°F"),
+    }
+
+    def convert(self, value: float, from_unit: int, to_unit: int) -> float:
+        key = (from_unit, to_unit)
+        if key not in temp_conv_funcs:
+            raise KeyError("Invalid temperature conversion.")
+        _, _, func = temp_conv_funcs[key]
+        return func(value)
+
+    def display_menu(self) -> None:
+        temp_conv_menuMsg()
+
+    def get_value_prompt(self, unit_name: str) -> str:
+        return "\nEnter temperature: "
+
 def temperature_converter() -> None:
     """Main temperature conversion interface."""
     try:
-        temp_conv_menuMsg()
-        input_choice = int(input("\nEnter input unit (1-3): "))
-
-        if input_choice == TempUnit.QUIT:
-            return
-
-        output_choice = int(input("Enter output unit (1-3): "))
-
-        if output_choice == TempUnit.QUIT:
-            return
-
-        key = (input_choice, output_choice)
-
-        if key in temp_conv_funcs:
-            print("\nEnter temperature: ", end="")
-            input_tmp = get_val()
-
-            if input_tmp is not None:
-                from_tmp, to_tmp, tmp_func = temp_conv_funcs[key]
-                result = tmp_func(input_tmp)
-                print(f"\n   {input_tmp} {from_tmp} = {result} {to_tmp}\n")
-            else:
-                errmsg()
-        else:
-            errmsg()
-
-    except (TypeError, UnboundLocalError, SyntaxError, ValueError):
+        TemperatureConverter().run()
+    except (TypeError, UnboundLocalError, SyntaxError, ValueError, KeyError):
         errmsg()

@@ -9,8 +9,8 @@ from decimal import Decimal, localcontext
 from typing import Tuple, Callable, Dict
 from enum import IntEnum
 
-from std import errmsg
-from sci import get_val, format_result
+from calculator.standard import errmsg
+from calculator.converters.utils import get_numeric_input, format_numeric_result, to_decimal
 
 INTERNAL_PRECISION = 60
 
@@ -32,14 +32,6 @@ def _compute_pi() -> Decimal:
 
 
 PI = _compute_pi()
-
-
-def _to_decimal(value: float | int | Decimal) -> Decimal:
-    if isinstance(value, Decimal):
-        return value
-    if isinstance(value, (int, float)):
-        return Decimal(str(value))
-    raise TypeError("Angle value must be numeric.")
 
 
 class AngleUnit(IntEnum):
@@ -70,20 +62,20 @@ def angle_conversion_menuMsg() -> None:
 # Angle Conversion Functions
 # ============================================================================
 
-def to_rads(angle: float) -> Decimal:
+def to_rads(angle: float) -> float:
     """Convert degrees to radians."""
-    return _to_decimal(angle) * PI / Decimal(180)
+    return float(to_decimal(angle, "Angle") * PI / Decimal(180))
 
 
-def to_deg(angle: float) -> Decimal:
+def to_deg(angle: float) -> float:
     """Convert radians to degrees."""
-    return _to_decimal(angle) * Decimal(180) / PI
+    return float(to_decimal(angle, "Angle") * Decimal(180) / PI)
 
 
-def to_grad(angle: float) -> Decimal:
+def to_grad(angle: float) -> float:
     """Convert degrees to gradians."""
-    angle_dec = _to_decimal(angle)
-    return angle_dec * Decimal(200) / Decimal(180)
+    angle_dec = to_decimal(angle, "Angle")
+    return float(angle_dec * Decimal(200) / Decimal(180))
 
 
 def convert_angle(
@@ -106,8 +98,8 @@ def convert_angle(
     Returns:
         Tuple of two formatted conversion results
     """
-    ans1 = f"{name1}({angle}) = {format_result(func1(angle))}"
-    ans2 = f"{name2}({angle}) = {format_result(func2(angle))}"
+    ans1 = f"{name1}({angle}) = {format_numeric_result(func1(angle))}"
+    ans2 = f"{name2}({angle}) = {format_numeric_result(func2(angle))}"
     return ans1, ans2
 
 
@@ -142,7 +134,7 @@ def angle_converter() -> None:
             name1, func1, name2, func2 = angle_conv_funcs[choice]
             unit_name = angle_conv_choices[choice - 1]
             print(f"\nEnter angle in {unit_name}: ", end="")
-            angle = get_val()
+            angle = get_numeric_input()
 
             if angle is not None:
                 ans1, ans2 = convert_angle(name1, func1, name2, func2, angle)

@@ -12,19 +12,13 @@ Units:
 - Binary Bytes: Kibibytes, Mebibytes, Gibibytes, Tebibytes, Pebibytes, Exbibytes, Zebibytes, Yobibytes
 """
 
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from enum import IntEnum
 from typing import Dict
 
-# Import from std module for error handling
-from std import errmsg
-
-def _to_decimal(value: float | int | Decimal) -> Decimal:
-    if isinstance(value, Decimal):
-        return value
-    if isinstance(value, (int, float)):
-        return Decimal(str(value))
-    raise TypeError("Data value must be numeric.")
+from calculator.standard import errmsg
+from calculator.converters.base import BaseConverter
+from calculator.converters.utils import get_numeric_input, to_decimal
 
 class DataUnit(IntEnum):
     """Data unit types - 35 units total."""
@@ -134,7 +128,7 @@ def data_converter_menuMsg() -> None:
 # Universal Data Conversion Function
 # ============================================================================
 
-def convert_data(value: float | int | Decimal, from_unit: int, to_unit: int) -> Decimal:
+def convert_data(value: float | int | Decimal, from_unit: int, to_unit: int) -> float:
     """
     Universal data converter - converts ANY data unit to ANY other data unit.
     
@@ -248,12 +242,12 @@ def convert_data(value: float | int | Decimal, from_unit: int, to_unit: int) -> 
     }
     
     # Step 1: Convert input value to bits (base unit)
-    data_in_bits = _to_decimal(value) * to_bits_factors[from_unit]
+    data_in_bits = to_decimal(value, "Data") * to_bits_factors[from_unit]
     
     # Step 2: Convert bits to target unit
     result = data_in_bits / to_bits_factors[to_unit]
     
-    return result
+    return float(result)
 
 
 # ============================================================================
@@ -359,7 +353,7 @@ DATA_UNIT_ABBREV = {
 # Helper Functions
 # ============================================================================
 
-def get_data_value() -> Decimal:
+def get_data_value() -> float | None:
     """
     Prompt user for numeric input with error handling.
     
@@ -367,9 +361,11 @@ def get_data_value() -> Decimal:
         float if valid, None otherwise
     """
     try:
-        val = Decimal(input().strip())
+        val = get_numeric_input()
+        if val is None:
+            raise ValueError("No input")
         return val
-    except (InvalidOperation, ValueError, SyntaxError, TypeError):
+    except (ValueError, SyntaxError, TypeError):
         errmsg()
         return None
 
@@ -384,7 +380,7 @@ def format_data_result(result: float | int | Decimal) -> str:
     Returns:
         String representation with appropriate precision
     """
-    result_dec = _to_decimal(result)
+    result_dec = to_decimal(result, "Data")
     if not result_dec.is_finite():
         return str(result_dec)
 
@@ -400,67 +396,34 @@ def format_data_result(result: float | int | Decimal) -> str:
 # Main Data Converter Function
 # ============================================================================
 
+class DataConverter(BaseConverter):
+    """Data unit converter implementation."""
+
+    name = "DATA"
+    emoji = ""
+    units = {unit: (DATA_UNIT_NAMES[unit], DATA_UNIT_ABBREV[unit]) for unit in DATA_UNIT_NAMES}
+
+    def convert(self, value: float, from_unit: int, to_unit: int) -> float:
+        return convert_data(value, from_unit, to_unit)
+
+    def display_menu(self) -> None:
+        data_converter_menuMsg()
+
+    def get_value_prompt(self, unit_name: str) -> str:
+        return "\nEnter data amount: "
+
+    def format_result(self, result: float) -> str:
+        return format_data_result(result)
+
 def data_converter() -> None:
     """
     Main data unit conversion interface.
     Provides interactive menu for data conversions.
     """
-    while True:
-        try:
-            data_converter_menuMsg()
-            input_choice = int(input("\nEnter FROM unit (1-35): "))
-            
-            # Check for quit
-            if input_choice == DataUnit.QUIT:
-                print("\n Data converter closed\n")
-                break
-            
-            # Validate input choice
-            if input_choice not in DATA_UNIT_NAMES:
-                print("Invalid choice. Please select 1-35.")
-                continue
-            
-            output_choice = int(input("Enter TO unit (1-35): "))
-            
-            # Check for quit
-            if output_choice == DataUnit.QUIT:
-                print("\n Data converter closed\n")
-                break
-            
-            # Validate output choice
-            if output_choice not in DATA_UNIT_NAMES:
-                print("Invalid choice. Please select 1-35.")
-                continue
-            
-            # Check for same unit conversion
-            if input_choice == output_choice:
-                print("\nInput and output units are the same. No conversion needed.\n")
-                continue
-
-            print("\nEnter data amount: ", end='')
-            input_data = get_data_value()
-
-            if input_data is not None:
-                from_unit_name = DATA_UNIT_NAMES[input_choice]
-                to_unit_name = DATA_UNIT_NAMES[output_choice]
-                from_abbrev = DATA_UNIT_ABBREV[input_choice]
-                to_abbrev = DATA_UNIT_ABBREV[output_choice]
-                
-                # Use universal converter
-                result = convert_data(input_data, input_choice, output_choice)
-                
-                # Display result
-                print("\n" + "="*60)
-                print("   CONVERSION RESULT:")
-                print(f"   {input_data} {from_abbrev} = {format_data_result(result)} {to_abbrev}")
-                print(f"   ({from_unit_name} -> {to_unit_name})")
-                print("="*60 + "\n")
-            else:
-                errmsg()
-
-        except (TypeError, UnboundLocalError, SyntaxError, ValueError):
-            errmsg()
-            continue
+    try:
+        DataConverter().run()
+    except (TypeError, UnboundLocalError, SyntaxError, ValueError, KeyError):
+        errmsg()
 
 
 # ============================================================================

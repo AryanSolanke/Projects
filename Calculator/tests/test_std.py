@@ -24,7 +24,7 @@ from typing import List, Tuple, Generator
 import tempfile
 import shutil
 
-from std import (
+from calculator.standard import (
     errmsg,
     format_answer,
     record_history_std_calc,
@@ -51,7 +51,7 @@ def temp_history_file(monkeypatch, tmp_path) -> Generator[Path, None, None]:
         Path to temporary history file
     """
     temp_file = tmp_path / "test_history.txt"
-    monkeypatch.setattr('std.HISTORY_FILE', temp_file)
+    monkeypatch.setattr('calculator.standard.HISTORY_FILE', temp_file)
     yield temp_file
 
 
@@ -546,7 +546,7 @@ class TestHistoryManagement:
         Expected: Error message
         """
         nonexistent = Path("/tmp/nonexistent_history_file.txt")
-        monkeypatch.setattr('std.HISTORY_FILE', nonexistent)
+        monkeypatch.setattr('calculator.standard.HISTORY_FILE', nonexistent)
         display_hist_std_calc()
         captured = capsys.readouterr()
         assert "No history available" in captured.out
@@ -583,7 +583,7 @@ class TestHistoryManagement:
         nonexistent = Path("/tmp/nonexistent_history_file_clear.txt")
         if nonexistent.exists():
             nonexistent.unlink()
-        monkeypatch.setattr('std.HISTORY_FILE', nonexistent)
+        monkeypatch.setattr('calculator.standard.HISTORY_FILE', nonexistent)
         clear_hist_std_calc()
         # Should not crash, should handle gracefully
 

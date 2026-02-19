@@ -8,15 +8,9 @@ Supports comprehensive bidirectional conversions for all units.
 from decimal import Decimal
 from enum import IntEnum
 
-from std import errmsg
-from sci import get_val, format_result
-
-def _to_decimal(value: float | int | Decimal) -> Decimal:
-    if isinstance(value, Decimal):
-        return value
-    if isinstance(value, (int, float)):
-        return Decimal(str(value))
-    raise TypeError("Weight value must be numeric.")
+from calculator.standard import errmsg
+from calculator.converters.base import BaseConverter
+from calculator.converters.utils import to_decimal
 
 
 class WeightUnit(IntEnum):
@@ -69,7 +63,7 @@ def weight_conv_menuMsg() -> None:
 # Universal Weight Conversion Function
 # ============================================================================
 
-def convert_weight(value: float, from_unit: int, to_unit: int) -> Decimal:
+def convert_weight(value: float, from_unit: int, to_unit: int) -> float:
     """
     Universal weight converter - converts ANY weight unit to ANY other weight unit.
 
@@ -101,8 +95,8 @@ def convert_weight(value: float, from_unit: int, to_unit: int) -> Decimal:
         WeightUnit.LONG_TON_UK: Decimal("1016.05"),
     }
 
-    weight_in_kg = _to_decimal(value) * to_kg_factors[from_unit]
-    return weight_in_kg / to_kg_factors[to_unit]
+    weight_in_kg = to_decimal(value, "Weight") * to_kg_factors[from_unit]
+    return float(weight_in_kg / to_kg_factors[to_unit])
 
 
 # ============================================================================
@@ -146,50 +140,25 @@ WEIGHT_UNIT_ABBREV = {
 # Main Weight Converter Function
 # ============================================================================
 
+class WeightConverter(BaseConverter):
+    """Weight converter implementation."""
+
+    name = "WEIGHT"
+    emoji = ""
+    units = {unit: (WEIGHT_UNIT_NAMES[unit], WEIGHT_UNIT_ABBREV[unit]) for unit in WEIGHT_UNIT_NAMES}
+
+    def convert(self, value: float, from_unit: int, to_unit: int) -> float:
+        return convert_weight(value, from_unit, to_unit)
+
+    def display_menu(self) -> None:
+        weight_conv_menuMsg()
+
+    def get_value_prompt(self, unit_name: str) -> str:
+        return "\nEnter weight: "
+
 def weight_converter() -> None:
     """Main weight conversion interface."""
     try:
-        weight_conv_menuMsg()
-        input_choice = int(input("\nEnter FROM unit (1-13): "))
-
-        if input_choice == WeightUnit.QUIT:
-            return
-
-        if input_choice not in WEIGHT_UNIT_NAMES:
-            print("Invalid choice. Please select 1-13.")
-            return
-
-        output_choice = int(input("Enter TO unit (1-13): "))
-
-        if output_choice == WeightUnit.QUIT:
-            return
-
-        if output_choice not in WEIGHT_UNIT_NAMES:
-            print("Invalid choice. Please select 1-13.")
-            return
-
-        if input_choice == output_choice:
-            print("\nInput and output units are the same. No conversion needed.\n")
-            return
-
-        print("\nEnter weight: ", end="")
-        input_weight = get_val()
-
-        if input_weight is not None:
-            from_unit_name = WEIGHT_UNIT_NAMES[input_choice]
-            to_unit_name = WEIGHT_UNIT_NAMES[output_choice]
-            from_abbrev = WEIGHT_UNIT_ABBREV[input_choice]
-            to_abbrev = WEIGHT_UNIT_ABBREV[output_choice]
-
-            result = convert_weight(input_weight, input_choice, output_choice)
-
-            print("\n" + "="*50)
-            print("   CONVERSION RESULT:")
-            print(f"   {input_weight} {from_abbrev} = {format_result(result)} {to_abbrev}")
-            print(f"   ({from_unit_name} -> {to_unit_name})")
-            print("="*50 + "\n")
-        else:
-            errmsg()
-
-    except (TypeError, UnboundLocalError, SyntaxError, ValueError):
+        WeightConverter().run()
+    except (TypeError, UnboundLocalError, SyntaxError, ValueError, KeyError):
         errmsg()

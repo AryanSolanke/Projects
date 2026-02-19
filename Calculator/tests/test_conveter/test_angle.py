@@ -11,34 +11,18 @@ Coverage:
 """
 
 import pytest
-from decimal import Decimal
 import math
 from unittest.mock import patch
 
-from converter.angle_converter import (
-    to_rads as _to_rads,
-    to_deg as _to_deg,
-    to_grad as _to_grad,
+from calculator.converters.angle import (
+    to_rads,
+    to_deg,
+    to_grad,
     convert_angle,
     angle_converter,
     AngleUnit, angle_conv_funcs,
 )
-
-def _to_float(value):
-    return float(value) if isinstance(value, Decimal) else value
-
-
-def to_rads(value):
-    return _to_float(_to_rads(value))
-
-
-def to_deg(value):
-    return _to_float(_to_deg(value))
-
-
-def to_grad(value):
-    return _to_float(_to_grad(value))
-from std import errmsg
+from calculator.standard import errmsg
 
 
 # ============================================================================
@@ -467,7 +451,7 @@ class TestAngleConverterUI:
 
         Expected: "No angle given"
         """
-        with patch('sci.get_val', return_value=None):
+        with patch('calculator.converters.angle.get_numeric_input', return_value=None):
             inputs = iter(['1', '4'])
             monkeypatch.setattr('builtins.input', lambda _: next(inputs))
             angle_converter()
@@ -513,7 +497,7 @@ class TestAngleConverterUI:
         
         Expected: "No angle given"
         """
-        with patch('sci.get_val', return_value=None):
+        with patch('calculator.converters.angle.get_numeric_input', return_value=None):
             inputs = iter(['1', '4'])
             monkeypatch.setattr('builtins.input', lambda _: next(inputs))
             angle_converter()

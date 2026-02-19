@@ -46,8 +46,8 @@ Comprehensive conversion system supporting **5 categories**:
 ## 🎯 Key Technical Highlights
 
 ### Architecture
-- **Modular Design**: Clear separation of concerns (std, sci, converter package)
-- **Package Structure**: Organized converter submodules with clean imports
+- **Modular Design**: Clear separation of concerns (standard, scientific, converters)
+- **Package Structure**: Proper `calculator/` package with focused submodules
 - **Zero Dependencies**: Pure Python implementation (except testing)
 
 ### Mathematical Correctness
@@ -74,23 +74,41 @@ Comprehensive conversion system supporting **5 categories**:
 ```
 Calculator/
 │
-├── main.py                      # Application entry point & UI orchestration
-├── std.py                       # Standard arithmetic engine
-├── sci.py                       # Scientific functions engine
-├── converters.py               # Unit converter router
+├── main.py                      # Compatibility entry point
+├── std.py                       # Compatibility shim
+├── sci.py                       # Compatibility shim
+├── converters.py               # Compatibility shim
+├── setup.py                     # Installable package metadata
+├── requirements.txt             # Runtime dependencies (none)
+├── requirements-dev.txt         # Dev tools (pytest, ruff, mypy, etc.)
+├── history/                      # Calculator history files (ignored in git)
 │
-├── converter/                   # Converter package (5 modules)
-│   ├── __init__.py             # Package initialization
-│   ├── angle_converter.py      # Angle conversions
-│   ├── temp_converter.py       # Temperature conversions
-│   ├── weight_converter.py     # Weight conversions
-│   ├── pressure_converter.py   # Pressure conversions
-│   └── data_converter.py       # Data unit conversions (35 units)
+├── calculator/                  # Primary package
+│   ├── __init__.py
+│   ├── main.py                  # Application entry point
+│   ├── standard.py              # Standard arithmetic engine
+│   ├── scientific.py            # Scientific functions engine
+│   ├── router.py                # Unit converter router
+│   ├── config.py                # Central configuration
+│   ├── exceptions.py            # Custom exceptions
+│   └── converters/              # Converter modules
+│       ├── __init__.py
+│       ├── base.py              # Base converter class
+│       ├── utils.py             # Shared converter utilities
+│       ├── angle.py             # Angle conversions
+│       ├── temperature.py       # Temperature conversions
+│       ├── weight.py            # Weight conversions
+│       ├── pressure.py          # Pressure conversions
+│       └── data.py              # Data unit conversions (35 units)
 │
 └── tests/                      # Comprehensive test suite
     ├── test_std.py            # Standard calculator tests (68 tests)
     ├── test_sci.py            # Scientific calculator tests (87 tests)
-    └── test_converter.py     # Converter tests (237 tests)
+    └── test_conveter/         # Converter tests (171 tests)
+        ├── test_angle.py
+        ├── test_temperature.py
+        ├── test_weight.py
+        └── test_pressure.py
 ```
 
 ## 🚀 Installation & Usage
@@ -112,10 +130,14 @@ Calculator/
    ```bash
    python main.py
    ```
+   Or:
+   ```bash
+   python -m calculator.main
+   ```
 
 3. **Run tests** (optional):
    ```bash
-   pytest tests/ -v
+   python -m pytest -v
    ```
 
 ### Usage Examples
@@ -148,7 +170,7 @@ Calculator/
 
 ## 🧪 Testing
 
-The project includes 392 comprehensive tests covering:
+The project includes 326 comprehensive tests covering:
 - ✅ Normal operations and edge cases
 - ✅ Domain violations and error handling
 - ✅ Boundary values and extreme inputs
@@ -163,10 +185,10 @@ The project includes 392 comprehensive tests covering:
 ### Running Tests
 ```bash
 # Run all tests
-pytest tests/ -v
+python -m pytest -v
 
 # Run specific test file
-pytest tests/test_std.py -v
+python -m pytest tests/test_std.py -v
 
 # Run with coverage
 pytest tests/ --cov=. --cov-report=html
@@ -213,12 +235,13 @@ This project demonstrates:
 
 ## 📋 Recent Updates
 
-### Version 2.1 - Integrated Data Converter (Current)
-- ✅ **Data Converter Integration**: Moved data_converter.py into converter package
-- ✅ **5 Converter Categories**: Angle, Temperature, Weight, Pressure, Data
-- ✅ **Enhanced Menu System**: Updated converter router for data conversions
-- ✅ **1,190 Data Conversions**: Complete SI and IEC standard support
-- ✅ **Consistent Package Structure**: All converters in unified package
+### Version 2.2 - Package Reorganization (Current)
+- ✅ **Proper Package Layout**: Introduced `calculator/` package with clear module boundaries
+- ✅ **Central Config**: History files and precision settings consolidated in `calculator/config.py`
+- ✅ **Base Converter**: Shared converter behavior in `calculator/converters/base.py`
+- ✅ **Compatibility Shims**: Root-level `main.py`, `std.py`, `sci.py`, `converters.py` preserved
+  for backward compatibility
+- ✅ **History Directory**: History files stored under `history/` at repo root
 
 ### Version 2.0 - Major Refactor
 - ✅ **Modular Converter Architecture**: Separated converters into independent modules

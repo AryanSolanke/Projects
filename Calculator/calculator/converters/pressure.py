@@ -8,15 +8,9 @@ Supports comprehensive bidirectional conversions for all units.
 from decimal import Decimal
 from enum import IntEnum
 
-from std import errmsg
-from sci import get_val, format_result
-
-def _to_decimal(value: float | int | Decimal) -> Decimal:
-    if isinstance(value, Decimal):
-        return value
-    if isinstance(value, (int, float)):
-        return Decimal(str(value))
-    raise TypeError("Pressure value must be numeric.")
+from calculator.standard import errmsg
+from calculator.converters.base import BaseConverter
+from calculator.converters.utils import to_decimal
 
 
 class PressureUnit(IntEnum):
@@ -54,7 +48,7 @@ def pressure_conv_menuMsg() -> None:
 # Universal Pressure Conversion Function
 # ============================================================================
 
-def convert_pressure(value: float, from_unit: int, to_unit: int) -> Decimal:
+def convert_pressure(value: float, from_unit: int, to_unit: int) -> float:
     """
     Universal pressure converter - converts ANY pressure unit to ANY other pressure unit.
 
@@ -79,8 +73,8 @@ def convert_pressure(value: float, from_unit: int, to_unit: int) -> Decimal:
         PressureUnit.PSI: Decimal("6894.76"),
     }
 
-    pressure_in_pa = _to_decimal(value) * to_pascal_factors[from_unit]
-    return pressure_in_pa / to_pascal_factors[to_unit]
+    pressure_in_pa = to_decimal(value, "Pressure") * to_pascal_factors[from_unit]
+    return float(pressure_in_pa / to_pascal_factors[to_unit])
 
 
 # ============================================================================
@@ -110,50 +104,25 @@ PRESSURE_UNIT_ABBREV = {
 # Main Pressure Converter Function
 # ============================================================================
 
+class PressureConverter(BaseConverter):
+    """Pressure converter implementation."""
+
+    name = "PRESSURE"
+    emoji = ""
+    units = {unit: (PRESSURE_UNIT_NAMES[unit], PRESSURE_UNIT_ABBREV[unit]) for unit in PRESSURE_UNIT_NAMES}
+
+    def convert(self, value: float, from_unit: int, to_unit: int) -> float:
+        return convert_pressure(value, from_unit, to_unit)
+
+    def display_menu(self) -> None:
+        pressure_conv_menuMsg()
+
+    def get_value_prompt(self, unit_name: str) -> str:
+        return "\nEnter pressure: "
+
 def pressure_converter() -> None:
     """Main pressure conversion interface."""
     try:
-        pressure_conv_menuMsg()
-        input_choice = int(input("\nEnter FROM unit (1-6): "))
-
-        if input_choice == PressureUnit.QUIT:
-            return
-
-        if input_choice not in PRESSURE_UNIT_NAMES:
-            print("Invalid choice. Please select 1-6.")
-            return
-
-        output_choice = int(input("Enter TO unit (1-6): "))
-
-        if output_choice == PressureUnit.QUIT:
-            return
-
-        if output_choice not in PRESSURE_UNIT_NAMES:
-            print("Invalid choice. Please select 1-6.")
-            return
-
-        if input_choice == output_choice:
-            print("\nInput and output units are the same. No conversion needed.\n")
-            return
-
-        print("\nEnter pressure: ", end="")
-        input_pressure = get_val()
-
-        if input_pressure is not None:
-            from_unit_name = PRESSURE_UNIT_NAMES[input_choice]
-            to_unit_name = PRESSURE_UNIT_NAMES[output_choice]
-            from_abbrev = PRESSURE_UNIT_ABBREV[input_choice]
-            to_abbrev = PRESSURE_UNIT_ABBREV[output_choice]
-
-            result = convert_pressure(input_pressure, input_choice, output_choice)
-
-            print("\n" + "="*50)
-            print("   CONVERSION RESULT:")
-            print(f"   {input_pressure} {from_abbrev} = {format_result(result)} {to_abbrev}")
-            print(f"   ({from_unit_name} -> {to_unit_name})")
-            print("="*50 + "\n")
-        else:
-            errmsg()
-
-    except (TypeError, UnboundLocalError, SyntaxError, ValueError):
+        PressureConverter().run()
+    except (TypeError, UnboundLocalError, SyntaxError, ValueError, KeyError):
         errmsg()

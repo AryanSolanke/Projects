@@ -26,7 +26,7 @@ from typing import Callable, Tuple, Generator
 from pathlib import Path
 import tempfile
 
-from sci import (
+from calculator.scientific import (
     # Utility functions
     get_val,
     format_result,
@@ -122,7 +122,7 @@ def temp_sci_history_file(monkeypatch) -> Generator[Path, None, None]:
     """Create temporary history file for isolated testing."""
     with tempfile.NamedTemporaryFile(mode='w', suffix='_sci.txt', delete=False) as tmp:
         temp_file = Path(tmp.name)
-    monkeypatch.setattr('sci.HISTORY_FILE', temp_file)
+    monkeypatch.setattr('calculator.scientific.HISTORY_FILE', temp_file)
     yield temp_file
     if temp_file.exists():
         temp_file.unlink()
