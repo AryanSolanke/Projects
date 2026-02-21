@@ -9,13 +9,20 @@ from decimal import Decimal, localcontext
 from typing import Tuple, Callable, Dict
 from enum import IntEnum
 
-from calculator.standard import errmsg
-from calculator.converters.utils import get_numeric_input, format_numeric_result, to_decimal
+from calculator.exceptions import ExpressionError, CalculatorError, NullInputError, InvalidInputError
+from calculator.converters.converter_utils import get_numeric_input, format_numeric_result, to_decimal
+
 
 INTERNAL_PRECISION = 60
 
 
 def _compute_pi() -> Decimal:
+    """
+    Evaluate value of PI using Gauss-Lengendre Algorithm
+
+    Returns:
+        Value of PI with a precision of 60 decimal places.
+    """
     with localcontext() as ctx:
         ctx.prec = INTERNAL_PRECISION
         a = Decimal(1)
@@ -59,7 +66,7 @@ def angle_conversion_menuMsg() -> None:
 
 
 # ============================================================================
-# Angle Conversion Functions (pure Decimal)
+# Angle Conversion Functions
 # ============================================================================
 
 def to_rads(angle: Decimal) -> Decimal:
@@ -140,9 +147,9 @@ def angle_converter() -> None:
                 print(f"\n   {ans1}")
                 print(f"   {ans2}\n")
             else:
-                print("No angle given\n")
-        else:
-            print("Invalid choice. Please select 1-3\n")
-
-    except (TypeError, UnboundLocalError, SyntaxError, ValueError):
-        errmsg()
+                raise NullInputError()
+    
+    except ValueError:
+        raise InvalidInputError("Invalid choice: Please select 1-3\n")
+    except (TypeError, ExpressionError, CalculatorError, NullInputError, InvalidInputError):
+        raise

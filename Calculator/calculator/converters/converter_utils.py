@@ -2,13 +2,13 @@
 Converter Utilities
 
 Shared helpers for converter modules.
-All computations use Decimal for high accuracy - no float dependencies.
 """
 
 from __future__ import annotations
 
 from decimal import Decimal, InvalidOperation
 from typing import Optional
+from calculator.exceptions import ExpressionError, CalculatorError, NullInputError
 
 
 def to_decimal(value, value_type: str = "Value") -> Decimal:
@@ -45,10 +45,12 @@ def get_numeric_input(prompt: str = "") -> Optional[Decimal]:
     try:
         raw = input(prompt).strip()
         if raw == "":
-            return None
+            raise NullInputError()
         return Decimal(raw)
-    except (InvalidOperation, ValueError, TypeError):
-        return None
+    except (ValueError, InvalidOperation):
+        raise ExpressionError(f"'{raw}' is not a valid number. Please enter digits only.")
+    except TypeError:
+        raise TypeError("Invalid Type: Cannot perform operations on text. Please use numbers only.")
 
 
 def format_numeric_result(result, precision: int = 9) -> str:
@@ -63,10 +65,8 @@ def format_numeric_result(result, precision: int = 9) -> str:
         String representation with appropriate precision
     """
     if not isinstance(result, Decimal):
-        try:
-            result = Decimal(str(result))
-        except (InvalidOperation, TypeError):
-            return str(result)
+        result = Decimal(str(result))
+        return str(result)
     if not result.is_finite():
         return str(result)
     return f"{result:.{precision}g}"

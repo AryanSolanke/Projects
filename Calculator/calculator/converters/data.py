@@ -16,9 +16,9 @@ from decimal import Decimal
 from enum import IntEnum
 from typing import Dict
 
-from calculator.standard import errmsg
 from calculator.converters.base import BaseConverter
-from calculator.converters.utils import get_numeric_input, to_decimal
+from calculator.converters.converter_utils import to_decimal
+from calculator.exceptions import NullInputError, InvalidInputError, ExpressionError, CalculatorError
 
 class DataUnit(IntEnum):
     """Data unit types - 35 units total."""
@@ -353,22 +353,6 @@ DATA_UNIT_ABBREV = {
 # Helper Functions
 # ============================================================================
 
-def get_data_value() -> "Decimal | None":
-    """
-    Prompt user for numeric input with error handling.
-    
-    Returns:
-        Decimal if valid, None otherwise
-    """
-    try:
-        val = get_numeric_input()
-        if val is None:
-            raise ValueError("No input")
-        return val
-    except (ValueError, SyntaxError, TypeError):
-        errmsg()
-        return None
-
 
 def format_data_result(result) -> str:
     """
@@ -400,7 +384,7 @@ class DataConverter(BaseConverter):
     """Data unit converter implementation."""
 
     name = "DATA"
-    emoji = ""
+    emoji = "📊"
     units = {unit: (DATA_UNIT_NAMES[unit], DATA_UNIT_ABBREV[unit]) for unit in DATA_UNIT_NAMES}
 
     def convert(self, value: Decimal, from_unit: int, to_unit: int) -> Decimal:
@@ -410,7 +394,7 @@ class DataConverter(BaseConverter):
         data_converter_menuMsg()
 
     def get_value_prompt(self, unit_name: str) -> str:
-        return "\nEnter data amount: "
+        return f"\nEnter data amount in {unit_name}: "
 
     def format_result(self, result) -> str:
         return format_data_result(result)
@@ -422,9 +406,8 @@ def data_converter() -> None:
     """
     try:
         DataConverter().run()
-    except (TypeError, UnboundLocalError, SyntaxError, ValueError, KeyError):
-        errmsg()
-
+    except (NullInputError, InvalidInputError, ExpressionError, CalculatorError):
+        raise
 
 # ============================================================================
 # Main Entry Point
@@ -432,7 +415,6 @@ def data_converter() -> None:
 
 if __name__ == '__main__':
     print("\n" + "="*60)
-    print("        COMPREHENSIVE DATA UNIT CONVERTER")
-    print("        35 Units | 1,190 Conversions")
+    print("        DATA UNIT CONVERTER")
     print("="*60)
     data_converter()

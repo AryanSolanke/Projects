@@ -8,10 +8,9 @@ Supports comprehensive bidirectional conversions for all units.
 from decimal import Decimal
 from enum import IntEnum
 
-from calculator.standard import errmsg
 from calculator.converters.base import BaseConverter
-from calculator.converters.utils import to_decimal
-
+from calculator.converters.converter_utils import to_decimal
+from calculator.exceptions import NullInputError, InvalidInputError, ExpressionError, CalculatorError
 
 class WeightUnit(IntEnum):
     """Weight unit types - 13 units total."""
@@ -154,11 +153,11 @@ class WeightConverter(BaseConverter):
         weight_conv_menuMsg()
 
     def get_value_prompt(self, unit_name: str) -> str:
-        return "\nEnter weight: "
+        return f"\nEnter weight in {unit_name}: "
 
 def weight_converter() -> None:
     """Main weight conversion interface."""
     try:
         WeightConverter().run()
-    except (TypeError, UnboundLocalError, SyntaxError, ValueError, KeyError):
-        errmsg()
+    except (NullInputError, InvalidInputError, ExpressionError, CalculatorError):
+        raise

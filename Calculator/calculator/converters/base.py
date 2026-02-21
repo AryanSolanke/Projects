@@ -9,8 +9,8 @@ from decimal import Decimal
 from typing import Dict, Tuple, Optional
 
 from calculator.config import MENU_WIDTH
-from calculator.converters.utils import get_numeric_input, format_numeric_result
-
+from calculator.converters.converter_utils import get_numeric_input, format_numeric_result
+from calculator.exceptions import NullInputError, ExpressionError, InvalidInput
 
 class BaseConverter(ABC):
     """
@@ -66,16 +66,14 @@ class BaseConverter(ABC):
             if from_unit == quit_id:
                 return
             if from_unit not in self.units:
-                print(f"Invalid choice. Please select 1-{max(self.units.keys())}.")
-                return
+                raise InvalidInput(f"Invalid choice. Please select 1-{max(self.units.keys())}.")
 
             to_unit = int(input("Enter TO unit: "))
             if to_unit == quit_id:
                 return
             if to_unit not in self.units:
-                print(f"Invalid choice. Please select 1-{max(self.units.keys())}.")
-                return
-
+                raise InvalidInput(f"Invalid choice. Please select 1-{max(self.units.keys())}.")
+        
             if from_unit == to_unit:
                 print("\nInput and output units are the same. No conversion needed.\n")
                 return
@@ -83,8 +81,7 @@ class BaseConverter(ABC):
             unit_name = self.units[from_unit][0]
             value = get_numeric_input(self.get_value_prompt(unit_name))
             if value is None:
-                print("Error: Invalid input.")
-                return
+                raise NullInputError()
 
             result = self.convert(value, from_unit, to_unit)
 
@@ -97,5 +94,5 @@ class BaseConverter(ABC):
             print(f"   ({from_name} -> {to_name})")
             print("=" * MENU_WIDTH + "\n")
 
-        except (TypeError, ValueError):
-            print("Error: Invalid input.")
+        except ValueError:
+            raise InvalidInput("Please enter a valid unit number")

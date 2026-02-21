@@ -10,7 +10,8 @@ from enum import IntEnum
 
 from calculator.standard import errmsg
 from calculator.converters.base import BaseConverter
-from calculator.converters.utils import to_decimal
+from calculator.converters.converter_utils import to_decimal
+from calculator.exceptions import InvalidInputError, NullInputError, ExpressionError, CalculatorError
 
 
 class PressureUnit(IntEnum):
@@ -124,5 +125,5 @@ def pressure_converter() -> None:
     """Main pressure conversion interface."""
     try:
         PressureConverter().run()
-    except (TypeError, UnboundLocalError, SyntaxError, ValueError, KeyError):
-        errmsg()
+    except (NullInputError, InvalidInputError, ExpressionError, CalculatorError):
+        raise

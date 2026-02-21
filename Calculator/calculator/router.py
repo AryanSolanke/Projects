@@ -13,7 +13,7 @@ from calculator.converters.temperature import temperature_converter
 from calculator.converters.weight import weight_converter
 from calculator.converters.pressure import pressure_converter
 from calculator.converters.data import data_converter
-
+from calculator.exceptions import InvalidInputError, NullInputError, ExpressionError, CalculatorError
 
 class MenuOptions(IntEnum):
     """Conversion unit types."""
@@ -71,6 +71,6 @@ def converter_menu() -> None:
             else:
                 errmsg()
 
-        except (TypeError, UnboundLocalError, SyntaxError, ValueError):
-            errmsg()
+        except (TypeError, UnboundLocalError, SyntaxError, ValueError, NullInputError, InvalidInputError, ExpressionError, CalculatorError, KeyError) as e:
+            print(f"{e}")
             continue

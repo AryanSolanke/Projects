@@ -4,10 +4,12 @@ Standard Calculator Module
 Provides expression evaluation with history tracking and error handling.
 """
 
-from decimal import Decimal, InvalidOperation, DivisionByZero, localcontext
+from calculator.exceptions import UnbalancedParenthesesError
+
+from decimal import Decimal, InvalidOperation, localcontext
 import re
 
-from calculator.config import DECIMAL_PRECISION, STD_HISTORY_FILE
+from calculator.config import DECIMAL_PRECISION, DISPLAY_PRECISION, STD_HISTORY_FILE
 
 # ============================================================================
 # Constants
@@ -19,14 +21,9 @@ FLOAT_LIKE_MAX_EXP = 308
 _NUMBER_PATTERN = re.compile(r"(?:\d+\.\d+|\d+|(?<![\d.])\.\d+)")
 
 
-# ============================================================================
-# Error Handling
-# ============================================================================
-
 def errmsg() -> None:
     """Display standard error message for invalid input."""
     print("Error: Invalid input.")
-
 
 # ============================================================================
 # Result Formatting
@@ -44,7 +41,7 @@ def format_answer(result: Decimal) -> str:
     """
     if not isinstance(result, Decimal):
         result = Decimal(str(result))
-    formatted_res = f"{result:.{DECIMAL_PRECISION}f}"
+    formatted_res = f"{result:.{DISPLAY_PRECISION}g}"
     stripped_res = formatted_res.rstrip("0").rstrip(".")
     # Normalize negative zero
     return "0" if stripped_res == "-0" else stripped_res
@@ -83,8 +80,6 @@ def record_history_std_calc(exp: str, result: str) -> None:
             f.write(f"{exp} = {result}\n")
     except FileNotFoundError:
         print("Failed to record history")
-    except Exception:
-        errmsg()
 
 
 def display_hist_std_calc() -> None:
@@ -152,8 +147,7 @@ def validate_exp(exp: str) -> bool:
     
     # Check for unbalanced parentheses
     if exp.count('(') != exp.count(')'):
-        print("Error: Unbalanced parentheses")
-        return False
+        raise UnbalancedParenthesesError
     
     # Check for allowed characters
     allowed_chars = "0123456789+-*/%(). "
@@ -198,6 +192,6 @@ def evaluate_expression(exp: str) -> str:
         formatted_result = format_answer(result)
         record_history_std_calc(exp, formatted_result)
         return formatted_result
-    except (SyntaxError, ZeroDivisionError, TypeError, OverflowError, InvalidOperation, DivisionByZero):
+    except (SyntaxError, ZeroDivisionError, TypeError, OverflowError, InvalidOperation):
         errmsg()
         return "0"

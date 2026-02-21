@@ -11,8 +11,8 @@ from typing import Callable, Dict, Tuple
 
 from calculator.standard import errmsg
 from calculator.converters.base import BaseConverter
-from calculator.converters.utils import to_decimal
-
+from calculator.converters.converter_utils import to_decimal
+from calculator.exceptions import CalculatorError, ExpressionError, InvalidInputError, NullInputError
 
 class TempUnit(IntEnum):
     """Temperature unit types."""
@@ -119,5 +119,5 @@ def temperature_converter() -> None:
     """Main temperature conversion interface."""
     try:
         TemperatureConverter().run()
-    except (TypeError, UnboundLocalError, SyntaxError, ValueError, KeyError):
-        errmsg()
+    except (NullInputError, InvalidInputError, ExpressionError, CalculatorError, ):
+        raise
