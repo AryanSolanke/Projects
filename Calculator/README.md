@@ -16,6 +16,13 @@ A robust, enterprise-grade console-based Python calculator featuring modular arc
 - **High Precision**: Results formatted to 9 significant figures with intelligent rounding
 - **O(1) Dispatch**: Dictionary-based function lookup using tuple-key mapping for optimal performance
 
+### 💻 Programmer Calculator
+- **Base Conversion**: DEC, HEX, BIN, and OCT conversions with auto-detected input prefixes
+- **Bitwise Operations**: AND, OR, XOR, NOT, NAND, NOR, and XNOR
+- **Bit Shift Toolkit**: Arithmetic shifts, logical shifts, rotates, and carry rotates (RCL/RCR)
+- **Word Size Modes**: BYTE (8-bit), WORD (16-bit), DWORD (32-bit), and QWORD (64-bit)
+- **Two's Complement Semantics**: Signed/unsigned masking behavior aligned with programmer-style calculators
+
 ### 🔄 Unit Converter
 Comprehensive conversion system supporting **5 categories**:
 
@@ -46,7 +53,7 @@ Comprehensive conversion system supporting **5 categories**:
 ## 🎯 Key Technical Highlights
 
 ### Architecture
-- **Modular Design**: Clear separation of concerns (standard, scientific, converters)
+- **Modular Design**: Clear separation of concerns (standard, scientific, programmer, converters)
 - **Package Structure**: Proper `calculator/` package with focused submodules
 - **Zero Dependencies**: Pure Python implementation (except testing)
 
@@ -88,6 +95,7 @@ Calculator/
 │   ├── main.py                  # Application entry point
 │   ├── standard.py              # Standard arithmetic engine
 │   ├── scientific.py            # Scientific functions engine
+│   ├── programmer.py            # Programmer calculator engine
 │   ├── router.py                # Unit converter router
 │   ├── config.py                # Central configuration
 │   ├── exceptions.py            # Custom exceptions
@@ -102,9 +110,10 @@ Calculator/
 │       └── data.py              # Data unit conversions (35 units)
 │
 └── tests/                      # Comprehensive test suite
-    ├── test_std.py            # Standard calculator tests (68 tests)
-    ├── test_sci.py            # Scientific calculator tests (87 tests)
-    └── test_conveter/         # Converter tests (171 tests)
+    ├── test_std.py            # Standard calculator tests
+    ├── test_sci.py            # Scientific calculator tests
+    ├── test_programmer.py     # Programmer calculator tests
+    └── test_conveter/         # Converter tests
         ├── test_angle.py
         ├── test_temperature.py
         ├── test_weight.py
@@ -168,9 +177,29 @@ Calculator/
    (Gigabyte → Gibibyte)
 ```
 
+#### Programmer Calculator - Bitwise Workflow
+```
+PROGRAMMER CALCULATOR [QWORD (64-bit)]
+1. Base Conversion
+2. Bitwise Operations
+3. Bit Shift
+4. Toggle Word Size
+5. Quit Programmer Calculator
+
+➤ Enter choice: 2
+➤ Enter value A: 0xF0
+➤ Enter value B: 0b1010
+
+Result:
+  DEC : 0
+  HEX : 0
+  BIN : 0000 ... 0000
+  OCT : 0
+```
+
 ## 🧪 Testing
 
-The project includes 326 comprehensive tests covering:
+The project includes 352 automated tests covering:
 - ✅ Normal operations and edge cases
 - ✅ Domain violations and error handling
 - ✅ Boundary values and extreme inputs
@@ -180,6 +209,7 @@ The project includes 326 comprehensive tests covering:
 ### Test Coverage
 - **Standard Calculator**: Expression evaluation, history management, error handling
 - **Scientific Calculator**: All 24 functions across all quadrants, domain validation
+- **Programmer Calculator**: Base conversions, bitwise logic, shifts/rotations, and word-size masking
 - **Converters**: Accuracy verification, bidirectional consistency, unit validation
 
 ### Running Tests
@@ -235,7 +265,14 @@ This project demonstrates:
 
 ## 📋 Recent Updates
 
-### Version 2.2 - Package Reorganization (Current)
+### Version 2.3 - Programmer Mode Expansion (Current)
+- ✅ **Programmer Calculator Added**: New dedicated mode integrated into `calculator/main.py`
+- ✅ **Bitwise Toolkit**: Added AND/OR/XOR/NOT/NAND/NOR/XNOR support
+- ✅ **Shift + Rotate Support**: Added ASL/ASR/LSL/LSR/ROL/ROR/RCL/RCR operations
+- ✅ **Word Size Control**: Added BYTE/WORD/DWORD/QWORD toggling with signed masking
+- ✅ **Test Coverage Added**: New `tests/test_programmer.py` for programmer-mode behavior
+
+### Version 2.2 - Package Reorganization
 - ✅ **Proper Package Layout**: Introduced `calculator/` package with clear module boundaries
 - ✅ **Central Config**: History files and precision settings consolidated in `calculator/config.py`
 - ✅ **Base Converter**: Shared converter behavior in `calculator/converters/base.py`
@@ -250,7 +287,7 @@ This project demonstrates:
 - ✅ **Import System Overhaul**: Resolved all import conflicts with proper package structure
 - ✅ **Expanded Unit Support**: Added pressure conversions (6 units, 30 conversion pairs)
 - ✅ **Code Quality**: Standardized commenting style, improved error messages
-- ✅ **Test Coverage**: All 392 tests passing with comprehensive edge case coverage
+- ✅ **Test Coverage**: Broad automated coverage added for core and converter flows
 
 ## 📝 Code Quality Standards
 
@@ -307,4 +344,4 @@ Built with rigorous attention to mathematical correctness, code quality, and use
 
 **Built with precision, tested with rigor, designed with care.** 🎯
 
-**Total Conversion Capabilities**: 1,440 unique conversions across 5 categories!
+**Total Conversion Capabilities**: 1,440 unique conversions across 5 converter categories.
