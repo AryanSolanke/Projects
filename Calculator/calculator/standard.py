@@ -4,8 +4,8 @@ Standard Calculator Module
 Provides expression evaluation with history tracking and error handling.
 """
 
-from calculator.exceptions import UnbalancedParenthesesError
-
+from calculator.exceptions import UnbalancedParenthesesError, ExpressionError, CalculatorError, NullInputError
+from enum import IntEnum
 from decimal import Decimal, InvalidOperation, localcontext
 import re
 
@@ -24,6 +24,14 @@ _NUMBER_PATTERN = re.compile(r"(?:\d+\.\d+|\d+|(?<![\d.])\.\d+)")
 def errmsg() -> None:
     """Display standard error message for invalid input."""
     print("Error: Invalid input.")
+
+
+class StdOperation(IntEnum):
+    """Standard calculator operations."""
+    EVALUATE      = 1
+    SHOW_HISTORY  = 2
+    CLEAR_HISTORY = 3
+    QUIT          = 4
 
 # ============================================================================
 # Result Formatting
@@ -80,6 +88,8 @@ def record_history_std_calc(exp: str, result: str) -> None:
             f.write(f"{exp} = {result}\n")
     except FileNotFoundError:
         print("Failed to record history")
+    except (PermissionError, UnicodeDecodeError, OSError):
+        print("Internal Error: Failed to record history")
 
 
 def display_hist_std_calc() -> None:
@@ -100,8 +110,8 @@ def display_hist_std_calc() -> None:
         for line in history:
             print(f"  {line}")
         print("="*40 + "\n")
-    except Exception:
-        errmsg()
+    except (PermissionError, UnicodeDecodeError, OSError):
+        print("Internal Error: Failed reading history")
 
 
 def clear_hist_std_calc() -> None:
@@ -111,8 +121,8 @@ def clear_hist_std_calc() -> None:
         print("   History cleared successfully!")
     except FileNotFoundError:
         print("Failed to clear history")
-    except Exception:
-        errmsg()
+    except (PermissionError, UnicodeDecodeError, OSError):
+        print("Internal Error: Failed to clear history")
 
 
 # ============================================================================
@@ -142,20 +152,19 @@ def validate_exp(exp: str) -> bool:
     """
     # Check for empty input
     if not exp.strip():
-        print("No input given")
-        return False
+        raise NullInputError()
     
     # Check for unbalanced parentheses
     if exp.count('(') != exp.count(')'):
-        raise UnbalancedParenthesesError
+        raise UnbalancedParenthesesError()
     
     # Check for allowed characters
     allowed_chars = "0123456789+-*/%(). "
     for char in exp:
         if char not in allowed_chars:
-            print(f"Error: Character '{char}' not allowed")
+            print("Error: Invalid Expression. Please enter a valid character [0123456789+-*/%(). ]")
             return False
-        
+
     return True
 
 
@@ -173,25 +182,76 @@ def evaluate_expression(exp: str) -> str:
     Returns:
         Formatted result string, or "0" if evaluation fails
     """
-    if not validate_exp(exp):
-        return "0"
-    
     try:
+        if not validate_exp(exp):
+            return "0"
+    
         decimal_exp = _NUMBER_PATTERN.sub(
             lambda m: f"Decimal('{m.group(0)}')", exp
         )
         with localcontext() as ctx:
             ctx.prec = max(DECIMAL_PRECISION, 28)
             result = eval(decimal_exp, {"Decimal": Decimal})
+
         if not isinstance(result, Decimal):
             result = Decimal(str(result))
+
         if not result.is_finite():
-            raise InvalidOperation
+            raise InvalidOperation("Math error: result is not finite")
+        
         if result.is_finite() and result.adjusted() > FLOAT_LIKE_MAX_EXP:
-            raise OverflowError
+            raise OverflowError("Math error: Result overflowed.")
+        
         formatted_result = format_answer(result)
         record_history_std_calc(exp, formatted_result)
-        return formatted_result
-    except (SyntaxError, ZeroDivisionError, TypeError, OverflowError, InvalidOperation):
-        errmsg()
-        return "0"
+        return formatted_result 
+    except ZeroDivisionError:
+        raise InvalidOperation("Math error: Cannot divide by zero.")
+    
+    except InvalidOperation:
+        raise ExpressionError("Math error: Invalid mathematical operation")
+    
+    except TypeError:
+        raise ExpressionError()
+
+    except OverflowError:
+        raise OverflowError("Math error: Result overflowed.")
+    
+# ============================================================================
+# Main Interface Function
+# ============================================================================
+
+def std_calc() -> None:
+    """
+    Standard calculator interface.
+    Handles expression evaluation and history management.
+    """
+    while True:
+        std_calc_menuMsg()
+        try:
+            op_num = int(input("\nEnter your choice: "))
+
+            if op_num == StdOperation.EVALUATE:
+                exp = exp_input()
+                result = evaluate_expression(exp)
+                print(f" Result: {result}")
+
+            elif op_num == StdOperation.SHOW_HISTORY:
+                display_hist_std_calc()
+
+            elif op_num == StdOperation.CLEAR_HISTORY:
+                clear_hist_std_calc()
+
+            elif op_num == StdOperation.QUIT:
+                print("\n Standard calculator closed!\n")
+                break
+
+        except CalculatorError as e:
+            print(e)
+            continue
+        except OverflowError as e:
+            print(e)
+            continue
+        except ValueError:
+            print("Invalid input: Please select 1-4")
+            continue

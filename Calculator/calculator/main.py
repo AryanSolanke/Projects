@@ -9,11 +9,7 @@ from enum import IntEnum
 
 from calculator.standard import (
     errmsg,
-    exp_input,
-    evaluate_expression,
-    display_hist_std_calc,
-    clear_hist_std_calc,
-    std_calc_menuMsg,
+    std_calc
 )
 from calculator.scientific import (
     display_hist_sci_calc,
@@ -33,14 +29,6 @@ class MainMode(IntEnum):
     CONVERTER  = 3
     PROGRAMMER = 4
     QUIT       = 5
-
-
-class StdOperation(IntEnum):
-    """Standard calculator operations."""
-    EVALUATE      = 1
-    SHOW_HISTORY  = 2
-    CLEAR_HISTORY = 3
-    QUIT          = 4
 
 
 class SciOperation(IntEnum):
@@ -76,36 +64,7 @@ def mode_choice_menu() -> None:
 # Calculator Mode Functions
 # ============================================================================
 
-def std_calc() -> None:
-    """
-    Standard calculator interface.
-    Handles expression evaluation and history management.
-    """
-    while True:
-        std_calc_menuMsg()
-        try:
-            op_num = int(input("\nEnter your choice: "))
 
-            if op_num == StdOperation.EVALUATE:
-                exp = exp_input()
-                result = evaluate_expression(exp)
-                print(f" Result: {result}")
-
-            elif op_num == StdOperation.SHOW_HISTORY:
-                display_hist_std_calc()
-
-            elif op_num == StdOperation.CLEAR_HISTORY:
-                clear_hist_std_calc()
-
-            elif op_num == StdOperation.QUIT:
-                print("\n Standard calculator closed!\n")
-                break
-            else:
-                errmsg()
-
-        except (ValueError, KeyboardInterrupt, UnboundLocalError, TypeError):
-            errmsg()
-            continue
 
 
 def sci_calc() -> None:
