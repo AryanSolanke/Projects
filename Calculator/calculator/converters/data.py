@@ -14,11 +14,10 @@ Units:
 
 from decimal import Decimal
 from enum import IntEnum
-from typing import Dict
 
 from calculator.converters.base import BaseConverter
 from calculator.converters.converter_utils import to_decimal
-from calculator.exceptions import NullInputError, InvalidInputError, ExpressionError, CalculatorError
+from calculator.exceptions import CalculatorError
 
 class DataUnit(IntEnum):
     """Data unit types - 35 units total."""
@@ -406,7 +405,7 @@ def data_converter() -> None:
     """
     try:
         DataConverter().run()
-    except (NullInputError, InvalidInputError, ExpressionError, CalculatorError):
+    except (CalculatorError):
         raise
 
 # ============================================================================

@@ -13,7 +13,7 @@ from calculator.converters.temperature import temperature_converter
 from calculator.converters.weight import weight_converter
 from calculator.converters.pressure import pressure_converter
 from calculator.converters.data import data_converter
-from calculator.exceptions import InvalidInputError, NullInputError, ExpressionError, CalculatorError
+from calculator.exceptions import CalculatorError
 
 class MenuOptions(IntEnum):
     """Conversion unit types."""
@@ -50,10 +50,11 @@ def converter_menuMsg() -> None:
 def converter_menu() -> None:
     """Main converter interface. Routes to specific converter modules."""
     while True:
+        
+        converter_menuMsg()
         try:
-            converter_menuMsg()
             op_num = int(input("\nEnter your choice: "))
-
+        
             if op_num == MenuOptions.QUIT:
                 print("\n   Converter menu closed\n")
                 break
@@ -69,8 +70,11 @@ def converter_menu() -> None:
             elif op_num == MenuOptions.DATA_CONVERSION:
                 data_converter()
             else:
-                errmsg()
+                print("Invalid choice: Please select 1-6\n")
 
-        except (TypeError, UnboundLocalError, SyntaxError, ValueError, NullInputError, InvalidInputError, ExpressionError, CalculatorError, KeyError) as e:
+        except ValueError:
+            print("Invalid value: Please select 1-6\n")
+            continue
+        except (TypeError, CalculatorError) as e:
             print(f"{e}")
             continue

@@ -10,7 +10,7 @@ from enum import IntEnum
 
 from calculator.converters.base import BaseConverter
 from calculator.converters.converter_utils import to_decimal
-from calculator.exceptions import NullInputError, InvalidInputError, ExpressionError, CalculatorError
+from calculator.exceptions import CalculatorError
 
 class WeightUnit(IntEnum):
     """Weight unit types - 13 units total."""
@@ -159,5 +159,5 @@ def weight_converter() -> None:
     """Main weight conversion interface."""
     try:
         WeightConverter().run()
-    except (NullInputError, InvalidInputError, ExpressionError, CalculatorError):
+    except (CalculatorError):
         raise

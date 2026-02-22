@@ -9,10 +9,9 @@ from decimal import Decimal
 from enum import IntEnum
 from typing import Callable, Dict, Tuple
 
-from calculator.standard import errmsg
 from calculator.converters.base import BaseConverter
 from calculator.converters.converter_utils import to_decimal
-from calculator.exceptions import CalculatorError, ExpressionError, InvalidInputError, NullInputError
+from calculator.exceptions import CalculatorError
 
 class TempUnit(IntEnum):
     """Temperature unit types."""
@@ -119,5 +118,5 @@ def temperature_converter() -> None:
     """Main temperature conversion interface."""
     try:
         TemperatureConverter().run()
-    except (NullInputError, InvalidInputError, ExpressionError, CalculatorError, ):
+    except (CalculatorError):
         raise

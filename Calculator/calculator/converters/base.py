@@ -6,11 +6,11 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from decimal import Decimal
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple
 
 from calculator.config import MENU_WIDTH
 from calculator.converters.converter_utils import get_numeric_input, format_numeric_result
-from calculator.exceptions import NullInputError, ExpressionError, InvalidInput
+from calculator.exceptions import NullInputError, InvalidInputError
 
 class BaseConverter(ABC):
     """
@@ -66,13 +66,13 @@ class BaseConverter(ABC):
             if from_unit == quit_id:
                 return
             if from_unit not in self.units:
-                raise InvalidInput(f"Invalid choice. Please select 1-{max(self.units.keys())}.")
+                raise InvalidInputError(f"Invalid choice. Please select 1-{max(self.units.keys())}.")
 
             to_unit = int(input("Enter TO unit: "))
             if to_unit == quit_id:
                 return
             if to_unit not in self.units:
-                raise InvalidInput(f"Invalid choice. Please select 1-{max(self.units.keys())}.")
+                raise InvalidInputError(f"Invalid choice. Please select 1-{max(self.units.keys())}.")
         
             if from_unit == to_unit:
                 print("\nInput and output units are the same. No conversion needed.\n")
@@ -95,4 +95,4 @@ class BaseConverter(ABC):
             print("=" * MENU_WIDTH + "\n")
 
         except ValueError:
-            raise InvalidInput("Please enter a valid unit number")
+            raise InvalidInputError("Please enter a valid unit number")

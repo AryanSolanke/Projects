@@ -9,7 +9,7 @@ from decimal import Decimal, localcontext
 from typing import Tuple, Callable, Dict
 from enum import IntEnum
 
-from calculator.exceptions import ExpressionError, CalculatorError, NullInputError, InvalidInputError
+from calculator.exceptions import CalculatorError, NullInputError, InvalidInputError
 from calculator.converters.converter_utils import get_numeric_input, format_numeric_result, to_decimal
 
 
@@ -151,5 +151,5 @@ def angle_converter() -> None:
     
     except ValueError:
         raise InvalidInputError("Invalid choice: Please select 1-3\n")
-    except (TypeError, ExpressionError, CalculatorError, NullInputError, InvalidInputError):
+    except (TypeError, CalculatorError):
         raise
