@@ -7,12 +7,9 @@ Supports history tracking and precise numerical formatting.
 
 from decimal import Decimal, InvalidOperation, localcontext
 from typing import Callable, Tuple, Optional
-from dataclasses import dataclass
 from enum import IntEnum
 from textwrap import dedent
-
-# Import error message utility from standard calculator module
-from calculator.standard import errmsg
+from calculator.exceptions import CalculatorError, ExpressionError, InvalidInputError, AsymptoteError, DomainError
 from calculator.config import SCI_HISTORY_FILE, DISPLAY_PRECISION, INTERNAL_PRECISION
 
 
@@ -81,6 +78,18 @@ class FunctionCategory(IntEnum):
     INVERSE_HYPERBOLIC = 4
 
 
+class SciOperation(IntEnum):
+    """Scientific calculator operations."""
+    TRIG               = 1
+    INVERSE_TRIG       = 2
+    HYPERBOLIC         = 3
+    INVERSE_HYPERBOLIC = 4
+    SHOW_MENU          = 5
+    SHOW_HISTORY       = 6
+    CLEAR_HISTORY      = 7
+    QUIT               = 8
+
+
 class SubOperation(IntEnum):
     """Enumeration of sub-operations within each categpry."""
     FUNC_1 = 1  # sin/sinh/sin⁻¹/sinh⁻¹
@@ -89,20 +98,6 @@ class SubOperation(IntEnum):
     FUNC_4 = 4  # cot/coth/cot⁻¹/coth⁻¹
     FUNC_5 = 5  # sec/sech/sec⁻¹/sech⁻¹
     FUNC_6 = 6  # cosec/cosech/cosec⁻¹/cosech⁻¹
-
-
-# ============================================================================
-# Custom Exceptions
-# ============================================================================
-
-class DomainError(ValueError):
-    """Raised when input is outside the valid domain for a function."""
-    pass
-
-
-class AsymptoteError(ValueError):
-    """Raised when input approaches a function's asymptote."""
-    pass
 
 
 # ============================================================================
@@ -116,11 +111,13 @@ def _to_decimal(value: Decimal | int | str) -> Decimal:
         return Decimal(value)
     try:
         return Decimal(str(value))
-    except (InvalidOperation, TypeError, ValueError):
-        raise TypeError("Value must be numeric.")
+    except InvalidOperation:
+        raise ExpressionError() 
+    except (TypeError, ValueError):
+        raise InvalidInputError("Invalid Value: Please use numbers only.")
 
 
-def _compute_pi() -> Decimal:
+def compute_pi() -> Decimal:
     with localcontext() as ctx:
         ctx.prec = INTERNAL_PRECISION
         a = Decimal(1)
@@ -136,7 +133,7 @@ def _compute_pi() -> Decimal:
         return (a + b) * (a + b) / (Decimal(4) * t)
 
 
-PI = _compute_pi()
+PI = compute_pi()
 TWO_PI = PI * 2
 
 
@@ -273,10 +270,9 @@ def get_val() -> Optional[Decimal]:
     try:
         val = Decimal(input().strip())
         return val
-    except (InvalidOperation, ValueError, SyntaxError, TypeError):
-        errmsg()
-        return None
-    
+    except (InvalidOperation, ValueError, TypeError):
+        raise InvalidInputError("Invalid Value: Please use numbers only.")
+
 
 def format_result(result: Decimal | int | str) -> str:
     """Format numerical result with intelligent precision.
@@ -301,7 +297,7 @@ def display_hist_sci_calc() -> None:
     """Display calculation history from file."""
     try:
         if not HISTORY_FILE.exists():
-            print("\nNo history file found. Perform a calculation first!")
+            print("\nNo history file found. Try performing a calculation first!")
 
         history = HISTORY_FILE.read_text(encoding="utf-8").strip()
 
@@ -311,8 +307,8 @@ def display_hist_sci_calc() -> None:
             print("\n--- Scientific Calculation History ---")
             print(history)
 
-    except Exception as e:
-        print(f"Error reading history: {e}")
+    except (PermissionError, UnicodeDecodeError, OSError):
+        print("Internal Error: Failed reading history")
 
 
 def record_history_sci_calc(name: str, val: Decimal | int | str, answer: str) -> None:
@@ -327,16 +323,16 @@ def record_history_sci_calc(name: str, val: Decimal | int | str, answer: str) ->
     try:
         with HISTORY_FILE.open('a', encoding="utf-8") as f:
             f.write(f"{name}({val}) = {answer}\n")
-    except Exception as e:
-        print(f"File Error: Could not record history. ({e})")
+    except (FileNotFoundError, PermissionError, UnicodeDecodeError, OSError):
+        print("Internal Error: Failed to record history")
 
 def clear_hist_sci_calc() -> None:
     """Clear all history by truncating the history file."""
     try:
         with HISTORY_FILE.open('w', encoding="utf-8"):
             print("Scientific history cleared successfully!")
-    except Exception as e:
-        print(f"Could not clear history: {e}")
+    except (FileNotFoundError, PermissionError, UnicodeDecodeError, OSError):
+        print("Internal Error: Failed to clear history")
 
 
 # ============================================================================
@@ -355,8 +351,9 @@ def validate_subOpNum(sub_op_num: int) -> int:
         """
         if 1 <= sub_op_num <= 6:
                 return 1
-        errmsg()
-        return 0
+        else:
+            print("Invalid Choice: Please select 1-6")
+            return 0
             
 
 # ============================================================================
@@ -379,12 +376,12 @@ def _validate_trig_asymptote(sub_op_num: int, angle: Decimal | int | str) -> Non
     mod_180 = angle_dec % Decimal(180)
     if sub_op_num in (SubOperation.FUNC_4, SubOperation.FUNC_6):
         if abs(mod_180) <= ANGLE_TOLERANCE or abs(mod_180 - Decimal(180)) <= ANGLE_TOLERANCE:
-            raise AsymptoteError("Error: Division by zero (Asymptote at n*180°)")
+            raise AsymptoteError("Asymptote Error: Division by zero (Asymptote at n*180°)")
     
     # Undefined where cos(x) = 0: tan(x), sec(x)
     if sub_op_num in (SubOperation.FUNC_3, SubOperation.FUNC_5):
         if abs(mod_180 - Decimal(90)) <= ANGLE_TOLERANCE:
-            raise AsymptoteError("Error: Division by zero (Asymptote at n*180° + 90°)")
+            raise AsymptoteError("Asymptote Error: Division by zero (Asymptote at n*180° + 90°)")
 
 
 def _validate_hyperbolic_asymptote(sub_op_num: int, val: Decimal | int | str) -> None:
@@ -401,7 +398,7 @@ def _validate_hyperbolic_asymptote(sub_op_num: int, val: Decimal | int | str) ->
     # coth(0) and cosech(0) are undefined
     val_dec = _to_decimal(val)
     if sub_op_num in (SubOperation.FUNC_4, SubOperation.FUNC_6) and val_dec == 0:
-        raise AsymptoteError("Error: Division by zero (Undefined at x=0)")
+        raise AsymptoteError("Asymptote Error: Division by zero (Undefined at x=0)")
 
 
 def _validate_inverse_trig_domain(sub_op_num: int, val: Decimal | int | str) -> None:
@@ -687,15 +684,13 @@ def validate_and_eval(
         record_history_sci_calc(name, val, formatted_result)
         return f"{name}({val}) = {formatted_result}"
     
-    except (DomainError, AsymptoteError) as e:
-        # Return domain/Asymptote errors as strings for backward compatibility
+    except CalculatorError as e:
         return str(e)
     
     except (ValueError, ArithmeticError):
         return f"Math Error: {e}"
     
     except Exception as e:
-        # Catch unexpected runtime exceptions
         return f"System Error: {type(e).__name__}"
 
 
@@ -706,20 +701,74 @@ def eval_trigo_func(key: Tuple[int, int]) -> None:
     Args:
         key: Tuple of (category, sub_operation) identifying the function
     """
-    if key not in trigo_funcs:
-        errmsg()
-        return None
-    
-    op_num, sub_op_num = key
-    name, func = trigo_funcs[key]
+    try:
+        if key not in trigo_funcs:
+            print("Invalid Key Error: Please select a correct pair of main_menu and sub_menu options.")
+        
+        op_num, sub_op_num = key
+        name, func = trigo_funcs[key]
 
-    print("Enter angle:" if op_num == FunctionCategory.TRIGONOMETRIC else "Enter value: ", end='')
-    val = get_val()
-    if val is not None:
-        answer = validate_and_eval(op_num, sub_op_num, name, func, val)
-        print(answer)
+        print("Enter angle:" if op_num == FunctionCategory.TRIGONOMETRIC else "Enter value: ", end='')
+        val = get_val()
+        if val is not None:
+            answer = validate_and_eval(op_num, sub_op_num, name, func, val)
+            print(answer)
 
-def print_eval(name, val, func):
-    result = format_result(func(_to_decimal(val)))
-    record_history_sci_calc(name, val, result)
-    return f"{name}({val}) = {result}"
+    except CalculatorError:
+        raise
+
+    except Exception:
+        raise
+
+
+# ============================================================================
+# Main User interface function
+# ============================================================================
+
+
+def sci_calc() -> None:
+    """
+    Scientific calculator interface.
+    Handles trigonometric and hyperbolic function calculations.
+    """
+    while True:
+        try:
+            op_num = int(input("\nEnter operation number: "))
+
+            if op_num in (SciOperation.TRIG, SciOperation.INVERSE_TRIG,
+                          SciOperation.HYPERBOLIC, SciOperation.INVERSE_HYPERBOLIC):
+                # Get sub-operation for function categories 1-4
+                sub_op_num = int(input("Enter sub-operation number: "))
+
+                if validate_subOpNum(sub_op_num) == 0:
+                    continue
+
+                key = (op_num, sub_op_num)
+                eval_trigo_func(key)
+
+            elif op_num == SciOperation.SHOW_MENU:
+                sci_calc_menuMsg()
+
+            elif op_num == SciOperation.SHOW_HISTORY:
+                display_hist_sci_calc()
+
+            elif op_num == SciOperation.CLEAR_HISTORY:
+                clear_hist_sci_calc()
+
+            elif op_num == SciOperation.QUIT:
+                print("\n Scientific calculator closed!\n")
+                break
+            else:
+                print("Invalid Input: Please select 1-9")
+
+        except CalculatorError as e:
+            print(e)
+            continue
+
+        except (ValueError, TypeError):
+            print("Invalid input: Please use numbers only.")
+            continue
+
+        except Exception:
+            print(f"System Error: {type(e).__name__}")
+            continue

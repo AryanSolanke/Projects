@@ -12,10 +12,7 @@ from calculator.standard import (
     std_calc
 )
 from calculator.scientific import (
-    display_hist_sci_calc,
-    clear_hist_sci_calc,
-    validate_subOpNum,
-    eval_trigo_func,
+    sci_calc,
     sci_calc_menuMsg,
 )
 from calculator.router import converter_menu
@@ -29,18 +26,6 @@ class MainMode(IntEnum):
     CONVERTER  = 3
     PROGRAMMER = 4
     QUIT       = 5
-
-
-class SciOperation(IntEnum):
-    """Scientific calculator operations."""
-    TRIG               = 1
-    INVERSE_TRIG       = 2
-    HYPERBOLIC         = 3
-    INVERSE_HYPERBOLIC = 4
-    SHOW_MENU          = 5
-    SHOW_HISTORY       = 6
-    CLEAR_HISTORY      = 7
-    QUIT               = 8
 
 
 # ============================================================================
@@ -58,53 +43,6 @@ def mode_choice_menu() -> None:
     print("4. Programmer Calculator")
     print("5. Quit Calculator")
     print("="*50)
-
-
-# ============================================================================
-# Calculator Mode Functions
-# ============================================================================
-
-
-
-
-def sci_calc() -> None:
-    """
-    Scientific calculator interface.
-    Handles trigonometric and hyperbolic function calculations.
-    """
-    while True:
-        try:
-            op_num = int(input("\nEnter operation number: "))
-
-            if op_num in (SciOperation.TRIG, SciOperation.INVERSE_TRIG,
-                          SciOperation.HYPERBOLIC, SciOperation.INVERSE_HYPERBOLIC):
-                # Get sub-operation for function categories 1-4
-                sub_op_num = int(input("Enter sub-operation number: "))
-
-                if validate_subOpNum(sub_op_num) == 0:
-                    continue
-
-                key = (op_num, sub_op_num)
-                eval_trigo_func(key)
-
-            elif op_num == SciOperation.SHOW_MENU:
-                sci_calc_menuMsg()
-
-            elif op_num == SciOperation.SHOW_HISTORY:
-                display_hist_sci_calc()
-
-            elif op_num == SciOperation.CLEAR_HISTORY:
-                clear_hist_sci_calc()
-
-            elif op_num == SciOperation.QUIT:
-                print("\n Scientific calculator closed!\n")
-                break
-            else:
-                errmsg()
-
-        except (ValueError, KeyboardInterrupt, UnboundLocalError, TypeError):
-            errmsg()
-            continue
 
 
 # ============================================================================

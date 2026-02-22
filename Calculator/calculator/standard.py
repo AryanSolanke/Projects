@@ -86,9 +86,7 @@ def record_history_std_calc(exp: str, result: str) -> None:
     try:
         with HISTORY_FILE.open('a', encoding="utf-8") as f:
             f.write(f"{exp} = {result}\n")
-    except FileNotFoundError:
-        print("Failed to record history")
-    except (PermissionError, UnicodeDecodeError, OSError):
+    except (FileNotFoundError, PermissionError, UnicodeDecodeError, OSError):
         print("Internal Error: Failed to record history")
 
 
@@ -119,9 +117,7 @@ def clear_hist_std_calc() -> None:
     try:
         HISTORY_FILE.write_text("", encoding="utf-8")
         print("   History cleared successfully!")
-    except FileNotFoundError:
-        print("Failed to clear history")
-    except (PermissionError, UnicodeDecodeError, OSError):
+    except (FileNotFoundError, PermissionError, UnicodeDecodeError, OSError):
         print("Internal Error: Failed to clear history")
 
 
@@ -245,6 +241,8 @@ def std_calc() -> None:
             elif op_num == StdOperation.QUIT:
                 print("\n Standard calculator closed!\n")
                 break
+            else:
+                print("Invalid input: Please select 1-4")
 
         except CalculatorError as e:
             print(e)
