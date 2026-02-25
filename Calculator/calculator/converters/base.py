@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from decimal import Decimal
+from pathlib import Path
 from typing import Dict, Tuple
 
 from calculator.config import MENU_WIDTH
@@ -56,6 +57,49 @@ class BaseConverter(ABC):
         """Format the conversion result."""
         return format_numeric_result(result)
 
+    def record_history(self, value: Decimal, from_unit: int, to_unit: int, formatted_result: str) -> None:
+        """Append conversion to converter-specific history file when configured."""
+        if self.history_file is None:
+            return
+        try:
+            from_name, from_abbrev = self.units[from_unit]
+            to_name, to_abbrev = self.units[to_unit]
+            with self.history_file.open("a", encoding="utf-8") as f:
+                f.write(
+                    f"{value} {from_abbrev} = {formatted_result} {to_abbrev} ({from_name} -> {to_name})\n"
+                )
+        except (FileNotFoundError, PermissionError, UnicodeDecodeError, OSError):
+            print(f"Internal Error: Failed to record {self.name.lower()} history")
+
+    def display_history(self) -> None:
+        """Display converter-specific history file when configured."""
+        if self.history_file is None:
+            print(f"No {self.name.lower()} history configured.")
+            return
+        try:
+            if not self.history_file.exists():
+                print(f"No {self.name.lower()} history available.")
+                return
+            history = self.history_file.read_text(encoding="utf-8").strip()
+            if not history:
+                print(f"{self.name.title()} history is empty.")
+                return
+            print(f"\n--- {self.name.title()} Conversion History ---")
+            print(history)
+        except (PermissionError, UnicodeDecodeError, OSError):
+            print(f"Internal Error: Failed reading {self.name.lower()} history")
+
+    def clear_history(self) -> None:
+        """Clear converter-specific history file when configured."""
+        if self.history_file is None:
+            print(f"No {self.name.lower()} history configured.")
+            return
+        try:
+            self.history_file.write_text("", encoding="utf-8")
+            print(f"{self.name.title()} conversion history cleared successfully!")
+        except (FileNotFoundError, PermissionError, UnicodeDecodeError, OSError):
+            print(f"Internal Error: Failed to clear {self.name.lower()} history")
+
     def run(self) -> None:
         """Main conversion interface."""
         try:
@@ -84,15 +128,18 @@ class BaseConverter(ABC):
                 raise NullInputError()
 
             result = self.convert(value, from_unit, to_unit)
+            formatted_result = self.format_result(result)
+            self.record_history(value, from_unit, to_unit, formatted_result)
 
             from_name, from_abbrev = self.units[from_unit]
             to_name, to_abbrev = self.units[to_unit]
 
             print("\n" + "=" * MENU_WIDTH)
             print("   CONVERSION RESULT:")
-            print(f"   {value} {from_abbrev} = {self.format_result(result)} {to_abbrev}")
+            print(f"   {value} {from_abbrev} = {formatted_result} {to_abbrev}")
             print(f"   ({from_name} -> {to_name})")
             print("=" * MENU_WIDTH + "\n")
 
         except ValueError:
             raise InvalidInputError("Please enter a valid unit number")
+    history_file: Path | None = None

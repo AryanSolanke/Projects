@@ -10,6 +10,7 @@ from enum import IntEnum
 
 from calculator.converters.base import BaseConverter
 from calculator.converters.converter_utils import to_decimal
+from calculator.config import WEIGHT_HISTORY_FILE
 from calculator.exceptions import CalculatorError
 
 class WeightUnit(IntEnum):
@@ -134,6 +135,8 @@ WEIGHT_UNIT_ABBREV = {
     WeightUnit.LONG_TON_UK: "ton (UK)",
 }
 
+HISTORY_FILE = WEIGHT_HISTORY_FILE
+
 
 # ============================================================================
 # Main Weight Converter Function
@@ -144,6 +147,7 @@ class WeightConverter(BaseConverter):
 
     name = "WEIGHT"
     emoji = ""
+    history_file = HISTORY_FILE
     units = {unit: (WEIGHT_UNIT_NAMES[unit], WEIGHT_UNIT_ABBREV[unit]) for unit in WEIGHT_UNIT_NAMES}
 
     def convert(self, value: Decimal, from_unit: int, to_unit: int) -> Decimal:
@@ -154,6 +158,16 @@ class WeightConverter(BaseConverter):
 
     def get_value_prompt(self, unit_name: str) -> str:
         return f"\nEnter weight in {unit_name}: "
+
+
+def display_hist_weight_conv() -> None:
+    """Display weight conversion history."""
+    WeightConverter().display_history()
+
+
+def clear_hist_weight_conv() -> None:
+    """Clear weight conversion history."""
+    WeightConverter().clear_history()
 
 def weight_converter() -> None:
     """Main weight conversion interface."""

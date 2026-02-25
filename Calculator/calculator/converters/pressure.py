@@ -10,6 +10,7 @@ from enum import IntEnum
 
 from calculator.converters.base import BaseConverter
 from calculator.converters.converter_utils import to_decimal
+from calculator.config import PRESSURE_HISTORY_FILE
 from calculator.exceptions import CalculatorError
 
 
@@ -99,6 +100,8 @@ PRESSURE_UNIT_ABBREV = {
     PressureUnit.PSI: "psi",
 }
 
+HISTORY_FILE = PRESSURE_HISTORY_FILE
+
 
 # ============================================================================
 # Main Pressure Converter Function
@@ -109,6 +112,7 @@ class PressureConverter(BaseConverter):
 
     name = "PRESSURE"
     emoji = ""
+    history_file = HISTORY_FILE
     units = {unit: (PRESSURE_UNIT_NAMES[unit], PRESSURE_UNIT_ABBREV[unit]) for unit in PRESSURE_UNIT_NAMES}
 
     def convert(self, value: Decimal, from_unit: int, to_unit: int) -> Decimal:
@@ -119,6 +123,16 @@ class PressureConverter(BaseConverter):
 
     def get_value_prompt(self, unit_name: str) -> str:
         return "\nEnter pressure: "
+
+
+def display_hist_pressure_conv() -> None:
+    """Display pressure conversion history."""
+    PressureConverter().display_history()
+
+
+def clear_hist_pressure_conv() -> None:
+    """Clear pressure conversion history."""
+    PressureConverter().clear_history()
 
 def pressure_converter() -> None:
     """Main pressure conversion interface."""

@@ -17,6 +17,7 @@ from enum import IntEnum
 
 from calculator.converters.base import BaseConverter
 from calculator.converters.converter_utils import to_decimal
+from calculator.config import DATA_HISTORY_FILE
 from calculator.exceptions import CalculatorError
 
 class DataUnit(IntEnum):
@@ -63,6 +64,9 @@ class DataUnit(IntEnum):
     YOBIBYTE = 35
     
     QUIT = 36
+
+
+HISTORY_FILE = DATA_HISTORY_FILE
 
 
 # ============================================================================
@@ -384,6 +388,7 @@ class DataConverter(BaseConverter):
 
     name = "DATA"
     emoji = "📊"
+    history_file = HISTORY_FILE
     units = {unit: (DATA_UNIT_NAMES[unit], DATA_UNIT_ABBREV[unit]) for unit in DATA_UNIT_NAMES}
 
     def convert(self, value: Decimal, from_unit: int, to_unit: int) -> Decimal:
@@ -397,6 +402,16 @@ class DataConverter(BaseConverter):
 
     def format_result(self, result) -> str:
         return format_data_result(result)
+
+
+def display_hist_data_conv() -> None:
+    """Display data conversion history."""
+    DataConverter().display_history()
+
+
+def clear_hist_data_conv() -> None:
+    """Clear data conversion history."""
+    DataConverter().clear_history()
 
 def data_converter() -> None:
     """

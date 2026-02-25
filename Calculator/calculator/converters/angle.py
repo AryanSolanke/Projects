@@ -11,9 +11,11 @@ from enum import IntEnum
 
 from calculator.exceptions import CalculatorError, NullInputError, InvalidInputError
 from calculator.converters.converter_utils import get_numeric_input, format_numeric_result, to_decimal
+from calculator.config import ANGLE_HISTORY_FILE
 
 
 INTERNAL_PRECISION = 60
+HISTORY_FILE = ANGLE_HISTORY_FILE
 
 
 def _compute_pi() -> Decimal:
@@ -109,6 +111,42 @@ def convert_angle(
     return ans1, ans2
 
 
+def record_history_angle_conv(unit_name: str, angle: Decimal, ans1: str, ans2: str) -> None:
+    """Append angle conversion to history file."""
+    try:
+        with HISTORY_FILE.open("a", encoding="utf-8") as f:
+            f.write(f"{unit_name}({angle}) -> {ans1} | {ans2}\n")
+    except (FileNotFoundError, PermissionError, UnicodeDecodeError, OSError):
+        print("Internal Error: Failed to record angle history")
+
+
+def display_hist_angle_conv() -> None:
+    """Display angle conversion history from file."""
+    try:
+        if not HISTORY_FILE.exists():
+            print("No angle conversion history available.")
+            return
+
+        history = HISTORY_FILE.read_text(encoding="utf-8").strip()
+        if not history:
+            print("Angle conversion history is empty.")
+            return
+
+        print("\n--- Angle Conversion History ---")
+        print(history)
+    except (PermissionError, UnicodeDecodeError, OSError):
+        print("Internal Error: Failed reading angle history")
+
+
+def clear_hist_angle_conv() -> None:
+    """Clear angle conversion history by truncating the history file."""
+    try:
+        HISTORY_FILE.write_text("", encoding="utf-8")
+        print("Angle conversion history cleared successfully!")
+    except (FileNotFoundError, PermissionError, UnicodeDecodeError, OSError):
+        print("Internal Error: Failed to clear angle history")
+
+
 # ============================================================================
 # Conversion Lookup Tables
 # ============================================================================
@@ -144,6 +182,7 @@ def angle_converter() -> None:
 
             if angle is not None:
                 ans1, ans2 = convert_angle(name1, func1, name2, func2, angle)
+                record_history_angle_conv(unit_name, angle, ans1, ans2)
                 print(f"\n   {ans1}")
                 print(f"   {ans2}\n")
             else:

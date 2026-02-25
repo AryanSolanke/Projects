@@ -11,6 +11,7 @@ from typing import Callable, Dict, Tuple
 
 from calculator.converters.base import BaseConverter
 from calculator.converters.converter_utils import to_decimal
+from calculator.config import TEMP_HISTORY_FILE
 from calculator.exceptions import CalculatorError
 
 class TempUnit(IntEnum):
@@ -84,6 +85,8 @@ temp_conv_funcs: Dict[Tuple[int, int], Tuple[str, str, Callable]] = {
     (TempUnit.FAHRENHEIT, TempUnit.KELVIN): ("Fahrenheit", "Kelvin", F_to_kelvin),
 }
 
+HISTORY_FILE = TEMP_HISTORY_FILE
+
 
 # ============================================================================
 # Main Temperature Converter Function
@@ -94,6 +97,7 @@ class TemperatureConverter(BaseConverter):
 
     name = "TEMPERATURE"
     emoji = ""
+    history_file = HISTORY_FILE
 
     units = {
         TempUnit.CELSIUS: ("Celsius", "°C"),
@@ -113,6 +117,16 @@ class TemperatureConverter(BaseConverter):
 
     def get_value_prompt(self, unit_name: str) -> str:
         return "\nEnter temperature: "
+
+
+def display_hist_temp_conv() -> None:
+    """Display temperature conversion history."""
+    TemperatureConverter().display_history()
+
+
+def clear_hist_temp_conv() -> None:
+    """Clear temperature conversion history."""
+    TemperatureConverter().clear_history()
 
 def temperature_converter() -> None:
     """Main temperature conversion interface."""
