@@ -687,7 +687,7 @@ def validate_and_eval(
     except CalculatorError as e:
         return str(e)
     
-    except (ValueError, ArithmeticError):
+    except (ValueError, ArithmeticError) as e:
         return f"Math Error: {e}"
     
     except Exception as e:

@@ -22,6 +22,22 @@ class InvalidInputError(CalculatorError):
         super().__init__(message)
 
 
+class InvalidBaseError(InvalidInputError):
+    """Raised when a base is unsupported or invalid."""
+
+
+class InvalidBitShiftError(InvalidInputError):
+    """Raised when a bit shift amount is invalid."""
+
+
+class BitwiseOperationError(CalculatorError):
+    """Raised when a bitwise operation cannot be completed."""
+
+
+class ConversionError(CalculatorError):
+    """Raised when base conversion fails."""
+
+
 class NullInputError(CalculatorError):
     """Empty input given."""
 

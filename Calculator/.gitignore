@@ -1,0 +1,47 @@
+# --- Python / Conda ---
+__pycache__/
+*.py[cod]
+*.pyc
+*$py.class
+.pytest_cache/
+.venv/
+env/
+venv/
+.conda/
+dist/
+
+# --- C++ / Compilers ---
+# Ignore the executable files you build
+*.exe
+*.out
+*.app
+*.o
+*.obj
+history/*.txt
+
+# --- SQL / Databases ---
+# We usually keep the .db file itself, but ignore the temporary "journal" files
+*.db-journal
+*.db-wal
+*.db-shm
+
+# --- VS Code ---
+.vscode/
+*.log
+*.txt
+
+# --- SQLTools / Project Settings ---
+.vscode/
+*.json
+
+#--- Ignore changes to git-ignore file---
+.gitignore
+
+__init__.py
+.coverage
+SKILL.md
+*.egg-info
+
+# --- History Files ---
+history/
+
