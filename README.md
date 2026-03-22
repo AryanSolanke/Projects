@@ -28,4 +28,4 @@ python main.py
 
 ## License
 
-See each project for its license or usage terms.
+MIT. See LICENSE.

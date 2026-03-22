@@ -334,7 +334,7 @@ Contributions are welcome! Please ensure:
 
 ## 📄 License
 
-This project is available for educational and personal use.
+MIT. See the repository root LICENSE.
 
 ## 🙏 Acknowledgments
 
