@@ -177,3 +177,5 @@ def weight_converter() -> None:
         WeightConverter().run()
     except (CalculatorError):
         raise
+
+

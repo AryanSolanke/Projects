@@ -73,3 +73,5 @@ def format_numeric_result(result, precision: int = 9) -> str:
     if not result.is_finite():
         return str(result)
     return f"{result:.{precision}g}"
+
+

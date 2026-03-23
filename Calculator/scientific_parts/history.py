@@ -39,3 +39,6 @@ def clear_hist_sci_calc(history_file=HISTORY_FILE) -> None:
             print("Scientific history cleared successfully!")
     except (FileNotFoundError, PermissionError, UnicodeDecodeError, OSError):
         print("Internal Error: Failed to clear history")
+
+
+

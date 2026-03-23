@@ -78,3 +78,5 @@ def converter_menu() -> None:
         except (TypeError, CalculatorError) as e:
             print(f"{e}")
             continue
+
+

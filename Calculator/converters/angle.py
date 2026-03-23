@@ -186,3 +186,5 @@ def angle_converter() -> None:
         raise InvalidInputError("Invalid choice: Please select 1-3\n")
     except (TypeError, CalculatorError):
         raise
+
+

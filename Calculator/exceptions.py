@@ -62,3 +62,5 @@ class AsymptoteError(CalculatorError):
 
     def __init__(self, message="\nAsysmptote Error: Input approached function's asymptote.\n"):
         super().__init__(message)
+
+

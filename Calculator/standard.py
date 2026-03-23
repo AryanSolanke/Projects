@@ -4,12 +4,12 @@ Standard Calculator Module
 Provides expression evaluation with history tracking and error handling.
 """
 
-from calculator.exceptions import UnbalancedParenthesesError, ExpressionError, CalculatorError, NullInputError
 from enum import IntEnum
 from decimal import Decimal, InvalidOperation, DivisionByZero, localcontext
 import ast
 import operator
 
+from calculator.exceptions import UnbalancedParenthesesError, ExpressionError, CalculatorError, NullInputError
 from calculator.config import DECIMAL_PRECISION, DISPLAY_PRECISION, STD_HISTORY_FILE
 from calculator.utils import errmsg
 
@@ -321,3 +321,5 @@ def std_calc() -> None:
         except ValueError:
             print("Invalid input: Please select 1-4")
             continue
+
+

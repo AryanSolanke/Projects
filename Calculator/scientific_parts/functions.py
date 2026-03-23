@@ -118,3 +118,6 @@ def sech_inv(val: NumberLike) -> Decimal:
 
 def cosech_inv(val: NumberLike) -> Decimal:
     return _asinh_decimal(Decimal(1) / _to_decimal(val))
+
+
+

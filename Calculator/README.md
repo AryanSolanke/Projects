@@ -54,7 +54,8 @@ Comprehensive conversion system supporting **5 categories**:
 
 ### Architecture
 - **Modular Design**: Clear separation of concerns (standard, scientific, programmer, converters)
-- **Package Structure**: Proper `calculator/` package with focused submodules
+- **Flat Layout**: Core modules live at the repo root with grouped subpackages for converters and scientific/programmer internals
+- **Stable Imports**: `calculator.*` imports still work through a lightweight root shim
 - **Zero Dependencies**: Pure Python implementation (except testing)
 
 ### Mathematical Correctness
@@ -81,33 +82,40 @@ Comprehensive conversion system supporting **5 categories**:
 ```
 Calculator/
 │
-├── main.py                      # Compatibility entry point
-├── std.py                       # Compatibility shim
-├── sci.py                       # Compatibility shim
-├── converters.py               # Compatibility shim
+├── calculator.py               # Import shim preserving `calculator.*`
+├── main.py                     # Application entry point
+├── standard.py                 # Standard arithmetic engine
+├── scientific.py               # Scientific functions engine
+├── programmer.py               # Programmer calculator engine
+├── router.py                   # Unit converter router
+├── config.py                   # Central configuration
+├── exceptions.py               # Custom exceptions
+├── utils.py                    # Shared utilities
 ├── setup.py                     # Installable package metadata
 ├── requirements.txt             # Runtime dependencies (none)
 ├── requirements-dev.txt         # Dev tools (pytest, ruff, mypy, etc.)
 ├── history/                      # Calculator history files (ignored in git)
 │
-├── calculator/                  # Primary package
+├── converters/                 # Converter modules
 │   ├── __init__.py
-│   ├── main.py                  # Application entry point
-│   ├── standard.py              # Standard arithmetic engine
-│   ├── scientific.py            # Scientific functions engine
-│   ├── programmer.py            # Programmer calculator engine
-│   ├── router.py                # Unit converter router
-│   ├── config.py                # Central configuration
-│   ├── exceptions.py            # Custom exceptions
-│   └── converters/              # Converter modules
-│       ├── __init__.py
-│       ├── base.py              # Base converter class
-│       ├── utils.py             # Shared converter utilities
-│       ├── angle.py             # Angle conversions
-│       ├── temperature.py       # Temperature conversions
-│       ├── weight.py            # Weight conversions
-│       ├── pressure.py          # Pressure conversions
-│       └── data.py              # Data unit conversions (35 units)
+│   ├── base.py                 # Base converter class
+│   ├── converter_utils.py      # Shared converter utilities
+│   ├── angle.py                # Angle conversions
+│   ├── temperature.py          # Temperature conversions
+│   ├── weight.py               # Weight conversions
+│   ├── pressure.py             # Pressure conversions
+│   └── data.py                 # Data unit conversions (35 units)
+│
+├── programmer_parts/           # Programmer-mode internals
+│   ├── __init__.py
+│   └── operations.py
+│
+├── scientific_parts/           # Scientific-mode internals
+│   ├── __init__.py
+│   ├── core.py
+│   ├── functions.py
+│   ├── history.py
+│   └── validators.py
 │
 └── tests/                      # Comprehensive test suite
     ├── test_std.py            # Standard calculator tests
@@ -141,7 +149,7 @@ Calculator/
    ```
    Or:
    ```bash
-   python -m calculator.main
+   calculator
    ```
 
 3. **Run tests** (optional):
@@ -265,19 +273,24 @@ This project demonstrates:
 
 ## 📋 Recent Updates
 
-### Version 2.3 - Programmer Mode Expansion (Current)
-- ✅ **Programmer Calculator Added**: New dedicated mode integrated into `calculator/main.py`
+### Version 2.4 - Flat Layout Cleanup (Current)
+- ✅ **Single Calculator Layer**: Removed the nested `calculator/` package directory from the repo layout
+- ✅ **Root Module Layout**: Core modules now live directly under the project root
+- ✅ **Stable Imports Preserved**: Added `calculator.py` so existing `calculator.*` imports still resolve cleanly
+- ✅ **Package Metadata Updated**: `setup.py` now packages the flat layout explicitly
+- ✅ **Pytest Bootstrap Added**: Local test config stabilizes import resolution and temp-directory handling
+
+### Version 2.3 - Programmer Mode Expansion
+- ✅ **Programmer Calculator Added**: New dedicated mode integrated into `main.py`
 - ✅ **Bitwise Toolkit**: Added AND/OR/XOR/NOT/NAND/NOR/XNOR support
 - ✅ **Shift + Rotate Support**: Added ASL/ASR/LSL/LSR/ROL/ROR/RCL/RCR operations
 - ✅ **Word Size Control**: Added BYTE/WORD/DWORD/QWORD toggling with signed masking
 - ✅ **Test Coverage Added**: New `tests/test_programmer.py` for programmer-mode behavior
 
 ### Version 2.2 - Package Reorganization
-- ✅ **Proper Package Layout**: Introduced `calculator/` package with clear module boundaries
-- ✅ **Central Config**: History files and precision settings consolidated in `calculator/config.py`
-- ✅ **Base Converter**: Shared converter behavior in `calculator/converters/base.py`
-- ✅ **Compatibility Shims**: Root-level `main.py`, `std.py`, `sci.py`, `converters.py` preserved
-  for backward compatibility
+- ✅ **Proper Package Layout**: Introduced grouped modules and subpackages for clearer boundaries
+- ✅ **Central Config**: History files and precision settings consolidated in `config.py`
+- ✅ **Base Converter**: Shared converter behavior in `converters/base.py`
 - ✅ **History Directory**: History files stored under `history/` at repo root
 
 ### Version 2.0 - Major Refactor

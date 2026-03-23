@@ -1,12 +1,32 @@
-from setuptools import setup, find_packages
+from setuptools import setup
+
+
+ROOT_MODULES = [
+    "calculator",
+    "main",
+    "standard",
+    "scientific",
+    "programmer",
+    "router",
+    "config",
+    "exceptions",
+    "utils",
+]
+
+SUBPACKAGES = [
+    "converters",
+    "programmer_parts",
+    "scientific_parts",
+]
 
 setup(
     name="aryan-advanced-calculator",
     version="1.2.1",
-    packages=find_packages(),
+    py_modules=ROOT_MODULES,
+    packages=SUBPACKAGES,
     entry_points={
         "console_scripts": [
-            "calculator=calculator.main:main",
+            "calculator=main:main",
         ],
     },
     python_requires=">=3.10",
@@ -15,3 +35,4 @@ setup(
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
 )
+

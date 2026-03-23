@@ -51,3 +51,5 @@ INTERNAL_PRECISION: Final = 60
 # UI settings
 ENABLE_EMOJIS: Final = True
 MENU_WIDTH: Final = 50
+
+

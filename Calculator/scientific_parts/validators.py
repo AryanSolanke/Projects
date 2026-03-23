@@ -65,3 +65,6 @@ def validate_inverse_hyperbolic_domain(sub_op_num: int, val) -> None:
         check_func, error_msg = domain_checks[sub_op_num]
         if check_func(_to_decimal(val)):
             raise DomainError(error_msg)
+
+
+

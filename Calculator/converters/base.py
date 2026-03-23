@@ -163,3 +163,5 @@ class BaseConverter(ABC):
         except ValueError:
             raise InvalidInputError("Please enter a valid unit number")
     history_file: Path | None = None
+
+

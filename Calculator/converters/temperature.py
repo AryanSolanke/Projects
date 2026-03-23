@@ -136,3 +136,5 @@ def temperature_converter() -> None:
         TemperatureConverter().run()
     except (CalculatorError):
         raise
+
+

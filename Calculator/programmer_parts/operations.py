@@ -190,3 +190,6 @@ def rotate_right_carry(value: int, n: int, carry: int, word_size: WordSize) -> t
     result = (extended >> 1) & ((1 << bits) - 1)
     return mask(result, word_size), extended & 1
 
+
+
+

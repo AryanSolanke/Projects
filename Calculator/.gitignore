@@ -4,6 +4,8 @@ __pycache__/
 *.pyc
 *$py.class
 .pytest_cache/
+.pytest_tmp/
+test_tmp/
 .venv/
 env/
 venv/
@@ -36,8 +38,6 @@ history/*.txt
 
 #--- Ignore changes to git-ignore file---
 .gitignore
-
-__init__.py
 .coverage
 SKILL.md
 *.egg-info

@@ -206,3 +206,6 @@ def format_result(result: NumberLike) -> str:
     """Format numerical result using configured significant precision."""
     return f"{result:.{RESULT_PRECISION}g}"
 
+
+
+
